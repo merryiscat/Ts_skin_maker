@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<skin>
+	<information>
+		<name>한눈에 스킨</name>
+		<version>1.0</version>
+		<description>
+			<![CDATA[검색엔진 최적화(SEO)가 적용되어 있으며 심플한 디자인으로 
+			빠른 성능을 제공하는 경량화된 스킨입니다.
+			 ]]>			
+		</description>
+		<license>
+			<![CDATA[ MIT License ]]>
+		</license>
+	</information>
+	<author>
+		<name>쭈미로운 생활</name>
+		<homepage>https://toyou101.tistory</homepage>
+		<email>foyou101@gmail.com</email>
+	</author>
+    <variables>
+		<variablegroup name="스킨 기본 설정">
+			<variable>
+				<name>enableMenu</name>
+				<label>
+					<![CDATA[상단 메뉴바 사용]]>
+				</label>
+				<type>BOOL</type>
+				<option/>
+				<default>true</default>
+				<description>
+					<![CDATA[상단 헤더 영역의 메뉴바를 사용합니다.]]>
+				</description>
+			</variable>
+            <variable>
+				<name>sidebarPosition</name>
+				<label>
+					<![CDATA[사이드바 위치 설정]]>
+				</label>
+                <type>SELECT</type>
+				<option><![CDATA[[{"name":"sidebar-left","label":"사이드바 왼쪽으로 이동","value":"left"},{"name":"sidebar-right","label":"사이드바 오른쪽으로 이동","value":"right"}]]]></option>		
+				<default>left</default>
+				<description>
+					<![CDATA[사이드바의 위치를 변경합니다.]]>
+				</description>
+			</variable>
+			<variable>
+				<name>enableAutoTOC </name>
+				<label>
+					<![CDATA[본문 목차 자동 생성]]>
+				</label>
+                <type>BOOL</type>
+				<option />
+				<default>true</default>
+				<description>
+					<![CDATA[본문의 H2 태그로 목차를 자동 생성합니다.]]>
+				</description>
+			</variable>
+			<variable>
+				<name>enableFloatingTOC </name>
+				<label>
+					<![CDATA[떠다니는 목차 생성]]>
+				</label>
+                <type>BOOL</type>
+				<option />
+				<default>false</default>
+				<description>
+					<![CDATA[플로팅 목차를 생성합니다.]]>
+				</description>
+			</variable>
+			<variable>
+				<name>mainFont</name>
+				<label>
+					<![CDATA[폰트 변경]]>
+				</label>
+                <type>SELECT</type>
+				<option><![CDATA[[{"name":"Noto Sans KR","label":"Noto Sans KR","value":"Noto Sans KR"},
+								  {"name":"Noto Serif KR","label":"Noto Serif KR","value":"Noto Serif KR"},
+								  {"name":"IBM Plex Sans KR","label":"IBM Plex Sans KR","value":"IBM Plex Sans KR"},
+								  {"name":"Gowun Dodum","label":"Gowun Dodum","value":"Gowun Dodum"},
+								  {"name":"Hahmlet","label":"Hahmlet","value":"Hahmlet"}
+								  
+								  ]]]></option>		
+				<default>Hahmlet</default>
+				<description>
+					<![CDATA[폰트를 변경합니다.]]>
+				</description>
+			</variable>
+			
+			<variable>
+				<name>mainColor</name>
+				<label>
+					<![CDATA[폰트색상 변경]]>
+				</label>
+                <type>COLOR</type>
+				<default>#3A4954</default>
+				<description>
+					<![CDATA[폰트 색상을 변경합니다.]]>
+				</description>
+			</variable>
+        </variablegroup>
+		<variablegroup name="댓글 설정">
+			<variable>
+				<name>enableComment</name>
+				<label>
+					<![CDATA[댓글창 숨김]]>
+				</label>
+				<type>BOOL</type>
+				<option/>
+				<default>false</default>
+				<description>
+					<![CDATA[댓글창을 설정 합니다.]]>
+				</description>
+			</variable>			
+			<variable>
+				<name>sortComment</name>
+				<label>
+					<![CDATA[댓글 정렬 기준]]>
+				</label>
+                <type>SELECT</type>
+				<option><![CDATA[[{"name":"comment-asc","label":"과거순","value":"comment-asc"},
+								  {"name":"comment-desc","label":"최신순","value":"comment-desc"}
+								  ]]]></option>
+				<default>Comment-asc</default>
+				<description>
+					<![CDATA[댓글창을 설정 합니다.]]>
+				</description>
+			</variable>		
+			<variable>
+				<name>writeCommentPosotion</name>
+				<label>
+					<![CDATA[댓글 입력 폼 위치 설정]]>
+				</label>
+                <type>SELECT</type>
+				<option><![CDATA[[{"name":"write-Comment-top","label":"댓글 상단으로 이동","value":"write-Comment-top"},
+								  {"name":"write-Comment-bottom","label":"댓글 하단으로 이동","value":"write-Comment-bottom"}
+								  ]]]></option>
+				<default>write-Comment-top</default>
+				<description>
+					<![CDATA[댓글창을 설정 합니다.]]>
+				</description>
+			</variable>	
+		</variablegroup>
+		<variablegroup name="애드센스 설정">
+			<variable>
+				<name>adsenseClientId</name>
+				<label>
+					<![CDATA[애드센스 Client ID]]>
+				</label>
+				<description>
+					<![CDATA[애드센스의 클라이언트ID를 입력합니다.]]>
+				</description>
+				<type>STRING</type>
+				<option />
+				<default></default>
+			</variable>
+			<variable>
+				<name>adsArticleTop</name>
+				<label>
+					<![CDATA[메인 상단 대형 광고]]>
+				</label>
+				<description>
+					<![CDATA[광고 SLOT 코드를 입력합니다.]]>
+				<type>STRING</type>
+				<option />
+				<default></default>
+				</description>
+			</variable>
+			<variable>
+				<name>adsSideShort</name>
+				<label>
+					<![CDATA[사이드 광고(Short)]]>
+				</label>
+				<description>
+					<![CDATA[광고 SLOT 코드를 입력합니다.]]>
+				</description>
+				<type>STRING</type>
+				<option />
+				<default></default>
+			</variable>
+			<variable>
+				<name>adsSideLong</name>
+				<label>
+					<![CDATA[사이드 광고(Long)]]>
+				</label>
+				<description>
+					<![CDATA[광고 SLOT 코드를 입력합니다.]]>
+				</description>
+				<type>STRING</type>
+				<option />
+				<default></default>
+			</variable>
+			<variable>
+				<name>adsArticleBottom</name>
+				<label>
+					<![CDATA[본문 하단 광고]]>
+				</label>
+				<description>
+					<![CDATA[광고 SLOT 코드를 입력합니다.]]>
+				</description>
+				<type>STRING</type>
+				<option />
+				<default></default>
+			</variable>
+		</variablegroup>
+
+    </variables>
+	<default>
+		<entriesOnPage>6</entriesOnPage>
+		<entriesOnList>6</entriesOnList>
+		<recentEntries>5</recentEntries>
+		<recentComments>5</recentComments>
+		<tagsInCloud>10</tagsInCloud> 
+		<sortInCloud>1</sortInCloud>
+		<lengthOfRecentNotice>50</lengthOfRecentNotice>
+		<lengthOfRecentEntry>50</lengthOfRecentEntry>
+		<lengthOfRecentComment>50</lengthOfRecentComment>
+	</default>
+</skin>
