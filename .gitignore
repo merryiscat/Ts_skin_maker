@@ -1,0 +1,15 @@
+# Windows null device file
+nul
+
+# Claude Code
+.claude/
+
+# Screenshots
+*.png
+
+# macOS
+.DS_Store
+
+# Editor directories
+.vscode/
+.idea/
