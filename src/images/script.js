@@ -86,7 +86,64 @@ function initMobileMenu() {
 }
 
 // ========================================
-// 3. 페이지 타입 감지 (유틸리티)
+// 3. 카테고리 토글 기능
+// ========================================
+
+/**
+ * 카테고리 접기/펼치기 기능 (Cursor 스타일)
+ */
+function initCategoryToggle() {
+  const categoryContainers = document.querySelectorAll('.tt_category, .category');
+
+  categoryContainers.forEach(container => {
+    // 모든 레벨의 카테고리 항목 찾기
+    const categoryItems = container.querySelectorAll('li');
+
+    categoryItems.forEach(item => {
+      const link = item.querySelector(':scope > a'); // 직계 자식 a만
+      const subList = item.querySelector(':scope > ul'); // 직계 자식 ul만
+
+      // 하위 카테고리가 있는 경우에만 토글 기능 추가
+      if (subList && link) {
+        link.classList.add('has-children');
+
+        // 화살표 영역 클릭 시 토글
+        link.addEventListener('click', (e) => {
+          // 왼쪽 화살표 영역 클릭 시 토글
+          const isArrowArea = e.offsetX < 20;
+
+          if (isArrowArea) {
+            e.preventDefault();
+            toggleCategory(link, subList);
+          }
+          // 나머지 영역 클릭 시 링크 이동
+        });
+      }
+    });
+  });
+
+  console.log('✅ 카테고리 토글 초기화 완료 (모든 레벨)');
+}
+
+/**
+ * 개별 카테고리 토글
+ */
+function toggleCategory(link, subList) {
+  const isCollapsed = subList.classList.contains('collapsed');
+
+  if (isCollapsed) {
+    // 펼치기
+    subList.classList.remove('collapsed');
+    link.classList.remove('collapsed');
+  } else {
+    // 접기
+    subList.classList.add('collapsed');
+    link.classList.add('collapsed');
+  }
+}
+
+// ========================================
+// 4. 페이지 타입 감지 (유틸리티)
 // ========================================
 
 /**
@@ -133,7 +190,13 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('❌ 모바일 메뉴 에러:', e.message);
   }
 
-  console.log('=== 초기화 완료 (최소 모드) ===');
+  try {
+    initCategoryToggle();
+  } catch (e) {
+    console.log('❌ 카테고리 토글 에러:', e.message);
+  }
+
+  console.log('=== 초기화 완료 ===');
 });
 
 // ========================================

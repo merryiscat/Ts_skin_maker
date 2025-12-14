@@ -45,6 +45,27 @@
   --color-text: #1f2937;
 }
 
+/* Accent 색상 유틸리티 클래스 */
+.bg-accent {
+  background-color: var(--color-accent) !important;
+}
+
+.text-accent {
+  color: var(--color-accent) !important;
+}
+
+.border-accent {
+  border-color: var(--color-accent) !important;
+}
+
+.hover\:bg-accent:hover {
+  background-color: var(--color-accent) !important;
+}
+
+.hover\:text-accent:hover {
+  color: var(--color-accent) !important;
+}
+
 /* 스크롤바 스타일 (다크 모드용) */
 ::-webkit-scrollbar {
   width: 10px;
@@ -233,22 +254,31 @@ pre code {
   text-decoration: none;
 }
 
-/* 폴더 아이콘 추가 */
+/* 폴더 아이콘 제거 */
 #category > li > a::before,
 .tt_category > li > a::before,
 .category > li > a::before {
-  content: '📁';
-  font-size: 1rem;
+  content: '';
 }
 
-/* 하위 카테고리 들여쓰기 */
+/* 하위 카테고리 들여쓰기 (Cursor 스타일) */
 #category ul,
 .tt_category ul,
 .category ul {
   list-style: none !important;
-  padding-left: 1.75rem !important; /* 들여쓰기 증가 */
+  padding-left: 0.5rem !important; /* Cursor 스타일로 들여쓰기 최소화 */
   margin-top: 0.25rem;
-  margin-left: 0.5rem; /* 왼쪽 여백 추가 */
+  margin-left: 0 !important; /* 왼쪽 여백 제거 */
+  border-left: 1px solid #3e3e42;
+}
+
+/* 티스토리 자동 생성 카테고리 리스트 - padding 제거 */
+.category_list,
+.sub_category_list {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin-top: 0.25rem;
+  margin-left: 0 !important;
   border-left: 1px solid #3e3e42;
 }
 
@@ -274,12 +304,11 @@ pre code {
   text-decoration: none;
 }
 
-/* 파일 아이콘 */
+/* 파일 아이콘 제거 */
 #category ul li a::before,
 .tt_category ul li a::before,
 .category ul li a::before {
-  content: '📄';
-  font-size: 0.875rem;
+  content: '';
 }
 
 /* 카테고리 글 개수 */
@@ -294,19 +323,86 @@ pre code {
   white-space: nowrap; /* 줄바꿈 방지 */
 }
 
-/* 3단계 이상 깊은 하위 카테고리 */
+/* 3단계 이상 깊은 하위 카테고리 (Cursor 스타일) */
 #category ul ul,
 .tt_category ul ul,
 .category ul ul {
-  padding-left: 1.5rem !important;
-  margin-left: 0.5rem;
+  padding-left: 0.5rem !important;
+  margin-left: 0;
 }
 
 #category ul ul ul,
 .tt_category ul ul ul,
 .category ul ul ul {
-  padding-left: 1.25rem !important;
-  margin-left: 0.5rem;
+  padding-left: 0.5rem !important;
+  margin-left: 0;
+}
+
+/* 티스토리 자동 생성 "전체보기" 링크 숨김 (독립적으로 추가했으므로) */
+.tt_category .link_tit,
+.category .link_tit {
+  display: none !important;
+}
+
+/* 카테고리 토글 화살표 (모든 레벨) */
+.tt_category a,
+.category a {
+  position: relative;
+  cursor: pointer;
+}
+
+.tt_category a.has-children::before,
+.category a.has-children::before {
+  content: '>';
+  position: absolute;
+  left: -0.5rem; /* Cursor 스타일에 맞춰 조정 */
+  font-size: 0.75rem;
+  color: #858585;
+  transition: transform 0.2s;
+  font-weight: bold;
+}
+
+.tt_category a.has-children:not(.collapsed)::before,
+.category a.has-children:not(.collapsed)::before {
+  transform: rotate(90deg);
+}
+
+/* 접힌 하위 카테고리 숨기기 (모든 레벨) */
+.tt_category ul.collapsed,
+.category ul.collapsed {
+  display: none;
+}
+
+/* 티스토리 자동 생성 클래스 (link_item, link_sub_item) */
+.tt_category a.link_item,
+.category a.link_item {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  color: #9d9d9d;
+  font-size: 0.8125rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+/* 더 강력한 선택자로 link_sub_item 스타일 적용 */
+a.link_sub_item,
+.tt_category a.link_sub_item,
+.category a.link_sub_item,
+ul.sub_category_list a.link_sub_item,
+.sub_category_list a.link_sub_item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding-top: 0.25rem !important;
+  padding-right: 0.5rem !important;
+  padding-bottom: 0.25rem !important;
+  padding-left: 0.125rem !important; /* 왼쪽만 2px로 */
+  color: #858585 !important;
+  font-size: 0.8125rem !important;
+  border-radius: 4px !important;
+  transition: all 0.2s !important;
 }
 
 /* ========================================
