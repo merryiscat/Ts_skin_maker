@@ -114,15 +114,15 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.3;
   margin-top: 1.5em;
-  margin-bottom: 0.75em;
+  margin-bottom: 1.25em; /* 제목 아래 간격 증가 */
 }
 
-h1 { font-size: 2.25rem; } /* 36px */
-h2 { font-size: 1.875rem; } /* 30px */
-h3 { font-size: 1.5rem; } /* 24px */
-h4 { font-size: 1.25rem; } /* 20px */
-h5 { font-size: 1.125rem; } /* 18px */
-h6 { font-size: 1rem; } /* 16px */
+h1 { font-size: 2rem; } /* 32px */
+h2 { font-size: 1.625rem; } /* 26px */
+h3 { font-size: 1.375rem; } /* 22px */
+h4 { font-size: 1.125rem; } /* 18px */
+h5 { font-size: 1rem; } /* 16px */
+h6 { font-size: 0.875rem; } /* 14px */
 
 /* 본문 텍스트 */
 p {
@@ -139,6 +139,41 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+/* 인용 블록 스타일 */
+blockquote {
+  margin: 1.5em 0;
+  padding: 0.875rem 1.25rem;
+  border-left: 4px solid var(--color-accent);
+  background-color: rgba(45, 45, 48, 0.5);
+  color: #a8a8a8; /* 밝은 회색 */
+  border-radius: 4px;
+  font-size: 0.9375rem;
+  text-align: left; /* 좌측 정렬 */
+}
+
+/* 인용 블록 자동 텍스트 제거 */
+blockquote::before,
+blockquote::after {
+  content: none !important;
+}
+
+/* 인용 블록 내 볼드 텍스트는 밝게 유지 */
+blockquote strong,
+blockquote b {
+  color: #e0e0e0;
+}
+
+/* 인용 블록 내 링크 */
+blockquote a {
+  color: var(--color-accent);
+}
+
+/* 인용 블록 내 코드 */
+blockquote code {
+  background: rgba(30, 30, 30, 0.6);
+  color: #ce9178;
 }
 
 /* ========================================
@@ -261,34 +296,41 @@ pre code {
   content: '';
 }
 
-/* 하위 카테고리 들여쓰기 (Cursor 스타일) */
+/* 하위 카테고리 들여쓰기 */
 #category ul,
 .tt_category ul,
 .category ul {
   list-style: none !important;
-  padding-left: 0.5rem !important; /* Cursor 스타일로 들여쓰기 최소화 */
+  padding-left: 0.5rem !important; /* 들여쓰기 유지 (상위↔하위 구분) */
   margin-top: 0.25rem;
   margin-left: 0 !important; /* 왼쪽 여백 제거 */
   border-left: 1px solid #3e3e42;
 }
 
-/* 티스토리 자동 생성 카테고리 리스트 - padding 제거 */
+/* 티스토리 자동 생성 카테고리 리스트 */
 .category_list,
 .sub_category_list {
   list-style: none !important;
-  padding-left: 0 !important;
+  padding-left: 0.5rem !important; /* 들여쓰기 */
   margin-top: 0.25rem;
   margin-left: 0 !important;
   border-left: 1px solid #3e3e42;
 }
 
+/* 더 구체적인 선택자로 강제 적용 */
+#sidebar #category ul li a,
+#sidebar .tt_category ul li a,
+#sidebar .category ul li a,
+aside#sidebar #category ul li a,
+aside#sidebar .tt_category ul li a,
+aside#sidebar .category ul li a,
 #category ul li a,
 .tt_category ul li a,
 .category ul li a {
   display: flex !important;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.125rem !important; /* 상 우 하 좌 - 세로선↔텍스트 간격 2px */
   color: #9d9d9d;
   font-size: 0.8125rem;
   border-radius: 4px;
@@ -311,30 +353,44 @@ pre code {
   content: '';
 }
 
-/* 카테고리 글 개수 */
+/* 카테고리 글 개수 (여러 가능한 클래스명 모두 포함) */
 #category .cnt,
+#category .c_cnt,
 .tt_category .cnt,
-.category .cnt {
+.tt_category .c_cnt,
+.category .cnt,
+.category .c_cnt,
+.link_item .cnt,
+.link_item .c_cnt,
+.link_sub_item .cnt,
+.link_sub_item .c_cnt,
+#sidebar .cnt,
+#sidebar .c_cnt,
+aside .cnt,
+aside .c_cnt {
+  display: inline-flex !important; /* 강제 표시 */
+  visibility: visible !important;
+  opacity: 1 !important;
   margin-left: auto;
   font-size: 0.75rem;
-  color: #6a9955;
+  color: #6a9955 !important;
   font-weight: 500;
   flex-shrink: 0; /* 크기 고정 (줄바꿈 방지) */
   white-space: nowrap; /* 줄바꿈 방지 */
 }
 
-/* 3단계 이상 깊은 하위 카테고리 (Cursor 스타일) */
+/* 3단계 이상 깊은 하위 카테고리 */
 #category ul ul,
 .tt_category ul ul,
 .category ul ul {
-  padding-left: 0.5rem !important;
+  padding-left: 0.5rem !important; /* 들여쓰기 유지 */
   margin-left: 0;
 }
 
 #category ul ul ul,
 .tt_category ul ul ul,
 .category ul ul ul {
-  padding-left: 0.5rem !important;
+  padding-left: 0.5rem !important; /* 들여쓰기 유지 */
   margin-left: 0;
 }
 
@@ -387,6 +443,12 @@ pre code {
 }
 
 /* 더 강력한 선택자로 link_sub_item 스타일 적용 */
+#sidebar a.link_sub_item,
+#sidebar .tt_category a.link_sub_item,
+#sidebar .category a.link_sub_item,
+aside#sidebar a.link_sub_item,
+aside#sidebar .tt_category a.link_sub_item,
+aside#sidebar .category a.link_sub_item,
 a.link_sub_item,
 .tt_category a.link_sub_item,
 .category a.link_sub_item,
@@ -398,7 +460,7 @@ ul.sub_category_list a.link_sub_item,
   padding-top: 0.25rem !important;
   padding-right: 0.5rem !important;
   padding-bottom: 0.25rem !important;
-  padding-left: 0.125rem !important; /* 왼쪽만 2px로 */
+  padding-left: 0.125rem !important; /* 세로선↔텍스트 간격 2px */
   color: #858585 !important;
   font-size: 0.8125rem !important;
   border-radius: 4px !important;
@@ -588,10 +650,37 @@ img.lazy.loaded {
   color: #d4d4d4;
 }
 
-.prose-invert h1,
-.prose-invert h2,
-.prose-invert h3 {
+/* Prose 제목 크기 재정의 */
+.prose h1,
+.prose-invert h1 {
+  font-size: 2rem !important; /* 32px */
   color: #f0f0f0;
+  margin-top: 1.5em !important;
+  margin-bottom: 1.25em !important;
+}
+
+.prose h2,
+.prose-invert h2 {
+  font-size: 1.625rem !important; /* 26px */
+  color: #f0f0f0;
+  margin-top: 1.5em !important;
+  margin-bottom: 1.25em !important;
+}
+
+.prose h3,
+.prose-invert h3 {
+  font-size: 1.375rem !important; /* 22px */
+  color: #f0f0f0;
+  margin-top: 1.5em !important;
+  margin-bottom: 1.25em !important;
+}
+
+.prose h4,
+.prose-invert h4 {
+  font-size: 1.125rem !important; /* 18px */
+  color: #f0f0f0;
+  margin-top: 1.5em !important;
+  margin-bottom: 1.25em !important;
 }
 
 .prose-invert a {
@@ -602,11 +691,47 @@ img.lazy.loaded {
   color: #f0f0f0;
 }
 
+/* Prose 인용 블록 스타일 재정의 */
+.prose blockquote,
 .prose-invert blockquote {
-  color: #9d9d9d;
-  border-left: 4px solid var(--color-accent);
-  padding-left: 1rem;
-  font-style: italic;
+  margin: 1.5em 0 !important;
+  padding: 0.875rem 1.25rem !important;
+  border-left: 4px solid var(--color-accent) !important;
+  background-color: rgba(45, 45, 48, 0.5) !important;
+  color: #a8a8a8 !important; /* 밝은 회색 */
+  border-radius: 4px !important;
+  font-size: 0.9375rem !important;
+  font-style: normal !important;
+  text-align: left !important; /* 좌측 정렬 */
+}
+
+/* Prose 인용 블록 자동 텍스트 제거 */
+.prose blockquote::before,
+.prose blockquote::after,
+.prose-invert blockquote::before,
+.prose-invert blockquote::after {
+  content: none !important;
+}
+
+/* 인용 블록 내 볼드 */
+.prose blockquote strong,
+.prose blockquote b,
+.prose-invert blockquote strong,
+.prose-invert blockquote b {
+  color: #e0e0e0 !important;
+}
+
+/* 인용 블록 내 링크 */
+.prose blockquote a,
+.prose-invert blockquote a {
+  color: var(--color-accent) !important;
+}
+
+/* 인용 블록 내 코드 */
+.prose blockquote code,
+.prose-invert blockquote code {
+  background: rgba(30, 30, 30, 0.6) !important;
+  color: #ce9178 !important;
 }
 
 /* 테이블 스타일 */
@@ -657,7 +782,32 @@ img.lazy.loaded {
 }
 
 /* ========================================
-   9. 반응형 조정
+   9. 독립 스크롤 (사이드바 + 메인)
+   ======================================== */
+
+/*
+  데스크톱에서 사이드바를 고정하고 독립 스크롤 구현
+*/
+@media (min-width: 768px) {
+  /* 사이드바 고정 및 독립 스크롤 */
+  #sidebar {
+    position: fixed !important;
+    top: 3rem; /* header 높이 (48px) */
+    left: 0;
+    bottom: 0;
+    width: 16rem; /* 256px */
+    overflow-y: auto !important;
+    transform: translateX(0) !important;
+  }
+
+  /* 메인 콘텐츠에 왼쪽 여백 추가 (사이드바 너비만큼) */
+  main {
+    margin-left: 16rem; /* 256px */
+  }
+}
+
+/* ========================================
+   10. 반응형 조정
    ======================================== */
 
 /*
@@ -665,9 +815,10 @@ img.lazy.loaded {
 */
 @media (max-width: 768px) {
   /* 제목 크기 축소 */
-  h1 { font-size: 1.875rem; } /* 30px */
-  h2 { font-size: 1.5rem; } /* 24px */
-  h3 { font-size: 1.25rem; } /* 20px */
+  h1 { font-size: 1.75rem; } /* 28px */
+  h2 { font-size: 1.375rem; } /* 22px */
+  h3 { font-size: 1.125rem; } /* 18px */
+  h4 { font-size: 1rem; } /* 16px */
 
   /* 코드 블록 패딩 축소 */
   pre {
@@ -686,13 +837,18 @@ img.lazy.loaded {
 */
 @media (min-width: 768px) and (max-width: 1024px) {
   /* 사이드바 너비 조정 */
-  aside {
-    width: 200px !important;
+  #sidebar {
+    width: 12.5rem !important; /* 200px */
+  }
+
+  /* 메인 콘텐츠 여백도 조정 */
+  main {
+    margin-left: 12.5rem !important; /* 200px */
   }
 }
 
 /* ========================================
-   10. 인쇄 스타일
+   11. 인쇄 스타일
    ======================================== */
 
 /*
@@ -729,7 +885,7 @@ img.lazy.loaded {
 }
 
 /* ========================================
-   11. 애니메이션
+   12. 애니메이션
    ======================================== */
 
 /*

@@ -52,6 +52,16 @@
     <showListOnCategory>1</showListOnCategory>
     <showListOnTag>1</showListOnTag>
     <contentWidth>1000</contentWidth>
+
+    <!-- 카테고리 트리 설정 -->
+    <tree>
+      <color>d4d4d4</color>
+      <bgColor>252526</bgColor>
+      <activeColor>007acc</activeColor>
+      <activeBgColor>3e3e42</activeBgColor>
+      <labelLength>50</labelLength>
+      <showValue>1</showValue>
+    </tree>
   </default>
 
   <!--
