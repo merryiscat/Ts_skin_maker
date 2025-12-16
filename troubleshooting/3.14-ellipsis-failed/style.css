@@ -244,10 +244,15 @@ pre code {
 }
 
 /* ========================================
-   4. 티스토리 카테고리 스타일 (VS Code 스타일)
+   4. 티스토리 카테고리 스타일
    ======================================== */
 
-/* 카테고리 컨테이너 초기화 */
+/*
+  티스토리에서 자동 생성되는 카테고리 리스트를
+  파일 트리 스타일로 변환
+
+  티스토리는 여러 클래스명을 사용할 수 있으므로 범용 셀렉터 사용
+*/
 #category,
 .tt_category,
 .category {
@@ -256,102 +261,190 @@ pre code {
   margin: 0;
 }
 
-/* 모든 리스트 아이템 초기화 */
 #category li,
 .tt_category li,
 .category li {
   margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
-/* 최상위 카테고리 링크 */
+/* 최상위 카테고리 및 전체보기 */
 #category > li > a,
 .tt_category > li > a,
-.category > li > a {
-  display: block;
-  padding: 4px 8px;
+.category > li > a,
+.category-link {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
   color: #d4d4d4;
   font-size: 0.875rem;
   border-radius: 4px;
   transition: background-color 0.2s;
-  cursor: pointer;
-  position: relative;
-  padding-left: 20px; /* 화살표 공간 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #category > li > a:hover,
 .tt_category > li > a:hover,
-.category > li > a:hover {
-  background-color: #2a2d2e;
+.category > li > a:hover,
+.category-link:hover {
+  background-color: #3e3e42;
   text-decoration: none;
 }
 
-/* 하위 카테고리 리스트 */
+/* 폴더 아이콘 제거 */
+#category > li > a::before,
+.tt_category > li > a::before,
+.category > li > a::before {
+  content: '';
+}
+
+/* 하위 카테고리 들여쓰기 */
 #category ul,
 .tt_category ul,
 .category ul {
-  padding-left: 12px !important; /* VS Code 스타일 좁은 들여쓰기 */
-  margin: 0;
+  list-style: none !important;
+  padding-left: 12px !important;
+  margin-top: 0.25rem;
+  margin-left: 0 !important;
 }
 
-/* 하위 카테고리 링크 */
+/* 티스토리 자동 생성 카테고리 리스트 */
+.category_list,
+.sub_category_list {
+  list-style: none !important;
+  padding-left: 12px !important;
+  margin-top: 0.25rem;
+  margin-left: 0 !important;
+}
+
 #category ul li a,
 .tt_category ul li a,
 .category ul li a {
-  display: block;
-  padding: 4px 8px;
-  padding-left: 20px; /* 화살표 공간 */
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.5rem; /* 상 우 하 좌 - 좌측 패딩 8px */
   color: #9d9d9d;
   font-size: 0.8125rem;
   border-radius: 4px;
-  transition: background-color 0.2s;
-  position: relative;
+  transition: all 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #category ul li a:hover,
 .tt_category ul li a:hover,
 .category ul li a:hover {
-  background-color: #2a2d2e;
+  background-color: #3e3e42;
   color: #d4d4d4;
   text-decoration: none;
 }
 
-/* 화살표 기본 (하위가 있는 경우) */
+/* 파일 아이콘 제거 */
+#category ul li a::before,
+.tt_category ul li a::before,
+.category ul li a::before {
+  content: '';
+}
+
+/* 카테고리 글 개수 */
+#category .cnt,
+.tt_category .cnt,
+.category .cnt,
+.link_item .cnt,
+.link_sub_item .cnt {
+  display: inline !important; /* 강제 표시 */
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #6a9955 !important;
+  font-weight: 500;
+  flex-shrink: 0; /* 크기 고정 (줄바꿈 방지) */
+  white-space: nowrap; /* 줄바꿈 방지 */
+}
+
+/* 3단계 이상 깊은 하위 카테고리 (BookClub 스타일) */
+#category ul ul,
+.tt_category ul ul,
+.category ul ul {
+  padding-left: 0 !important;
+  margin-left: 0;
+}
+
+#category ul ul ul,
+.tt_category ul ul ul,
+.category ul ul ul {
+  padding-left: 0 !important;
+  margin-left: 0;
+}
+
+/* 티스토리 자동 생성 "전체보기" 링크 숨김 (독립적으로 추가했으므로) */
+.tt_category .link_tit,
+.category .link_tit {
+  display: none !important;
+}
+
+/* 카테고리 토글 화살표 (모든 레벨) */
+.tt_category a,
+.category a {
+  position: relative;
+  cursor: pointer;
+}
+
 .tt_category a.has-children::before,
 .category a.has-children::before {
-  content: '▶';
+  content: '>';
   position: absolute;
-  left: 4px;
-  font-size: 10px;
+  left: -0.5rem; /* Cursor 스타일에 맞춰 조정 */
+  font-size: 0.75rem;
   color: #858585;
-  transition: transform 0.15s;
+  transition: transform 0.2s;
+  font-weight: normal;
 }
 
-/* 펼쳐진 상태 */
 .tt_category a.has-children:not(.collapsed)::before,
 .category a.has-children:not(.collapsed)::before {
-  content: '▼';
-  transform: none;
+  transform: rotate(90deg);
 }
 
-/* 접힌 하위 카테고리 숨기기 */
+/* 접힌 하위 카테고리 숨기기 (모든 레벨) */
 .tt_category ul.collapsed,
 .category ul.collapsed {
   display: none;
 }
 
-/* 글 개수 */
-#category .cnt,
-#category .c_cnt,
-.tt_category .cnt,
-.tt_category .c_cnt,
-.category .cnt,
-.category .c_cnt {
-  margin-left: 6px;
-  font-size: 0.75rem;
-  color: #6a9955;
-  opacity: 0.7;
+/* 티스토리 자동 생성 클래스 (link_item, link_sub_item) */
+.tt_category a.link_item,
+.category a.link_item {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  color: #9d9d9d;
+  font-size: 0.8125rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+/* 더 강력한 선택자로 link_sub_item 스타일 적용 */
+a.link_sub_item,
+.tt_category a.link_sub_item,
+.category a.link_sub_item,
+ul.sub_category_list a.link_sub_item,
+.sub_category_list a.link_sub_item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding-top: 0.25rem !important;
+  padding-right: 0.5rem !important;
+  padding-bottom: 0.25rem !important;
+  padding-left: 0.5rem !important; /* 왼쪽 8px로 통일 */
+  color: #858585 !important;
+  font-size: 0.8125rem !important;
+  border-radius: 4px !important;
+  transition: all 0.2s !important;
 }
 
 /* ========================================
