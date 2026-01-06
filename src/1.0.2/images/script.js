@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   initCategoryToggle();
   initScrollToTop();
-  initTagLimit(); // 태그 제한 기능 추가
 
   // 상세 페이지인 경우에만 TOC 및 태그 이동 실행
   if (getPageType() === 'page') {
@@ -31,58 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initSearch();
 });
 
+
 // ========================================
-// 0. 사이드바 태그 제한 (v1.0.2)
+// 1. 목차 (TOC) 및 스크롤 스파이
 // ========================================
-
-/**
- * 사이드바 태그 클라우드에서 최신 15개만 보여주고 나머지는 ... 처리
- */
-function initTagLimit() {
-  // 사이드바 내의 태그 컨테이너 찾기
-  // layout 구조상 aside#sidebar 내의 flex-wrap 클래스를 가진 div가 태그 컨테이너임
-  const sidebar = document.getElementById('sidebar');
-  if (!sidebar) return;
-
-  // 태그 컨테이너 찾기: "Tags" 헤더 다음의 div (flex-wrap 클래스 등)
-  // 명확한 식별을 위해 aside 내부의 특정 구조를 탐색
-  // skin.html 구조: aside > nav > div(Tags) > div.flex.flex-wrap
-  const tagContainer = sidebar.querySelector('.flex.flex-wrap.gap-1\\.5');
-
-  if (!tagContainer) {
-    console.log('❌ 태그 컨테이너를 찾을 수 없습니다.');
-    return;
-  }
-
-  const tags = tagContainer.querySelectorAll('a');
-  const limit = 15;
-
-  if (tags.length <= limit) return; // 제한보다 적으면 아무것도 안 함
-
-  // 15개 이후 숨기기
-  for (let i = limit; i < tags.length; i++) {
-    tags[i].style.display = 'none';
-  }
-
-  // 더보기 버튼 (...) 생성
-  const moreBtn = document.createElement('button');
-  moreBtn.textContent = '...';
-  moreBtn.className = 'px-2 py-1 bg-gray-800 text-gray-400 hover:text-white rounded text-xs transition-colors ml-1';
-  moreBtn.title = '태그 더보기';
-
-  // 클릭 이벤트
-  moreBtn.addEventListener('click', () => {
-    // 숨겨진 태그들 보이기
-    for (let i = limit; i < tags.length; i++) {
-      tags[i].style.display = 'inline-block'; // or '' to reset
-    }
-    // 버튼 제거 (또는 '접기'로 변경 가능)
-    moreBtn.remove();
-  });
-
-  tagContainer.appendChild(moreBtn);
-  console.log(`✅ 태그 제한 적용 완료 (${tags.length}개 중 ${limit}개 표시)`);
-}
 
 /**
  * 목차 생성 및 스크롤 감지 초기화

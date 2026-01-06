@@ -110,19 +110,49 @@ body {
   제목 스타일링
   SEO를 위해 제목 계층 구조 유지 (H1 > H2 > H3...)
 */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 600;
   line-height: 1.3;
   margin-top: 1.5em;
-  margin-bottom: 1.25em; /* 제목 아래 간격 증가 */
+  margin-bottom: 1.25em;
+  /* 제목 아래 간격 증가 */
 }
 
-h1 { font-size: 2rem; } /* 32px */
-h2 { font-size: 1.625rem; } /* 26px */
-h3 { font-size: 1.375rem; } /* 22px */
-h4 { font-size: 1.125rem; } /* 18px */
-h5 { font-size: 1rem; } /* 16px */
-h6 { font-size: 0.875rem; } /* 14px */
+h1 {
+  font-size: 2rem;
+}
+
+/* 32px */
+h2 {
+  font-size: 1.625rem;
+}
+
+/* 26px */
+h3 {
+  font-size: 1.375rem;
+}
+
+/* 22px */
+h4 {
+  font-size: 1.125rem;
+}
+
+/* 18px */
+h5 {
+  font-size: 1rem;
+}
+
+/* 16px */
+h6 {
+  font-size: 0.875rem;
+}
+
+/* 14px */
 
 /* 본문 텍스트 */
 p {
@@ -147,17 +177,18 @@ blockquote {
   padding: 0.875rem 1.25rem;
   border-left: 4px solid var(--color-accent);
   background-color: rgba(45, 45, 48, 0.5);
-  color: #a8a8a8; /* 밝은 회색 */
+  color: #a8a8a8;
+  /* 밝은 회색 */
   border-radius: 4px;
   font-size: 0.9375rem;
-  text-align: left; /* 좌측 정렬 */
+  text-align: left;
+  /* 좌측 정렬 */
 }
 
-/* 인용 블록 자동 텍스트 제거 (따옴표 아이콘 제거) */
+/* 인용 블록 자동 텍스트 제거 */
 blockquote::before,
 blockquote::after {
   content: none !important;
-  display: none !important;
 }
 
 /* 인용 블록 내 볼드 텍스트는 밝게 유지 */
@@ -227,7 +258,7 @@ pre code {
   counter-reset: linenumber;
 }
 
-.line-numbers > code {
+.line-numbers>code {
   position: relative;
   white-space: inherit;
 }
@@ -269,9 +300,9 @@ pre code {
 }
 
 /* 최상위 카테고리 및 전체보기 */
-#category > li > a,
-.tt_category > li > a,
-.category > li > a,
+#category>li>a,
+.tt_category>li>a,
+.category>li>a,
 .category-link {
   display: flex !important;
   align-items: center;
@@ -285,9 +316,9 @@ pre code {
   overflow-wrap: break-word;
 }
 
-#category > li > a:hover,
-.tt_category > li > a:hover,
-.category > li > a:hover,
+#category>li>a:hover,
+.tt_category>li>a:hover,
+.category>li>a:hover,
 .category-link:hover {
   background-color: #3e3e42;
   text-decoration: none;
@@ -317,13 +348,16 @@ pre code {
 .category .cnt,
 .link_item .cnt,
 .link_sub_item .cnt {
-  display: inline !important; /* 강제 표시 */
+  display: inline !important;
+  /* 강제 표시 */
   margin-left: auto;
   font-size: 0.75rem;
   color: #6a9955 !important;
   font-weight: 500;
-  flex-shrink: 0; /* 크기 고정 (줄바꿈 방지) */
-  white-space: nowrap; /* 줄바꿈 방지 */
+  flex-shrink: 0;
+  /* 크기 고정 (줄바꿈 방지) */
+  white-space: nowrap;
+  /* 줄바꿈 방지 */
 }
 
 /* 3단계 이상 깊은 하위 카테고리 (BookClub 스타일) */
@@ -359,7 +393,8 @@ pre code {
 .category a.has-children::before {
   content: '>';
   position: absolute;
-  left: -0.5rem; /* Cursor 스타일에 맞춰 조정 */
+  left: -0.5rem;
+  /* Cursor 스타일에 맞춰 조정 */
   font-size: 0.75rem;
   color: #858585;
   transition: transform 0.2s;
@@ -385,7 +420,8 @@ pre code {
   gap: 0.5rem;
   padding: 0.25rem 0.5rem;
   color: #9d9d9d;
-  left: -0.5rem; /* Cursor 스타일에 맞춰 조정 */
+  left: -0.5rem;
+  /* Cursor 스타일에 맞춰 조정 */
   font-size: 0.8125rem;
   border-radius: 4px;
   transition: all 0.2s;
@@ -596,7 +632,8 @@ img.lazy.loaded {
 /* Prose 제목 크기 재정의 */
 .prose h1,
 .prose-invert h1 {
-  font-size: 2rem !important; /* 32px */
+  font-size: 2rem !important;
+  /* 32px */
   color: #f0f0f0;
   margin-top: 1.5em !important;
   margin-bottom: 1.25em !important;
@@ -604,7 +641,8 @@ img.lazy.loaded {
 
 .prose h2,
 .prose-invert h2 {
-  font-size: 1.625rem !important; /* 26px */
+  font-size: 1.625rem !important;
+  /* 26px */
   color: #f0f0f0;
   margin-top: 1.5em !important;
   margin-bottom: 1.25em !important;
@@ -612,7 +650,8 @@ img.lazy.loaded {
 
 .prose h3,
 .prose-invert h3 {
-  font-size: 1.375rem !important; /* 22px */
+  font-size: 1.375rem !important;
+  /* 22px */
   color: #f0f0f0;
   margin-top: 1.5em !important;
   margin-bottom: 1.25em !important;
@@ -620,7 +659,8 @@ img.lazy.loaded {
 
 .prose h4,
 .prose-invert h4 {
-  font-size: 1.125rem !important; /* 18px */
+  font-size: 1.125rem !important;
+  /* 18px */
   color: #f0f0f0;
   margin-top: 1.5em !important;
   margin-bottom: 1.25em !important;
@@ -641,11 +681,13 @@ img.lazy.loaded {
   padding: 0.875rem 1.25rem !important;
   border-left: 4px solid var(--color-accent) !important;
   background-color: rgba(45, 45, 48, 0.5) !important;
-  color: #a8a8a8 !important; /* 밝은 회색 */
+  color: #a8a8a8 !important;
+  /* 밝은 회색 */
   border-radius: 4px !important;
   font-size: 0.9375rem !important;
   font-style: normal !important;
-  text-align: left !important; /* 좌측 정렬 */
+  text-align: left !important;
+  /* 좌측 정렬 */
 }
 
 /* Prose 인용 블록 자동 텍스트 제거 */
@@ -709,7 +751,8 @@ img.lazy.loaded {
 
 /* 리스트 스타일 */
 .prose-invert ul {
-  list-style: none; /* 기본 마커 제거 */
+  list-style: none;
+  /* 기본 마커 제거 */
   padding-left: 1.5rem;
   margin-bottom: 1rem;
 }
@@ -725,30 +768,32 @@ img.lazy.loaded {
 }
 
 /* ul 직속 자식 li에 ○ 마커 추가 */
-.prose-invert ul > li {
+.prose-invert ul>li {
   position: relative;
   padding-left: 0.5rem;
 }
 
-.prose-invert ul > li::before {
+.prose-invert ul>li::before {
   content: '○';
   position: absolute;
   left: -1rem;
   top: 0.05em;
-  color: #9ca3af; /* gray-400 */
+  color: #9ca3af;
+  /* gray-400 */
   font-weight: 400;
   font-size: 0.875rem;
   line-height: inherit;
 }
 
 /* 중첩 리스트 (1단계) */
-.prose-invert ul ul > li::before {
-  content: '▫'; /* 작은 사각형 */
+.prose-invert ul ul>li::before {
+  content: '▫';
+  /* 작은 사각형 */
   font-size: 0.75rem;
 }
 
 /* 중첩 리스트 (2단계 이상) */
-.prose-invert ul ul ul > li::before {
+.prose-invert ul ul ul>li::before {
   content: '○';
   font-size: 0.75rem;
   opacity: 0.8;
@@ -775,21 +820,27 @@ img.lazy.loaded {
   데스크톱에서 사이드바를 고정하고 독립 스크롤 구현
 */
 @media (min-width: 768px) {
+
   /* 사이드바 고정 및 독립 스크롤 */
   #sidebar {
     position: fixed !important;
-    top: 3rem; /* header 높이 (48px) */
+    top: 3rem;
+    /* header 높이 (48px) */
     left: 0;
-    bottom: 4rem; /* footer 높이만큼 여백 */
-    width: 18.75rem; /* 300px */
+    bottom: 4rem;
+    /* footer 높이만큼 여백 */
+    width: 18.75rem;
+    /* 300px */
     overflow-y: auto !important;
     transform: translateX(0) !important;
   }
 
   /* 메인 콘텐츠에 왼쪽 여백 및 하단 여백 추가 */
   main {
-    margin-left: 18.75rem; /* 300px */
-    padding-bottom: 5rem; /* footer 높이보다 약간 더 */
+    margin-left: 18.75rem;
+    /* 300px */
+    padding-bottom: 5rem;
+    /* footer 높이보다 약간 더 */
   }
 }
 
@@ -801,11 +852,28 @@ img.lazy.loaded {
   모바일 (768px 이하)
 */
 @media (max-width: 768px) {
+
   /* 제목 크기 축소 */
-  h1 { font-size: 1.75rem; } /* 28px */
-  h2 { font-size: 1.375rem; } /* 22px */
-  h3 { font-size: 1.125rem; } /* 18px */
-  h4 { font-size: 1rem; } /* 16px */
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  /* 28px */
+  h2 {
+    font-size: 1.375rem;
+  }
+
+  /* 22px */
+  h3 {
+    font-size: 1.125rem;
+  }
+
+  /* 18px */
+  h4 {
+    font-size: 1rem;
+  }
+
+  /* 16px */
 
   /* 코드 블록 패딩 축소 */
   pre {
@@ -828,15 +896,19 @@ img.lazy.loaded {
   태블릿 (768px ~ 1024px)
 */
 @media (min-width: 768px) and (max-width: 1024px) {
+
   /* 사이드바 너비 조정 */
   #sidebar {
-    width: 12.5rem !important; /* 200px */
+    width: 12.5rem !important;
+    /* 200px */
   }
 
   /* 메인 콘텐츠 여백도 조정 */
   main {
-    margin-left: 12.5rem !important; /* 200px */
-    padding-bottom: 5rem !important; /* footer 높이보다 약간 더 */
+    margin-left: 12.5rem !important;
+    /* 200px */
+    padding-bottom: 5rem !important;
+    /* footer 높이보다 약간 더 */
   }
 }
 
@@ -848,6 +920,7 @@ img.lazy.loaded {
   글을 인쇄할 때 최적화
 */
 @media print {
+
   /* 사이드바, 헤더, 푸터 숨김 */
   header,
   aside,
@@ -889,6 +962,7 @@ img.lazy.loaded {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -906,6 +980,7 @@ img.lazy.loaded {
   0% {
     background-position: -1000px 0;
   }
+
   100% {
     background-position: 1000px 0;
   }
@@ -924,7 +999,7 @@ img.lazy.loaded {
 /* 티스토리 자동 생성 요소 숨기기 */
 .tt_vox_namecard,
 .tt_box_namecard {
-    display: none !important;
+  display: none !important;
 }
 
 /* 댓글 관련 요소들의 폰트 색상을 흰색으로 변경 */
@@ -962,4 +1037,3 @@ button.tt-btn_register[disabled] {
   cursor: not-allowed !important;
   opacity: 0.6 !important;
 }
-
