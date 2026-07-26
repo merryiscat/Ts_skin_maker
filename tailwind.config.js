@@ -7,15 +7,15 @@
  *  Tailwind 공식이 프로덕션 사용을 금지하는 방식이었음)
  *
  * 빌드 방법: npm run build:css
- * 주의: 새 버전 폴더(예: src/1.3.0)를 만들면
+ * 주의: 새 버전 폴더(예: src/1.5.0)를 만들면
  *       아래 content 경로와 package.json의 출력 경로도 함께 바꿔야 합니다.
  */
 module.exports = {
   // 이 파일들에서 실제로 쓰인 클래스만 골라 CSS를 생성합니다
   content: [
-    './src/1.3.0/skin.html',
-    './src/1.3.0/preview.html',
-    './src/1.3.0/images/script.js'
+    './src/1.4.0/skin.html',
+    './src/1.4.0/preview.html',
+    './src/1.4.0/images/script.js'
   ],
 
   // 다크 모드: body의 dark 클래스 기준 (이 스킨은 다크 전용이라 항상 켜져 있음)
