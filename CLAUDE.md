@@ -5,8 +5,9 @@
 ## ⚠️ 중요 규칙
 **절대 이모지를 사용하지 말 것** - 코드, 주석, 커밋 메시지, 모든 곳에서 이모지 사용 금지
 **자동 버전 관리 필수** - src/ 폴더의 파일을 수정할 때마다 반드시 새 버전 폴더 생성. 사용자가 시키지 않아도 자동으로 버전업해야 함. 롤백 기점 확보가 목적.
-- 현재 버전 체계: `src/0.9.8` → `src/0.9.9` → `src/1.0.0` (최신)
-- 수정 시: 최신 버전 폴더를 통째로 복사해 새 버전 폴더(예: `src/1.0.1`)를 만든 뒤 그 안에서 작업하고, `index.xml`의 `<version>`도 함께 올릴 것
+- 현재 버전 체계: `src/0.9.8` → `src/0.9.9` → `src/1.0.0` → `src/1.1.0` → `src/1.2.0` (최신)
+- 수정 시: 최신 버전 폴더를 통째로 복사해 새 버전 폴더를 만든 뒤 그 안에서 작업하고, `index.xml`의 `<version>`도 함께 올릴 것
+- 새 버전 폴더를 만들면 `tailwind.config.js`의 content 경로와 `package.json`의 build:css 출력 경로도 새 버전으로 바꿀 것
 
 ## 프로젝트 개요
 
@@ -17,7 +18,14 @@
 **기술 스택**: Vanilla JavaScript + Tailwind CSS (유지보수성 우선)
 **우선순위**: SEO 최적화, 성능, 모바일 반응형
 
-## 현재 상태 (1.1.0 기준)
+## 현재 상태 (1.2.0 기준)
+
+**1.2.0 변경점 - Tailwind 빌드 전환:**
+- CDN(cdn.tailwindcss.com) 제거. 미리 빌드한 `images/tailwind.css`(약 12KB, minify)를 로드
+- 빌드 명령: 저장소 루트에서 `npm run build:css` (Node.js 필요, 설정은 `tailwind.config.js` + `tailwind-input.css`)
+- **skin.html/preview.html에서 Tailwind 클래스를 추가/변경하면 반드시 다시 빌드해야 함** (빌드된 CSS에는 스캔 시점에 쓰인 클래스만 포함됨)
+- accent 색상은 config에서 `var(--color-accent)`로 연결되어 있어, 관리자 옵션 색상이 `focus:ring-accent` 같은 Tailwind 클래스에도 반영됨
+- `node_modules/`는 .gitignore 처리 (절대 커밋 금지)
 
 - 스킨 이름: **Code Editor Blog** — Cursor/VS Code 에디터 스타일의 **다크 전용** 스킨 (1.1.0에서 라이트 모드 코드/변수 완전 제거)
 - 레이아웃: 고정 헤더(h-12, 데스크톱 검색창 포함) + 왼쪽 사이드바(검색(모바일)/프로필+구독버튼/About/최근공지/카테고리/태그) + 메인 콘텐츠 + 고정 푸터
@@ -30,7 +38,7 @@
   - 티스토리 에디터 특수 블록 다크 스타일: 인용 3종(`data-ke-style`), hr 8종, fileblock, moreless, imageblock/grid/slide, 오픈그래프 카드 (style.css 13~18번 섹션)
   - 페이지네이션 올바른 문법: `<s_paging>` + 속성 치환자 `<a [##_prev_page_##] class="[##_no_more_prev_##]">`
 - **스킨 옵션(index.xml) 연결 방식**: `[##_var_##]`는 skin.html에서만 치환되므로, head의 인라인 `<style>`에서 CSS 변수(`--color-accent`, `--font-code`)와 사이드바 너비를 주입. style.css의 `:root` 값은 폴백. 유지 중인 변수: accentColor, codeFont, sidebarWidth, enableSearch
-- **미구현/보류**: TOC 자동 생성, 이미지 지연 로딩(변수도 제거됨), Tailwind Play CDN → 빌드 전환(성능 과제), 형광펜 방어 CSS(style.css 17번 섹션에 주석 상태 — 실제 글로 에디터 출력 HTML 확인 후 활성화)
+- **미구현/보류**: TOC 자동 생성, 이미지 지연 로딩(변수도 제거됨), 형광펜 방어 CSS(style.css 17번 섹션에 주석 상태 — 실제 글로 에디터 출력 HTML 확인 후 활성화)
 
 ## 티스토리 스킨 핵심 구조
 
