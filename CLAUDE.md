@@ -4,7 +4,9 @@
 
 ## ⚠️ 중요 규칙
 **절대 이모지를 사용하지 말 것** - 코드, 주석, 커밋 메시지, 모든 곳에서 이모지 사용 금지
-**자동 버전 관리 필수** - src/ 폴더의 파일을 수정할 때마다 반드시 새 버전 폴더(3.X) 생성. 사용자가 시키지 않아도 자동으로 버전업해야 함. 롤백 기점 확보가 목적.
+**자동 버전 관리 필수** - src/ 폴더의 파일을 수정할 때마다 반드시 새 버전 폴더 생성. 사용자가 시키지 않아도 자동으로 버전업해야 함. 롤백 기점 확보가 목적.
+- 현재 버전 체계: `src/0.9.8` → `src/0.9.9` → `src/1.0.0` (최신)
+- 수정 시: 최신 버전 폴더를 통째로 복사해 새 버전 폴더(예: `src/1.0.1`)를 만든 뒤 그 안에서 작업하고, `index.xml`의 `<version>`도 함께 올릴 것
 
 ## 프로젝트 개요
 
@@ -14,6 +16,21 @@
 **디자인**: 모던하고 깔끔한 미학, 다크/라이트 모드 지원
 **기술 스택**: Vanilla JavaScript + Tailwind CSS (유지보수성 우선)
 **우선순위**: SEO 최적화, 성능, 모바일 반응형
+
+## 현재 상태 (1.1.0 기준)
+
+- 스킨 이름: **Code Editor Blog** — Cursor/VS Code 에디터 스타일의 **다크 전용** 스킨 (1.1.0에서 라이트 모드 코드/변수 완전 제거)
+- 레이아웃: 고정 헤더(h-12, 데스크톱 검색창 포함) + 왼쪽 사이드바(검색(모바일)/프로필+구독버튼/About/최근공지/카테고리/태그) + 메인 콘텐츠 + 고정 푸터
+- `src/1.1.0/preview.html`: 티스토리 업로드 없이 브라우저에서 확인하는 로컬 미리보기 겸 스타일 쇼케이스 (마크다운/특수 블록 샘플 포함). file:// 차단 시 `python -m http.server 8000`으로 열 것
+- **1.1.0에서 추가된 것**:
+  - 페이지 지원: 태그 클라우드(`s_tag`), 공지(`s_notice_rep` 목록+본문), 방명록(`s_guest`+`[##_guestbook_group_##]`), 보호글(`s_article_protected`), 리스트 헤더(`s_list`+`s_list_empty`)
+  - 구독 버튼: `[##_subscription_button_##]` (`.btn_subscription`, 구독 중 `.following`)
+  - 검색 복구: 엔터 시 `/search/{query}` 이동하는 단순 방식 (observer 절대 금지 — 과거 무한 루프 원인)
+  - Prism.js 구문 강조: `Prism.manual = true` + script.js가 `data-ke-language`를 `language-*` 클래스로 변환 후 수동 하이라이트. 코드블록에 맥OS 신호등 장식 + 복사 버튼
+  - 티스토리 에디터 특수 블록 다크 스타일: 인용 3종(`data-ke-style`), hr 8종, fileblock, moreless, imageblock/grid/slide, 오픈그래프 카드 (style.css 13~18번 섹션)
+  - 페이지네이션 올바른 문법: `<s_paging>` + 속성 치환자 `<a [##_prev_page_##] class="[##_no_more_prev_##]">`
+- **스킨 옵션(index.xml) 연결 방식**: `[##_var_##]`는 skin.html에서만 치환되므로, head의 인라인 `<style>`에서 CSS 변수(`--color-accent`, `--font-code`)와 사이드바 너비를 주입. style.css의 `:root` 값은 폴백. 유지 중인 변수: accentColor, codeFont, sidebarWidth, enableSearch
+- **미구현/보류**: TOC 자동 생성, 이미지 지연 로딩(변수도 제거됨), Tailwind Play CDN → 빌드 전환(성능 과제), 형광펜 방어 CSS(style.css 17번 섹션에 주석 상태 — 실제 글로 에디터 출력 HTML 확인 후 활성화)
 
 ## 티스토리 스킨 핵심 구조
 
@@ -43,13 +60,10 @@
 
 ## 분석된 참고 스킨
 
-`reference/` 디렉토리에는 서로 다른 접근 방식을 보여주는 5개의 참고 스킨이 있습니다:
+`reference/` 디렉토리에 실제로 존재하는 참고 스킨은 2개입니다 (과거 문서에 있던 5개 목록은 폐기됨):
 
-1. **hannoone_skin_v1.3.2**: 가볍고 SEO 중심, 스크립트 최적화 패턴 (MutationObserver로 불필요한 스크립트 차단)
-2. **Odyssey**: 4가지 리스트 스타일 변형이 있는 반응형 퍼블릭 사이트 디자인
-3. **pg_Poster**: jQuery + Slick.js를 사용한 커버/슬라이더 기능의 포트폴리오 중심 스킨
-4. **tistory_discord_ui**: Tailwind CSS를 사용한 모던한 디스코드 영감 UI (1줄로 압축된 CSS)
-5. **xf_Portfolio**: 반응형 그리드와 캐러셀이 있는 포트폴리오 쇼케이스
+1. **Odyssey(2025-12-10)**: 티스토리 공식 계열 스킨. 특수 블록 CSS(4683줄 이후), 구독 버튼(`[##_subscription_button_##]`, skin.html:716), 공지/보호글/페이징의 표준 마크업 레퍼런스
+2. **BookClub(2025-12-15)**: 심플한 구조의 스킨. `s_list` 헤더+빈 상태 패턴(skin.html:375), 테이블 `data-ke-style` 스타일(style.css:4066 이후) 참고에 유용
 
 **확인된 주요 패턴:**
 - 스크립트 최적화: 불필요한 티스토리 스크립트 차단/지연
@@ -180,7 +194,7 @@
 - [ ] 다크/라이트 모드 토글 작동
 - [ ] 모든 티스토리 치환자가 올바르게 렌더링
 - [ ] 검색이 `/search/{query}`로 리다이렉트
-- [ ] 댓글 섹션 표시 (`[##_guestbook_group_##]` 사용)
+- [ ] 댓글 섹션 표시 (현재 스킨은 `<s_rp>` + `[##_comment_group_##]` 사용, 방명록 페이지는 `[##_guestbook_group_##]`)
 - [ ] 카테고리 및 태그 내비게이션 작동
 - [ ] `<head>`에 SEO 메타 태그 존재
 - [ ] 성능: Lighthouse 점수 > 90
@@ -284,7 +298,6 @@ const lazyLoadImages = () => {
   - 모든 치환자와 상세 설명
   - 궁금한 점이 있을 때 참조
 - **참고 스킨**: `reference/` 디렉토리에 5개의 프로덕션 스킨
-- **계획 문서**: `.claude/plans/glowing-gathering-goose.md` (상세한 구현 계획)
 
 ## 빠른 명령어
 
@@ -308,6 +321,5 @@ find reference/ -name "skin.html"
    - 먼저 `TISTORY_quick_reference.md` 확인 (빠른 참조)
    - 찾는 내용이 없으면 `TISTRORY_skin_guide.md` 참조 (완전한 문서)
 2. **참고 스킨 연구**: 구현 패턴을 위해 `reference/`의 참고 스킨 연구
-3. **계획 따르기**: 단계별 가이드를 위해 `.claude/plans/glowing-gathering-goose.md`의 계획 따르기
-4. **점진적 테스트** - 모든 것이 완료될 때까지 기다리지 말 것
-5. **핵심 기능 우선순위** (index.xml, skin.html, style.css, script.js)를 개선보다 먼저
+3. **점진적 테스트** - 모든 것이 완료될 때까지 기다리지 말 것
+4. **핵심 기능 우선순위** (index.xml, skin.html, style.css, script.js)를 개선보다 먼저
