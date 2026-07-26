@@ -5,7 +5,7 @@
 ## ⚠️ 중요 규칙
 **절대 이모지를 사용하지 말 것** - 코드, 주석, 커밋 메시지, 모든 곳에서 이모지 사용 금지
 **자동 버전 관리 필수** - src/ 폴더의 파일을 수정할 때마다 반드시 새 버전 폴더 생성. 사용자가 시키지 않아도 자동으로 버전업해야 함. 롤백 기점 확보가 목적.
-- 현재 버전 체계: `src/0.9.8` → `src/0.9.9` → `src/1.0.0` → `src/1.1.0` → `src/1.2.0` (최신)
+- 현재 버전 체계: `src/0.9.8` → ... → `src/1.2.0` → `src/1.3.0` (최신)
 - 수정 시: 최신 버전 폴더를 통째로 복사해 새 버전 폴더를 만든 뒤 그 안에서 작업하고, `index.xml`의 `<version>`도 함께 올릴 것
 - 새 버전 폴더를 만들면 `tailwind.config.js`의 content 경로와 `package.json`의 build:css 출력 경로도 새 버전으로 바꿀 것
 
@@ -18,7 +18,14 @@
 **기술 스택**: Vanilla JavaScript + Tailwind CSS (유지보수성 우선)
 **우선순위**: SEO 최적화, 성능, 모바일 반응형
 
-## 현재 상태 (1.2.0 기준)
+## 현재 상태 (1.3.0 기준)
+
+**1.3.0 변경점:**
+- **목차(TOC) 구현**: script.js의 initTOC()가 글 상세 페이지에서 본문 h2/h3를 수집해 오른쪽 고정 목차 생성 (1500px 이상 화면 전용). 스크롤 스파이는 observer가 아닌 scroll 이벤트 + requestAnimationFrame 사용 (observer 금지 원칙 유지). skin.html 변경 없음 - 전부 JS 생성
+- **본문 제목 강화**: `.prose-invert .article-content h2`(28px + 하단 구분선)/h3/h4 재정의 (style.css 19번 섹션)
+- **코드블록 줄바꿈**: pre를 가로 스크롤에서 `white-space: pre-wrap`으로 변경 (Prism 테마가 code에 거는 `white-space: pre`도 함께 덮어씀)
+- preview.html의 body id를 `tt-body-page`로 변경 (TOC 로컬 테스트용)
+- **티스토리 업로드 주의**: skin.html/style.css는 스킨 편집 화면에서 갱신되지만, `images/script.js`와 `images/tailwind.css`는 "파일업로드" 탭에서 별도로 올려야 함 (기존 파일 삭제 후 재업로드). 이걸 빠뜨리면 404로 레이아웃 전체가 깨짐
 
 **1.2.0 변경점 - Tailwind 빌드 전환:**
 - CDN(cdn.tailwindcss.com) 제거. 미리 빌드한 `images/tailwind.css`(약 12KB, minify)를 로드
@@ -38,7 +45,7 @@
   - 티스토리 에디터 특수 블록 다크 스타일: 인용 3종(`data-ke-style`), hr 8종, fileblock, moreless, imageblock/grid/slide, 오픈그래프 카드 (style.css 13~18번 섹션)
   - 페이지네이션 올바른 문법: `<s_paging>` + 속성 치환자 `<a [##_prev_page_##] class="[##_no_more_prev_##]">`
 - **스킨 옵션(index.xml) 연결 방식**: `[##_var_##]`는 skin.html에서만 치환되므로, head의 인라인 `<style>`에서 CSS 변수(`--color-accent`, `--font-code`)와 사이드바 너비를 주입. style.css의 `:root` 값은 폴백. 유지 중인 변수: accentColor, codeFont, sidebarWidth, enableSearch
-- **미구현/보류**: TOC 자동 생성, 이미지 지연 로딩(변수도 제거됨), 형광펜 방어 CSS(style.css 17번 섹션에 주석 상태 — 실제 글로 에디터 출력 HTML 확인 후 활성화)
+- **미구현/보류**: 이미지 지연 로딩(변수도 제거됨), 형광펜 방어 CSS(style.css 17번 섹션에 주석 상태 — 실제 글로 에디터 출력 HTML 확인 후 활성화)
 
 ## 티스토리 스킨 핵심 구조
 
