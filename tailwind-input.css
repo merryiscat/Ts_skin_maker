@@ -1,0 +1,10 @@
+/*
+  Tailwind 빌드 입력 파일
+  아래 3줄이 빌드 시 실제 CSS로 변환됩니다.
+  - base: 브라우저 기본 스타일 초기화(reset)
+  - components: 컴포넌트 계층 (현재 미사용)
+  - utilities: skin.html에서 쓰인 유틸리티 클래스들 (bg-*, text-* 등)
+*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
