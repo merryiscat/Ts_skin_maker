@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Editor Blog 1.6.0 - Preview</title>
+
+  <!--
+    로컬 미리보기 파일입니다. (티스토리 업로드 대상 아님)
+    skin.html의 치환자를 더미 데이터로 채워 브라우저에서 바로 확인합니다.
+    - 1.1.0: 검색창, 구독 버튼, 최근 공지, 공지 뱃지, 태그 클라우드,
+      보호글 폼, 방명록, 페이지네이션, 마크다운/특수 블록 쇼케이스
+    - 1.3.0: 목차(TOC) 확인을 위해 body id를 tt-body-page로 설정
+      (1500px 이상 화면에서 오른쪽에 목차가 떠야 정상)
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Prism 구문 강조 테마 (skin.html과 동일) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-vsc-dark-plus.min.css">
+
+  <!-- Tailwind CSS: 빌드된 파일 사용 (npm run build:css 로 생성) -->
+  <link rel="stylesheet" href="./images/tailwind.css">
+
+  <link rel="stylesheet" href="./style.css">
+
+  <!-- skin.html의 스킨 옵션 주입 인라인 스타일을 더미 값으로 재현 -->
+  <style>
+    :root {
+      --color-accent: #007acc;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+    @media (min-width: 1025px) {
+      #sidebar { width: 300px; }
+      main { margin-left: 300px; }
+    }
+  </style>
+</head>
+
+<body id="tt-body-page" class="dark">
+
+  <header class="fixed top-0 left-0 right-0 bg-[#2d2d30] border-b border-gray-700 z-50 h-12">
+    <div class="flex items-center justify-between h-full px-4">
+      <div class="flex items-center gap-3">
+        <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+        <a href="#" class="text-sm font-semibold text-gray-200 hover:text-white flex items-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+          </svg>
+          Code Editor Blog
+        </a>
+      </div>
+
+      <!-- 검색창 (데스크톱) - 1.1.0 신규 -->
+      <div class="flex-1 max-w-xl mx-4 hidden md:block">
+        <div class="relative">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="> 검색..."
+            class="w-full bg-[#1e1e1e] border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-300 font-code focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+          >
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <div class="flex pt-12 min-h-screen bg-white dark:bg-[#1e1e1e]">
+
+    <aside id="sidebar" class="fixed md:static top-12 left-0 bottom-0 w-64 bg-gray-100 dark:bg-[#252526] border-r border-gray-700 overflow-y-auto transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-[46]">
+      <nav class="p-4 space-y-6">
+
+        <!-- 검색창 (모바일) - 1.1.0 신규 -->
+        <div class="md:hidden">
+          <input
+            type="text"
+            id="search-input-mobile"
+            placeholder="> 검색..."
+            class="w-full bg-[#1e1e1e] border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-300 font-code focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+          >
+        </div>
+
+        <div class="pb-4 border-b border-gray-700">
+          <div class="flex flex-col items-center gap-2 text-center border border-gray-300 dark:border-gray-600 rounded p-2">
+            <img src="https://placehold.co/96x96/252526/007acc?text=DEV" alt="Profile" class="w-24 h-24 rounded-md">
+            <div class="space-y-1">
+              <p class="text-sm font-semibold text-gray-200">Developer</p>
+              <p class="text-xs text-gray-400">Code Editor Blog</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pb-4 border-b border-gray-700">
+          <h3 class="text-xs font-semibold text-gray-400 uppercase mb-2 flex items-center gap-1">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+            </svg>
+            About
+          </h3>
+          <p class="text-xs text-gray-400 leading-relaxed mb-3">
+            Modern code-focused blog skin with editor-inspired design
+          </p>
+          <!-- 구독 버튼 (정적 더미, 1.6.0에서 About 하단으로 이동) -->
+          <button type="button" class="btn_subscription"><em>구독하기</em></button>
+          <button type="button" class="btn_subscription following"><em>구독중</em></button>
+        </div>
+
+        <!-- 최근 공지 - 1.1.0 신규 -->
+        <div class="pb-4 border-b border-gray-700">
+          <h3 class="text-xs font-semibold text-gray-400 uppercase mb-2 flex items-center gap-1">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 3a1 1 0 00-1.447-.894L8.763 6H5a3 3 0 000 6h.28l1.771 5.316A1 1 0 008 18h1a1 1 0 001-1v-4.382l6.553 3.276A1 1 0 0018 15V3z" clip-rule="evenodd"></path>
+            </svg>
+            Notice
+          </h3>
+          <ul class="text-sm space-y-1">
+            <li><a href="#" class="block px-2 py-1 text-gray-300 hover:bg-[#3e3e42] rounded transition-colors overflow-hidden text-ellipsis whitespace-nowrap">블로그 스킨 1.1.0 업데이트 안내</a></li>
+            <li><a href="#" class="block px-2 py-1 text-gray-300 hover:bg-[#3e3e42] rounded transition-colors overflow-hidden text-ellipsis whitespace-nowrap">댓글 정책 안내</a></li>
+          </ul>
+        </div>
+
+        <!-- 바로가기 메뉴 - 1.5.0 신규 -->
+        <div class="pb-4 border-b border-gray-700">
+          <h3 class="text-xs font-semibold text-gray-400 uppercase mb-2 flex items-center gap-1">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            Menu
+          </h3>
+          <div class="text-sm space-y-1">
+            <a href="#" class="category-link">방명록</a>
+            <a href="#" class="category-link">태그 클라우드</a>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-xs font-semibold text-gray-400 uppercase mb-2 flex items-center gap-1">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
+            </svg>
+            Categories
+          </h3>
+          <div class="text-sm space-y-1">
+            <a href="#" class="category-link block px-2 py-1.5 text-gray-300 hover:bg-gray-700 rounded">JavaScript</a>
+            <a href="#" class="category-link block px-2 py-1.5 text-gray-300 hover:bg-gray-700 rounded">Python</a>
+            <a href="#" class="category-link block px-2 py-1.5 text-gray-300 hover:bg-gray-700 rounded">DevOps</a>
+          </div>
+        </div>
+
+      </nav>
+    </aside>
+
+    <div id="sidebar-overlay" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-[45]"></div>
+
+    <main class="flex-1 overflow-x-hidden text-gray-900 dark:text-gray-300">
+      <div class="max-w-5xl mx-auto p-6 md:p-8">
+
+        <!-- 리스트 페이지 헤더 (s_list 더미) - 1.1.0 신규 -->
+        <div class="mb-8 pb-4 border-b border-gray-700">
+          <h1 class="text-2xl font-bold text-gray-100">
+            JavaScript
+            <span class="text-base font-normal text-gray-400 ml-2">12건</span>
+          </h1>
+        </div>
+
+        <!-- 공지 목록 카드 (notice-badge) - 1.1.0 신규 -->
+        <article class="mb-8 pb-8 border-b border-gray-700">
+          <div class="flex items-center gap-2 mb-3 text-xs text-gray-400">
+            <span class="notice-badge">공지</span>
+            <time>2026.07.26</time>
+          </div>
+          <h2 class="text-2xl font-bold mb-3">
+            <a href="#" class="text-gray-100 hover:text-accent transition-colors">
+              블로그 스킨 1.1.0 업데이트 안내
+            </a>
+          </h2>
+          <p class="text-gray-400 leading-relaxed mb-4 line-clamp-3">
+            태그, 공지, 방명록 페이지 지원과 구독 버튼, 코드 구문 강조가 추가되었습니다.
+          </p>
+        </article>
+
+        <!-- 일반 글 카드 -->
+        <article class="mb-8 pb-8 border-b border-gray-700">
+          <div class="flex items-center gap-2 mb-3 text-xs text-gray-400">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path>
+            </svg>
+            <span>JavaScript</span>
+            <span>•</span>
+            <time>2026-07-20</time>
+          </div>
+          <h2 class="text-2xl font-bold mb-3">
+            <a href="#" class="text-gray-100 hover:text-accent transition-colors">
+              Understanding JavaScript Async/Await Pattern
+            </a>
+          </h2>
+          <p class="text-gray-400 leading-relaxed mb-4 line-clamp-3">
+            Learn how to effectively use async/await in modern JavaScript development.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <a href="#" class="text-xs px-2 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors">#JavaScript</a>
+          </div>
+        </article>
+
+        <!-- ==============================================
+             마크다운 / 특수 블록 쇼케이스 (글 상세 스타일 검증용)
+             ============================================== -->
+        <article class="prose prose-invert max-w-none mb-12 pb-12 border-b border-gray-700">
+          <header class="mb-8 pb-6 border-b border-gray-700">
+            <div class="flex items-center gap-2 mb-3 text-sm text-gray-400 font-code">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
+              </svg>
+              <span>Preview</span>
+              <span>/</span>
+              <span class="text-gray-300">markdown-showcase.md</span>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-100 mb-4">마크다운 스타일 쇼케이스</h1>
+            <div class="text-sm text-gray-400"><time>2026.07.26</time></div>
+          </header>
+
+          <div class="article-content text-gray-300 leading-relaxed">
+
+            <h2>제목 스타일 (h2)</h2>
+            <h3>제목 스타일 (h3)</h3>
+            <h4>제목 스타일 (h4)</h4>
+            <h5>제목 스타일 (h5)</h5>
+            <h6>제목 스타일 (h6)</h6>
+
+            <p>
+              일반 본문 텍스트입니다. <strong>굵은 글씨</strong>, <em>기울임</em>,
+              <del>취소선 텍스트</del>, <u>밑줄 텍스트</u>, <code>인라인 코드</code>,
+              그리고 단축키는 <kbd>Ctrl</kbd> + <kbd>C</kbd> 형태로 표시됩니다.
+            </p>
+
+            <h2>인용문 (1.4.0에서 좌측 바 스타일로 통일)</h2>
+
+            <blockquote>기본 인용문. 마크다운의 "| 인용" 느낌으로 왼쪽 세로 바만 표시됩니다.</blockquote>
+
+            <blockquote data-ke-style="style1">에디터 인용 style1도 같은 좌측 바 디자인으로 통일</blockquote>
+
+            <blockquote data-ke-style="style2">에디터 인용 style2도 동일</blockquote>
+
+            <blockquote data-ke-style="style3">에디터 인용 style3도 동일</blockquote>
+
+            <h2>코드 블록 (Prism 구문 강조)</h2>
+
+            <pre data-ke-language="javascript"><code>// 자바스크립트 예제
+async function fetchPosts(page = 1) {
+  const response = await fetch(`/api/posts?page=${page}`);
+  if (!response.ok) throw new Error('요청 실패');
+  return response.json();
+}</code></pre>
+
+            <pre data-ke-language="python"><code># 파이썬 예제
+def fibonacci(n: int) -> list[int]:
+    result = [0, 1]
+    for _ in range(n - 2):
+        result.append(result[-1] + result[-2])
+    return result</code></pre>
+
+            <pre><code>언어 미지정 코드 블록 (language-none 처리)</code></pre>
+
+            <h2>목록</h2>
+
+            <ul>
+              <li>순서 없는 목록 항목 1</li>
+              <li>순서 없는 목록 항목 2
+                <ul>
+                  <li>중첩 목록 항목</li>
+                </ul>
+              </li>
+            </ul>
+
+            <ol>
+              <li>순서 있는 목록 항목 1</li>
+              <li>순서 있는 목록 항목 2</li>
+            </ol>
+
+            <ul>
+              <li><input type="checkbox" checked> 완료된 체크리스트</li>
+              <li><input type="checkbox"> 미완료 체크리스트</li>
+            </ul>
+
+            <h2>테이블</h2>
+
+            <table>
+              <tbody>
+                <tr><th>모델</th><th>입력</th><th>출력</th></tr>
+                <tr><td>A</td><td>$1.00</td><td>$5.00</td></tr>
+                <tr><td>B</td><td>$2.00</td><td>$8.00</td></tr>
+              </tbody>
+            </table>
+
+            <h2>구분선 (에디터 hr 스타일)</h2>
+            <hr data-ke-style="style1">
+            <hr data-ke-style="style5">
+            <hr data-ke-style="style6">
+            <hr data-ke-style="style7">
+
+            <h2>파일 첨부 블록</h2>
+            <figure class="fileblock">
+              <a href="#">
+                <span class="image"></span>
+                <span class="desc">
+                  <span class="filename"><span class="name">skin-1.1.0.zip</span></span>
+                  <span class="size">1.2 MB</span>
+                </span>
+              </a>
+            </figure>
+
+            <h2>링크 프리뷰 카드 (오픈그래프)</h2>
+            <figure data-ke-type="opengraph">
+              <a href="#">
+                <div class="og-image" style="background-image:url('https://placehold.co/200x200/2d2d30/9d9d9d?text=OG')"></div>
+                <div class="og-text">
+                  <p class="og-title">링크 프리뷰 카드 제목</p>
+                  <p class="og-desc">링크 미리보기 설명 텍스트가 여기에 두 줄까지 표시됩니다. 길어지면 말줄임 처리됩니다.</p>
+                  <p class="og-host">example.com</p>
+                </div>
+              </a>
+            </figure>
+
+            <h2>더보기 접기/펼치기</h2>
+            <div data-ke-type="moreLess">
+              <a class="btn-toggle-moreless" href="#">더보기...</a>
+              <div class="moreless-content">
+                <p>접혀 있던 내용이 여기에 표시됩니다.</p>
+              </div>
+            </div>
+
+            <h2>이미지와 캡션</h2>
+            <figure class="imageblock alignCenter">
+              <img src="https://placehold.co/800x300/252526/6a9955?text=Image" alt="샘플 이미지">
+              <figcaption>이미지 캡션 스타일</figcaption>
+            </figure>
+
+          </div>
+        </article>
+
+        <!-- 보호글 폼 - 1.1.0 신규 -->
+        <div class="mb-12 pb-12 border-b border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-200 mb-4">보호글 페이지 미리보기</h2>
+          <div class="protected-box">
+            <p class="text-gray-300 mb-1">보호되어 있는 글입니다.</p>
+            <p class="text-sm text-gray-500 mb-4">내용을 보시려면 비밀번호를 입력하세요.</p>
+            <form class="flex gap-2 justify-center" onsubmit="return false;">
+              <input type="password" placeholder="비밀번호" class="protected-input">
+              <button type="submit" class="protected-submit">확인</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- 태그 클라우드 - 1.1.0 신규 -->
+        <div class="mb-12 pb-12 border-b border-gray-700">
+          <div class="mb-8 pb-4 border-b border-gray-700">
+            <div class="flex items-center gap-2 mb-2 text-sm text-gray-400 font-code">
+              <span class="text-accent">~</span>
+              <span>/</span>
+              <span class="text-gray-300">tags</span>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-100">태그 클라우드</h1>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <a href="#" class="tag-cloud-item cloud1">#JavaScript</a>
+            <a href="#" class="tag-cloud-item cloud2">#Python</a>
+            <a href="#" class="tag-cloud-item cloud3">#Docker</a>
+            <a href="#" class="tag-cloud-item cloud4">#Git</a>
+            <a href="#" class="tag-cloud-item cloud5">#Linux</a>
+          </div>
+        </div>
+
+        <!-- 방명록 헤더 - 1.1.0 신규 -->
+        <div class="mb-12 pb-12 border-b border-gray-700">
+          <div class="mb-8 pb-4 border-b border-gray-700">
+            <div class="flex items-center gap-2 mb-2 text-sm text-gray-400 font-code">
+              <span class="text-accent">~</span>
+              <span>/</span>
+              <span class="text-gray-300">guestbook</span>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-100">방명록</h1>
+          </div>
+          <p class="text-sm text-gray-500">(실제 방명록 UI는 티스토리가 렌더링합니다)</p>
+        </div>
+
+        <!-- 페이지네이션 - 1.1.0 신규 마크업 -->
+        <nav class="flex justify-center items-center gap-2 mt-12 pt-6 border-t border-gray-700 text-sm">
+          <a href="#" class="paging-btn no-more-prev">이전</a>
+          <a href="#" class="paging-num">1</a>
+          <a href="#" class="paging-num">2</a>
+          <a href="#" class="paging-num">3</a>
+          <a href="#" class="paging-btn">다음</a>
+        </nav>
+
+      </div>
+    </main>
+
+  </div>
+
+  <footer class="fixed bottom-0 left-0 right-0 bg-[#2d2d30] border-t border-gray-700 py-3 z-40">
+    <div class="max-w-5xl mx-auto px-6 md:px-8 h-full">
+      <div class="relative flex justify-center items-center h-full text-sm text-gray-400">
+        <p class="text-center">
+          <span id="footer-year">2026</span> Merryiscat. All rights reserved.
+        </p>
+        <div class="absolute right-0 flex gap-4 items-center">
+          <button id="scroll-to-top" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Prism 로드 (skin.html과 동일한 방식) -->
+  <script>window.Prism = window.Prism || {}; window.Prism.manual = true;</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
+  <script src="./images/script.js" defer></script>
+
+  <!-- 미리보기 전용: 더보기 토글 동작 재현 (실제로는 티스토리 JS가 처리) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-ke-type="moreLess"] .btn-toggle-moreless').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          btn.closest('[data-ke-type="moreLess"]').classList.toggle('open');
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

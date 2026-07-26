@@ -13,9 +13,9 @@
 module.exports = {
   // 이 파일들에서 실제로 쓰인 클래스만 골라 CSS를 생성합니다
   content: [
-    './src/1.5.0/skin.html',
-    './src/1.5.0/preview.html',
-    './src/1.5.0/images/script.js'
+    './src/1.6.0/skin.html',
+    './src/1.6.0/preview.html',
+    './src/1.6.0/images/script.js'
   ],
 
   // 다크 모드: body의 dark 클래스 기준 (이 스킨은 다크 전용이라 항상 켜져 있음)
