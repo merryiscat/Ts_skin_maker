@@ -1,0 +1,1039 @@
+/*
+  ========================================
+  Code Editor Blog - 커스텀 스타일시트
+  ========================================
+
+  이 파일은 Tailwind CSS로 처리하지 못하는
+  티스토리 전용 스타일과 특수 컴포넌트를 정의합니다.
+
+  목차:
+  1. 전역 스타일
+  2. 타이포그래피
+  3. 코드 블록
+  4. 티스토리 카테고리 스타일
+  5. 티스토리 최근 글 스타일
+  6. 댓글 스타일
+  7. 이미지 스타일
+  8. 유틸리티
+*/
+
+/* ========================================
+   1. 전역 스타일
+   ======================================== */
+
+/*
+  루트 CSS 변수 정의
+  index.xml에서 설정한 값들을 CSS 변수로 변환
+*/
+:root {
+  --color-accent: #007acc;
+  --color-sidebar: #252526;
+  --color-main: #1e1e1e;
+  --color-text: #d4d4d4;
+  --font-code: 'JetBrains Mono', monospace;
+}
+
+/* 다크 모드 기본 설정 */
+.dark {
+  color-scheme: dark;
+}
+
+/* 라이트 모드 색상 (선택적) */
+.light {
+  --color-sidebar: #f3f4f6;
+  --color-main: #ffffff;
+  --color-text: #1f2937;
+}
+
+/* Accent 색상 유틸리티 클래스 */
+.bg-accent {
+  background-color: var(--color-accent) !important;
+}
+
+.text-accent {
+  color: var(--color-accent) !important;
+}
+
+.border-accent {
+  border-color: var(--color-accent) !important;
+}
+
+.hover\:bg-accent:hover {
+  background-color: var(--color-accent) !important;
+}
+
+.hover\:text-accent:hover {
+  color: var(--color-accent) !important;
+}
+
+/* 스크롤바 스타일 (다크 모드용) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3e3e42;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4e4e52;
+}
+
+/* 선택 영역 색상 */
+::selection {
+  background: var(--color-accent);
+  color: white;
+}
+
+/* ========================================
+   2. 타이포그래피
+   ======================================== */
+
+/*
+  본문 글꼴 설정
+  - 코드: JetBrains Mono (모노스페이스)
+  - 본문: 시스템 폰트 (빠른 로딩)
+*/
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*
+  제목 스타일링
+  SEO를 위해 제목 계층 구조 유지 (H1 > H2 > H3...)
+*/
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 1.5em;
+  margin-bottom: 1.25em;
+  /* 제목 아래 간격 증가 */
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+/* 32px */
+h2 {
+  font-size: 1.625rem;
+}
+
+/* 26px */
+h3 {
+  font-size: 1.375rem;
+}
+
+/* 22px */
+h4 {
+  font-size: 1.125rem;
+}
+
+/* 18px */
+h5 {
+  font-size: 1rem;
+}
+
+/* 16px */
+h6 {
+  font-size: 0.875rem;
+}
+
+/* 14px */
+
+/* 본문 텍스트 */
+p {
+  line-height: 1.7;
+  margin-bottom: 1em;
+}
+
+/* 링크 스타일 */
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* 인용 블록 스타일 */
+blockquote {
+  margin: 1.5em 0;
+  padding: 0.875rem 1.25rem;
+  border-left: 4px solid var(--color-accent);
+  background-color: rgba(45, 45, 48, 0.5);
+  color: #a8a8a8;
+  /* 밝은 회색 */
+  border-radius: 4px;
+  font-size: 0.9375rem;
+  text-align: left;
+  /* 좌측 정렬 */
+}
+
+/* 인용 블록 자동 텍스트 제거 */
+blockquote::before,
+blockquote::after {
+  content: none !important;
+}
+
+/* 인용 블록 내 볼드 텍스트는 밝게 유지 */
+blockquote strong,
+blockquote b {
+  color: #e0e0e0;
+}
+
+/* 인용 블록 내 링크 */
+blockquote a {
+  color: var(--color-accent);
+}
+
+/* 인용 블록 내 코드 */
+blockquote code {
+  background: rgba(30, 30, 30, 0.6);
+  color: #ce9178;
+}
+
+/* ========================================
+   3. 코드 블록 스타일
+   ======================================== */
+
+/*
+  인라인 코드
+  `code` 형태의 텍스트
+*/
+code {
+  font-family: var(--font-code);
+  font-size: 0.875em;
+  background: #2d2d30;
+  color: #ce9178;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-weight: 400;
+}
+
+/*
+  코드 블록
+  ```code``` 형태의 여러 줄 코드
+*/
+pre {
+  font-family: var(--font-code);
+  background: #1e1e1e;
+  border: 1px solid #3e3e42;
+  border-radius: 6px;
+  padding: 1.25rem;
+  overflow-x: auto;
+  margin: 1.5em 0;
+  line-height: 1.6;
+  font-size: 0.875rem;
+}
+
+/* 코드 블록 안의 코드 (중복 스타일 제거) */
+pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+  border-radius: 0;
+}
+
+/* 코드 줄번호 (선택적) */
+.line-numbers {
+  position: relative;
+  padding-left: 3.5em;
+  counter-reset: linenumber;
+}
+
+.line-numbers>code {
+  position: relative;
+  white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+  position: absolute;
+  pointer-events: none;
+  top: 0;
+  font-size: 100%;
+  left: -3.5em;
+  width: 3em;
+  letter-spacing: -1px;
+  border-right: 1px solid #3e3e42;
+  user-select: none;
+}
+
+/* ========================================
+   4. 티스토리 카테고리 스타일
+   ======================================== */
+
+/*
+  티스토리에서 자동 생성되는 카테고리 리스트를
+  파일 트리 스타일로 변환
+
+  티스토리는 여러 클래스명을 사용할 수 있으므로 범용 셀렉터 사용
+*/
+#category,
+.tt_category,
+.category {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#category li,
+.tt_category li,
+.category li {
+  margin: 0;
+}
+
+/* 최상위 카테고리 및 전체보기 */
+#category>li>a,
+.tt_category>li>a,
+.category>li>a,
+.category-link {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  color: #d4d4d4;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+#category>li>a:hover,
+.tt_category>li>a:hover,
+.category>li>a:hover,
+.category-link:hover {
+  background-color: #3e3e42;
+  text-decoration: none;
+}
+
+/* 상위 카테고리 들여쓰기 */
+#category ul,
+.tt_category ul,
+.category ul {
+  list-style: none !important;
+  padding-left: 25px !important;
+  margin-top: 0.25rem;
+  margin-left: 0 !important;
+}
+
+#category ul li a:hover,
+.tt_category ul li a:hover,
+.category ul li a:hover {
+  background-color: #3e3e42;
+  color: #d4d4d4;
+  text-decoration: none;
+}
+
+/* 카테고리 글 개수 */
+#category .cnt,
+.tt_category .cnt,
+.category .cnt,
+.link_item .cnt,
+.link_sub_item .cnt {
+  display: inline !important;
+  /* 강제 표시 */
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #6a9955 !important;
+  font-weight: 500;
+  flex-shrink: 0;
+  /* 크기 고정 (줄바꿈 방지) */
+  white-space: nowrap;
+  /* 줄바꿈 방지 */
+}
+
+/* 3단계 이상 깊은 하위 카테고리 (BookClub 스타일) */
+#category ul ul,
+.tt_category ul ul,
+.category ul ul {
+  padding-left: 0 !important;
+  margin-left: 0;
+}
+
+#category ul ul ul,
+.tt_category ul ul ul,
+.category ul ul ul {
+  padding-left: 0 !important;
+  margin-left: 0;
+}
+
+/* 티스토리 자동 생성 "전체보기" 링크 숨김 (독립적으로 추가했으므로) */
+.tt_category .link_tit,
+.category .link_tit {
+  display: none !important;
+}
+
+/* 카테고리 토글 화살표 (모든 레벨) */
+.tt_category a,
+.category a {
+  position: relative;
+  cursor: pointer;
+}
+
+/*카테고리 열고 닫기 */
+.tt_category a.has-children::before,
+.category a.has-children::before {
+  content: '>';
+  position: absolute;
+  left: -0.5rem;
+  /* Cursor 스타일에 맞춰 조정 */
+  font-size: 0.75rem;
+  color: #858585;
+  transition: transform 0.2s;
+  font-weight: normal;
+}
+
+.tt_category a.has-children:not(.collapsed)::before,
+.category a.has-children:not(.collapsed)::before {
+  transform: rotate(90deg);
+}
+
+/* 접힌 하위 카테고리 숨기기 (모든 레벨) */
+.tt_category ul.collapsed,
+.category ul.collapsed {
+  display: none;
+}
+
+/* 티스토리 자동 생성 클래스 (link_item, link_sub_item) */
+.tt_category a.link_item,
+.category a.link_item {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  color: #9d9d9d;
+  left: -0.5rem;
+  /* Cursor 스타일에 맞춰 조정 */
+  font-size: 0.8125rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+/* 더 강력한 선택자로 link_sub_item 스타일 적용 */
+a.link_sub_item,
+.tt_category a.link_sub_item,
+.category a.link_sub_item,
+ul.sub_category_list a.link_sub_item,
+.sub_category_list a.link_sub_item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding-top: 0.25rem !important;
+  padding-right: 0.5rem !important;
+  padding-bottom: 0.25rem !important;
+  padding-left: 0.5rem !important;
+  color: #858585 !important;
+  font-size: 0.8125rem !important;
+  border-radius: 4px !important;
+  transition: all 0.2s !important;
+}
+
+/* ========================================
+   5. 티스토리 최근 글 스타일
+   ======================================== */
+
+/*
+  최근 글 리스트를 파일 리스트처럼 표시
+*/
+#recent_article {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#recent_article li {
+  margin-bottom: 0.5rem;
+}
+
+#recent_article a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  color: #d4d4d4;
+  font-size: 0.8125rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  text-decoration: none;
+}
+
+#recent_article a:hover {
+  background-color: #3e3e42;
+}
+
+/* 파일 아이콘 */
+#recent_article a::before {
+  content: '📄';
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+/* 글 제목이 너무 길 때 말줄임 */
+#recent_article a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========================================
+   6. 댓글 스타일
+   ======================================== */
+
+/*
+  티스토리 기본 댓글 시스템 스타일 조정
+*/
+.guestbook {
+  margin-top: 2rem;
+}
+
+.guestbook .comment {
+  background: #2d2d30;
+  border: 1px solid #3e3e42;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.guestbook .comment .author {
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-bottom: 0.5rem;
+}
+
+.guestbook .comment .date {
+  font-size: 0.75rem;
+  color: #9d9d9d;
+  margin-left: 0.5rem;
+}
+
+.guestbook .comment .content {
+  color: #FFFFFF;
+  line-height: 1.6;
+}
+
+/* 댓글 입력 폼 */
+.guestbook textarea,
+.guestbook input[type="text"],
+.guestbook input[type="password"] {
+  width: 100%;
+  background: #1e1e1e;
+  border: 1px solid #3e3e42;
+  border-radius: 4px;
+  padding: 0.75rem;
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+.guestbook textarea:focus,
+.guestbook input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.guestbook button {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.guestbook button:hover {
+  opacity: 0.9;
+}
+
+/* ========================================
+   7. 이미지 스타일
+   ======================================== */
+
+/*
+  본문 이미지 반응형 처리
+*/
+.article-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  border: 1px solid #3e3e42;
+}
+
+/*
+  이미지 지연 로딩
+  loading="lazy" 속성이 추가된 이미지는
+  뷰포트에 들어올 때 로드됨
+*/
+img.lazy {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+img.lazy.loaded {
+  opacity: 1;
+}
+
+/* 이미지 캡션 */
+.article-content figcaption {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #9d9d9d;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* ========================================
+   8. 유틸리티 클래스
+   ======================================== */
+
+/*
+  Tailwind로 처리하기 어려운 유틸리티들
+*/
+
+/* 텍스트 말줄임 (3줄) */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 프로즈 스타일 (글 본문용) */
+.prose {
+  max-width: 65ch;
+}
+
+.prose-invert {
+  color: #d4d4d4;
+}
+
+/* Prose 제목 크기 재정의 */
+.prose h1,
+.prose-invert h1 {
+  font-size: 2rem !important;
+  /* 32px */
+  color: #f0f0f0;
+  margin-top: 1.5em !important;
+  margin-bottom: 1.25em !important;
+}
+
+.prose h2,
+.prose-invert h2 {
+  font-size: 1.625rem !important;
+  /* 26px */
+  color: #f0f0f0;
+  margin-top: 1.5em !important;
+  margin-bottom: 1.25em !important;
+}
+
+.prose h3,
+.prose-invert h3 {
+  font-size: 1.375rem !important;
+  /* 22px */
+  color: #f0f0f0;
+  margin-top: 1.5em !important;
+  margin-bottom: 1.25em !important;
+}
+
+.prose h4,
+.prose-invert h4 {
+  font-size: 1.125rem !important;
+  /* 18px */
+  color: #f0f0f0;
+  margin-top: 1.5em !important;
+  margin-bottom: 1.25em !important;
+}
+
+.prose-invert a {
+  color: var(--color-accent);
+}
+
+.prose-invert strong {
+  color: #f0f0f0;
+}
+
+/* Prose 인용 블록 스타일 재정의 */
+.prose blockquote,
+.prose-invert blockquote {
+  margin: 1.5em 0 !important;
+  padding: 0.875rem 1.25rem !important;
+  border-left: 4px solid var(--color-accent) !important;
+  background-color: rgba(45, 45, 48, 0.5) !important;
+  color: #a8a8a8 !important;
+  /* 밝은 회색 */
+  border-radius: 4px !important;
+  font-size: 0.9375rem !important;
+  font-style: normal !important;
+  text-align: left !important;
+  /* 좌측 정렬 */
+}
+
+/* Prose 인용 블록 자동 텍스트 제거 */
+.prose blockquote::before,
+.prose blockquote::after,
+.prose-invert blockquote::before,
+.prose-invert blockquote::after {
+  content: none !important;
+}
+
+/* 인용 블록 내 볼드 */
+.prose blockquote strong,
+.prose blockquote b,
+.prose-invert blockquote strong,
+.prose-invert blockquote b {
+  color: #e0e0e0 !important;
+}
+
+/* 인용 블록 내 링크 */
+.prose blockquote a,
+.prose-invert blockquote a {
+  color: var(--color-accent) !important;
+}
+
+/* 인용 블록 내 코드 */
+.prose blockquote code,
+.prose-invert blockquote code {
+  background: rgba(30, 30, 30, 0.6) !important;
+  color: #ce9178 !important;
+}
+
+/* 테이블 스타일 */
+.prose-invert table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.prose-invert th,
+.prose-invert td {
+  border: 1px solid #3e3e42;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.prose-invert th {
+  background: #2d2d30;
+  font-weight: 600;
+}
+
+.prose-invert tr:nth-child(even) {
+  background: #252526;
+}
+
+/* 수평선 */
+.prose-invert hr {
+  border: none;
+  border-top: 1px solid #3e3e42;
+  margin: 2rem 0;
+}
+
+/* 리스트 스타일 */
+.prose-invert ul {
+  list-style: none;
+  /* 기본 마커 제거 */
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose-invert ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose-invert li {
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+}
+
+/* ul 직속 자식 li에 ○ 마커 추가 */
+.prose-invert ul>li {
+  position: relative;
+  padding-left: 0.5rem;
+}
+
+.prose-invert ul>li::before {
+  content: '○';
+  position: absolute;
+  left: -1rem;
+  top: 0.05em;
+  color: #9ca3af;
+  /* gray-400 */
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: inherit;
+}
+
+/* 중첩 리스트 (1단계) */
+.prose-invert ul ul>li::before {
+  content: '▫';
+  /* 작은 사각형 */
+  font-size: 0.75rem;
+}
+
+/* 중첩 리스트 (2단계 이상) */
+.prose-invert ul ul ul>li::before {
+  content: '○';
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* 체크박스 리스트 예외 처리 */
+.prose-invert ul li:has(input[type="checkbox"])::before {
+  content: none;
+}
+
+.prose-invert ul li:has(input[type="checkbox"]) {
+  padding-left: 0;
+}
+
+.prose-invert input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+/* ========================================
+   9. 독립 스크롤 (사이드바 + 메인)
+   ======================================== */
+
+/*
+  데스크톱에서 사이드바를 고정하고 독립 스크롤 구현
+*/
+@media (min-width: 768px) {
+
+  /* 사이드바 고정 및 독립 스크롤 */
+  #sidebar {
+    position: fixed !important;
+    top: 3rem;
+    /* header 높이 (48px) */
+    left: 0;
+    bottom: 4rem;
+    /* footer 높이만큼 여백 */
+    width: 18.75rem;
+    /* 300px */
+    overflow-y: auto !important;
+    transform: translateX(0) !important;
+  }
+
+  /* 메인 콘텐츠에 왼쪽 여백 및 하단 여백 추가 */
+  main {
+    margin-left: 18.75rem;
+    /* 300px */
+    padding-bottom: 5rem;
+    /* footer 높이보다 약간 더 */
+  }
+}
+
+/* ========================================
+   10. 반응형 조정
+   ======================================== */
+
+/*
+  모바일 (768px 이하)
+*/
+@media (max-width: 768px) {
+
+  /* 제목 크기 축소 */
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  /* 28px */
+  h2 {
+    font-size: 1.375rem;
+  }
+
+  /* 22px */
+  h3 {
+    font-size: 1.125rem;
+  }
+
+  /* 18px */
+  h4 {
+    font-size: 1rem;
+  }
+
+  /* 16px */
+
+  /* 코드 블록 패딩 축소 */
+  pre {
+    padding: 1rem;
+    font-size: 0.8125rem;
+  }
+
+  /* 이미지 여백 축소 */
+  .article-content img {
+    margin: 1rem 0;
+  }
+
+  /* 메인 콘텐츠 하단 여백 (footer 고정 대응) */
+  main {
+    padding-bottom: 5rem;
+  }
+}
+
+/*
+  태블릿 (768px ~ 1024px)
+*/
+@media (min-width: 768px) and (max-width: 1024px) {
+
+  /* 사이드바 너비 조정 */
+  #sidebar {
+    width: 12.5rem !important;
+    /* 200px */
+  }
+
+  /* 메인 콘텐츠 여백도 조정 */
+  main {
+    margin-left: 12.5rem !important;
+    /* 200px */
+    padding-bottom: 5rem !important;
+    /* footer 높이보다 약간 더 */
+  }
+}
+
+/* ========================================
+   11. 인쇄 스타일
+   ======================================== */
+
+/*
+  글을 인쇄할 때 최적화
+*/
+@media print {
+
+  /* 사이드바, 헤더, 푸터 숨김 */
+  header,
+  aside,
+  footer,
+  #sidebar,
+  #theme-toggle,
+  #mobile-menu-btn,
+  #search-input {
+    display: none !important;
+  }
+
+  /* 본문만 표시 */
+  body {
+    background: white;
+    color: black;
+  }
+
+  /* 링크 URL 표시 */
+  a::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+  }
+
+  /* 페이지 여백 */
+  @page {
+    margin: 2cm;
+  }
+}
+
+/* ========================================
+   12. 애니메이션
+   ======================================== */
+
+/*
+  페이드 인 애니메이션
+*/
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/*
+  스켈레톤 로딩 애니메이션
+*/
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(to right, #252526 4%, #2d2d30 25%, #252526 36%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* ========================================
+   끝
+   ======================================== */
+
+/* 티스토리 자동 생성 요소 숨기기 */
+.tt_vox_namecard,
+.tt_box_namecard {
+  display: none !important;
+}
+
+/* 댓글 관련 요소들의 폰트 색상을 흰색으로 변경 */
+.tt-box-meta,
+.tt-box-meta *,
+.tt_desc,
+.tt_desc *,
+.tt-cmt,
+.tt-cmt *,
+.tt_txt_user,
+.tt_txt_user *,
+.guestbook label,
+.guestbook input[type="text"],
+.guestbook input[type="password"],
+.guestbook textarea,
+.guestbook input::placeholder,
+.guestbook textarea::placeholder {
+  color: #FFFFFF !important;
+}
+
+/* 입력 필드의 실제 입력값도 흰색으로 */
+.guestbook input[type="text"]:not(:placeholder-shown),
+.guestbook input[type="password"]:not(:placeholder-shown),
+.guestbook textarea:not(:placeholder-shown) {
+  color: #FFFFFF !important;
+}
+
+/* 댓글 등록 버튼 비활성화 상태 스타일 */
+.tt-btn_register:disabled,
+.tt-btn_register[disabled],
+button.tt-btn_register:disabled,
+button.tt-btn_register[disabled] {
+  background-color: #3a3a3a !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+}
