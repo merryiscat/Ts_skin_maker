@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>티스토리 스킨 만들기</title>
+<meta name="description" content="어떤 블로그인지 답하면 컨셉 4안을 만들어 줍니다. 고른 뒤 대화로 고쳐서 내려받습니다.">
+<link rel="stylesheet" href="./ui/shell.css">
+<style>
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    padding: 8px 14px;
+    background: var(--text);
+    color: var(--bg);
+    border-radius: var(--radius);
+    font-size: 13px;
+    z-index: 100;
+  }
+  .toast.bad { background: var(--danger); }
+  .boot { padding: 48px 16px; text-align: center; color: var(--dim); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <h1>티스토리 스킨 만들기</h1>
+  <div class="steps" id="steps"></div>
+  <span class="spacer"></span>
+  <span class="tiny dim">서버 없음 · 키는 이 브라우저를 벗어나지 않습니다</span>
+</div>
+
+<div id="root"><div class="boot">불러오는 중</div></div>
+
+<script type="module">
+import { start } from './app/app.js';
+start(document.getElementById('root'), document.getElementById('steps'));
+</script>
+</body>
+</html>

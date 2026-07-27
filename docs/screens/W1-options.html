@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W1 작업 화면 - 4안</title>
+<link rel="stylesheet" href="./wireframe.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-head">
+    <h1>W1 작업 화면 - 4안</h1>
+    <p>사용자가 대화로 스킨을 고쳐 나가는 핵심 화면. 네 안 모두 같은 기능을 담되 무게중심이 다르다.</p>
+  </div>
+
+  <div class="meta">
+    <dl>
+      <dt>풀 문제</dt>
+      <dd>지시 - 확인 - 판단의 반복. 사용자는 말하고, 결과를 보고, 더 고칠지 받아갈지 정한다.</dd>
+      <dt>진입점</dt>
+      <dd>P1 프리셋 선택에서 시작점을 고르고 진입</dd>
+      <dt>다음</dt>
+      <dd>D1 다운로드 / S1 설정</dd>
+      <dt>가정</dt>
+      <dd>API 키 등록 완료(E1), 프리셋 선택 완료(P1), 서버 없음, 비용은 사용자 부담</dd>
+      <dt>작성일</dt>
+      <dd>2026-07-27</dd>
+    </dl>
+  </div>
+
+  <div class="options">
+
+    <!-- =============================== 보편 A =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">보편 A</span>
+        <h2>대화 우선 3분할</h2>
+        <p class="option-concept">대화가 주인공. 왼쪽에서 말하고 오른쪽에서 확인한다. 대화 기록이 곧 작업 기록이 된다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">스킨 만들기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">코드 프리셋</span>
+          <span class="status status--on">검증 통과</span>
+          <span class="appbar-spacer"></span>
+          <span class="status">Claude Opus 5</span>
+          <span class="btn btn--sm">설정</span>
+          <span class="btn btn--sm btn--primary">내려받기</span>
+        </div>
+
+        <div class="work work--split">
+          <div class="pane">
+            <div class="pane-head">대화</div>
+            <div class="pane-body">
+              <div class="msg msg--sys"><div class="msg-body">코드 프리셋으로 시작합니다. 바꾸고 싶은 것을 말해 주세요.</div></div>
+              <div class="msg msg--user"><div class="msg-role">나</div><div class="msg-body">사이드바를 오른쪽으로 옮기고 글자를 조금 키워줘</div></div>
+              <div class="msg"><div class="msg-role">응답</div><div class="msg-body">사이드바 위치와 본문 글자 크기를 바꿨습니다. 목록 간격도 같이 늘렸습니다.</div></div>
+              <div class="msg msg--user"><div class="msg-role">나</div><div class="msg-body">목록에 썸네일도 넣어줘</div></div>
+            </div>
+            <div class="pane-foot">
+              <input class="input" placeholder="바꿀 내용 입력">
+              <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+                <span class="btn btn--sm">되돌리기</span>
+                <span class="appbar-spacer" style="flex:1"></span>
+                <span class="token">이번 대화 <span class="token">{토큰}</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pane">
+            <div class="pane-head">
+              미리보기
+              <span class="select">홈</span>
+              <span class="appbar-spacer" style="flex:1"></span>
+              <span class="btn btn--sm">모바일</span>
+              <span class="btn btn--sm">코드</span>
+            </div>
+            <div class="pane-body">
+              <div class="mini">
+                <div class="mini-bar"></div>
+                <div class="mini-row">
+                  <div class="mini-main">
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div><div class="mini-line mini-line--short"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div><div class="mini-line mini-line--short"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                  </div>
+                  <div class="mini-side">사이드바</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>대화 기록이 남아 무엇을 어떻게 바꿔 왔는지 그대로 보인다. 되돌릴 지점을 찾기 쉽다.</dd>
+        <dt>약점</dt>
+        <dd>미리보기가 절반뿐이라 스킨 전체 인상을 판단하기 어렵다. 판단이 어려우면 지시도 부정확해진다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 보편 B =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">보편 B</span>
+        <h2>미리보기 전면 + 하단 입력 도크</h2>
+        <p class="option-concept">결과물이 주인공. 화면 대부분을 미리보기에 주고 대화는 아래에 얇게 붙인다. 사용자가 실제로 오래 보는 것은 스킨이라는 관점.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">스킨 만들기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">코드 프리셋</span>
+          <span class="select">홈</span>
+          <span class="select">데스크탑</span>
+          <span class="appbar-spacer"></span>
+          <span class="status status--on">검증 통과</span>
+          <span class="btn btn--sm">대화 기록</span>
+          <span class="btn btn--sm btn--primary">내려받기</span>
+        </div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body">
+            <div class="mini" style="min-height:260px">
+              <div class="mini-bar"></div>
+              <div class="mini-row">
+                <div class="mini-side">사이드바</div>
+                <div class="mini-main">
+                  <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div><div class="mini-line mini-line--short"></div></div>
+                  <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div><div class="mini-line mini-line--short"></div></div>
+                  <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div><div class="mini-line mini-line--short"></div></div>
+                  <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pane-foot">
+            <div class="msg msg--sys" style="margin-bottom:8px"><div class="msg-body">사이드바 위치와 본문 글자 크기를 바꿨습니다.</div></div>
+            <input class="input" placeholder="바꿀 내용 입력">
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>스킨을 크게 볼 수 있어 판단이 정확하다. 좁은 화면에서도 구조가 그대로 성립한다.</dd>
+        <dt>약점</dt>
+        <dd>대화 기록이 접혀 있어 앞서 무엇을 지시했는지 놓치기 쉽다. 되돌리기 지점을 찾으려면 패널을 열어야 한다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 실험 A =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">실험 A</span>
+        <h2>미리보기에서 직접 지목</h2>
+        <p class="option-concept">말로 위치를 설명하지 않는다. 미리보기에서 고칠 영역을 눌러 대상으로 잡고 그 상태에서 지시한다. 지시의 절반을 클릭이 대신한다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">스킨 만들기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">코드 프리셋</span>
+          <span class="status status--on">지목 모드</span>
+          <span class="appbar-spacer"></span>
+          <span class="btn btn--sm">대화 기록</span>
+          <span class="btn btn--sm btn--primary">내려받기</span>
+        </div>
+
+        <div class="work work--preview-first">
+          <div class="pane">
+            <div class="pane-head">미리보기 <span class="select">홈</span></div>
+            <div class="pane-body">
+              <div class="mini" style="min-height:240px">
+                <div class="mini-bar"></div>
+                <div class="mini-row">
+                  <div class="mini-side" style="border:2px solid var(--c-0)">
+                    사이드바
+                    <div style="margin-top:6px"><span class="btn btn--sm">선택됨</span></div>
+                  </div>
+                  <div class="mini-main">
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pane">
+            <div class="pane-head">선택 영역</div>
+            <div class="pane-body">
+              <div class="card card--selected">
+                <div style="font-size:12px; font-weight:600">사이드바</div>
+                <ul class="list" style="margin-top:8px">
+                  <li>위치 <span class="select">왼쪽</span></li>
+                  <li>너비 <span class="select">16rem</span></li>
+                  <li>프로필 <span class="select">표시</span></li>
+                </ul>
+              </div>
+              <div style="margin-top:12px; font-size:11px; color:var(--c-2)">이 영역에 대해 지시</div>
+              <input class="input" style="margin-top:4px" placeholder="예: 더 좁게">
+            </div>
+            <div class="pane-foot">
+              <span class="btn btn--sm btn--block">선택 해제</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>위치를 말로 설명하는 부담이 사라진다. 지시가 짧아지고 모델이 엉뚱한 곳을 고칠 확률이 준다. 토큰도 덜 든다.</dd>
+        <dt>약점</dt>
+        <dd>미리보기 요소와 스킨 코드를 잇는 대응표를 따로 유지해야 한다. 프리셋을 늘릴 때마다 그 표도 같이 늘어난다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 실험 B =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">실험 B</span>
+        <h2>시도 스냅샷 타임라인</h2>
+        <p class="option-concept">고칠 때마다 스냅샷이 쌓이고 언제든 되돌아간다. 대화가 아니라 시도와 비교가 중심. 이 저장소가 버전 폴더로 실제로 쓰던 방식을 화면으로 올린 것.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">스킨 만들기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">코드 프리셋</span>
+          <span class="status">시도 4개</span>
+          <span class="appbar-spacer"></span>
+          <span class="btn btn--sm">둘 비교</span>
+          <span class="btn btn--sm btn--primary">이 시도 내려받기</span>
+        </div>
+
+        <div class="work work--split3">
+          <div class="pane">
+            <div class="pane-head">시도</div>
+            <div class="pane-body">
+              <div class="card"><div style="font-size:11px;color:var(--c-3)">시도 1</div>시작점 그대로</div>
+              <div class="card"><div style="font-size:11px;color:var(--c-3)">시도 2</div>사이드바 오른쪽</div>
+              <div class="card"><div style="font-size:11px;color:var(--c-3)">시도 3</div>글자 키움</div>
+              <div class="card card--selected"><div style="font-size:11px;color:var(--c-3)">시도 4 - 현재</div>썸네일 추가</div>
+            </div>
+            <div class="pane-foot">
+              <input class="input" placeholder="다음 시도 지시">
+            </div>
+          </div>
+
+          <div class="pane">
+            <div class="pane-head">미리보기 <span class="select">홈</span></div>
+            <div class="pane-body">
+              <div class="mini" style="min-height:200px">
+                <div class="mini-bar"></div>
+                <div class="mini-row">
+                  <div class="mini-main">
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                  </div>
+                  <div class="mini-side">사이드바</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pane">
+            <div class="pane-head">이 시도의 변경</div>
+            <div class="pane-body">
+              <ul class="list">
+                <li>목록에 썸네일 추가</li>
+                <li>목록 간격 <span class="token">2rem</span></li>
+                <li>검증 <span class="status status--on">통과</span></li>
+              </ul>
+              <div style="margin-top:12px">
+                <span class="btn btn--sm btn--block">시도 3으로 되돌리기</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>마음에 안 들 때 되돌릴 지점이 눈에 보인다. 여러 방향을 시도하고 비교하기 쉬워 취향을 찾아가는 과정에 맞는다.</dd>
+        <dt>약점</dt>
+        <dd>대화가 부수적으로 밀려 무엇을 지시했는지 문맥이 흐려진다. 시도가 많아지면 목록 관리가 또 하나의 일이 된다.</dd>
+      </dl>
+    </section>
+
+  </div>
+
+  <hr class="rule">
+
+  <div class="notes" style="position:static; max-width:none">
+    <h3>네 안이 갈리는 지점</h3>
+    <ul>
+      <li>보편 A - 대화 기록을 남기는 데 무게. 과정이 보인다.</li>
+      <li>보편 B - 결과물을 크게 보는 데 무게. 판단이 정확해진다.</li>
+      <li>실험 A - 지시 방법 자체를 바꾼다. 말 대신 클릭으로 대상을 잡는다.</li>
+      <li>실험 B - 반복의 단위를 대화가 아니라 시도로 본다. 되돌리기가 일급이 된다.</li>
+    </ul>
+
+    <h3>공통으로 들어가야 하는 것</h3>
+    <ul>
+      <li>페이지 타입 전환 - 홈 / 글 상세 / 카테고리 / 검색 / 태그 / 방명록 / 공지</li>
+      <li>검증 상태 표시 - 통과 / 실패. 실패 시 무엇이 왜 막혔는지</li>
+      <li>내려받기 진입</li>
+      <li>모바일 미리보기 전환</li>
+      <li>사용한 토큰 표시 - 비용이 사용자 지갑에서 나가므로</li>
+    </ul>
+
+    <h3>미정</h3>
+    <ul>
+      <li>혼합 가능. 예를 들어 보편 B의 큰 미리보기에 실험 B의 시도 목록을 붙일 수 있다.</li>
+      <li>코드 직접 편집 패널을 어디에 둘지는 안 정리를 고른 뒤에 결정한다.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

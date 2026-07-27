@@ -1,0 +1,730 @@
+/* =========================================================================
+   공유 스타일시트
+   프리셋 4종이 이 파일 하나를 같이 쓴다. 차이는 body 클래스와 CSS 변수로만 낸다.
+   변수 실제 값은 skin.html 의 인라인 style 이 주입한다. 아래 :root 는 폴백이다.
+   ([##_var_이름_##] 는 CSS 파일에서 치환되지 않으므로 여기에 쓰면 안 된다)
+   ========================================================================= */
+
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #f7f7f5;
+  --color-border: #e2e2df;
+  --color-text: #24211d;
+  --color-text-dim: #6b665f;
+  --color-accent: #2f6f4f;
+
+  --content-max: 44rem;
+  --sidebar-width: 16rem;
+  --radius: 4px;
+  --grid-min: 17rem;
+
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+  --font-code: 'JetBrains Mono', 'D2Coding', Consolas, monospace;
+  --font-size-base: 15px;
+  --line-height-base: 1.7;
+
+  --header-h: 3.25rem;
+  --space: 1rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+img { max-width: 100%; height: auto; }
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--color-accent); }
+
+/* ---------- 헤더 ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--header-h);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  height: 100%;
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 0 var(--space);
+}
+
+.header-left { display: flex; align-items: center; gap: 0.625rem; }
+
+.site-title { font-weight: 600; font-size: 0.95rem; }
+
+.top-nav { display: flex; gap: 1rem; font-size: 0.875rem; color: var(--color-text-dim); }
+
+.header-search { margin-left: auto; flex: 0 1 20rem; }
+
+.search-input {
+  width: 100%;
+  padding: 0.4rem 0.625rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.875rem;
+}
+.search-input:focus { outline: 2px solid var(--color-accent); outline-offset: -1px; }
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.375rem 0.625rem;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: inherit;
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+.icon-btn:hover { background: var(--color-surface); }
+
+.hamburger, .hamburger::before, .hamburger::after {
+  display: block;
+  width: 1.125rem;
+  height: 2px;
+  background: currentColor;
+  content: '';
+}
+.hamburger { position: relative; }
+.hamburger::before { position: absolute; top: -6px; }
+.hamburger::after { position: absolute; top: 6px; }
+
+/* ---------- 레이아웃 ---------- */
+
+.site-body {
+  display: flex;
+  align-items: flex-start;
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 0 var(--space);
+}
+
+.layout-sidebar-right .site-body { flex-direction: row-reverse; }
+
+.sidebar {
+  flex: 0 0 var(--sidebar-width);
+  width: var(--sidebar-width);
+  position: sticky;
+  top: var(--header-h);
+  max-height: calc(100vh - var(--header-h));
+  overflow-y: auto;
+  padding: 1.5rem 0;
+}
+
+.sidebar-inner { padding-right: 1.25rem; }
+.layout-sidebar-right .sidebar-inner { padding-right: 0; padding-left: 1.25rem; }
+
+.main { flex: 1 1 auto; min-width: 0; }
+
+.main-inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.layout-no-sidebar .main-inner { max-width: var(--content-max); }
+.list-grid .main-inner { max-width: var(--content-max); }
+
+.sidebar-overlay { display: none; }
+
+/* ---------- 사이드바 블록 ---------- */
+
+.side-block { margin-bottom: 1.75rem; }
+.side-block:last-child { margin-bottom: 0; }
+
+.side-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+}
+
+.profile { text-align: center; }
+.profile-img { width: 5rem; height: 5rem; border-radius: 50%; object-fit: cover; }
+.profile-name { margin: 0.5rem 0 0.25rem; font-weight: 600; font-size: 0.9rem; }
+.profile-desc { margin: 0; font-size: 0.8125rem; color: var(--color-text-dim); }
+
+.subscribe { margin-top: 0.75rem; }
+
+.side-list { margin: 0; padding: 0; list-style: none; font-size: 0.875rem; }
+.side-list li { margin-bottom: 0.25rem; }
+.side-list a { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.side-menu { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.875rem; }
+
+/*
+  카테고리는 [##_category_list_##] 가 <ul><li> 트리를 자동 생성한다.
+  마크업을 우리가 못 정하므로 하위 선택자로 잡는다.
+*/
+.category-list { font-size: 0.875rem; }
+.category-list ul { margin: 0; padding: 0 0 0 0.75rem; list-style: none; }
+.category-list > ul { padding-left: 0; }
+.category-list li { margin: 0.125rem 0; }
+.category-list a { display: block; padding: 0.1875rem 0; }
+.category-all { display: block; padding: 0.1875rem 0; font-weight: 600; }
+.category-list .cnt { color: var(--color-text-dim); font-size: 0.8125rem; }
+
+.tag-list { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+
+.tag {
+  display: inline-block;
+  padding: 0.125rem 0.4375rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+}
+.tag:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+/* ---------- 목록 머리말 ---------- */
+
+.list-header {
+  margin-bottom: 1.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.list-header h1 { margin: 0; font-size: 1.375rem; }
+.list-count { margin-left: 0.375rem; font-size: 0.875rem; font-weight: 400; color: var(--color-text-dim); }
+
+.empty { padding: 4rem 0; text-align: center; color: var(--color-text-dim); }
+.empty-title { margin: 0 0 0.375rem; font-size: 1.0625rem; font-weight: 600; color: var(--color-text); }
+.empty-desc { margin: 0; font-size: 0.875rem; }
+
+/*
+  빈 화면 문구를 페이지 타입에 맞춰 하나만 보여준다.
+  치환자로는 지금 어느 페이지인지 알 수 없어서 전부 적어 두고 body id 로 고른다.
+  기본은 전부 감춤이다. 모르는 페이지 타입에서 엉뚱한 문구가 뜨는 것보다
+  아무 문구도 안 뜨는 편이 낫다.
+*/
+.empty-title > span,
+.empty-desc > span { display: none; }
+
+#tt-body-index .empty-title .on-index,
+#tt-body-index .empty-desc .on-index,
+#tt-body-search .empty-title .on-other,
+#tt-body-search .empty-desc .on-search,
+#tt-body-category .empty-title .on-other,
+#tt-body-category .empty-desc .on-category,
+#tt-body-tag .empty-title .on-other,
+#tt-body-tag .empty-desc .on-tag { display: inline; }
+
+.badge {
+  display: inline-block;
+  padding: 0.0625rem 0.375rem;
+  background: var(--color-accent);
+  border-radius: var(--radius);
+  color: #fff;
+  font-size: 0.6875rem;
+}
+
+/* ---------- 글 목록 공통 ---------- */
+
+.card { margin-bottom: 2rem; }
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+}
+.card-cat { color: var(--color-accent); }
+
+.card-title { margin: 0 0 0.5rem; font-size: 1.1875rem; line-height: 1.4; }
+
+.card-summary {
+  margin: 0 0 0.625rem;
+  color: var(--color-text-dim);
+  font-size: 0.9rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-tags { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+
+.card-thumb { display: block; overflow: hidden; border-radius: var(--radius); background: var(--color-surface); }
+.card-thumb img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+
+/* 표준 리스트: 제목 + 요약 */
+.list-standard .card { padding-bottom: 2rem; border-bottom: 1px solid var(--color-border); }
+.list-standard .card:last-child { border-bottom: 0; }
+
+/* 칼럼: 구분선 없이 여백만으로 나눈다 */
+.list-plain .card { margin-bottom: 2.75rem; }
+.list-plain .card-title { font-size: 1.375rem; }
+
+/* 그리드: 카드 격자 */
+.list-grid s_index_article_rep,
+.list-grid .main-inner > s_article_rep { display: contents; }
+.list-grid .main-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--grid-min), 1fr));
+  gap: 1.5rem;
+}
+/* 격자 안에서 전폭을 차지해야 하는 블록들 */
+.list-grid .list-header,
+.list-grid .empty,
+.list-grid .paging,
+.list-grid .post,
+.list-grid .post-nav,
+.list-grid .comments,
+.list-grid .guestbook,
+.list-grid .tag-cloud,
+.list-grid .protected { grid-column: 1 / -1; }
+.list-grid .card { margin-bottom: 0; }
+.list-grid .card-body { padding-top: 0.625rem; }
+.list-grid .card-title { font-size: 1rem; }
+
+/* 밀집: 작은 썸네일을 왼쪽에 */
+.list-dense .card {
+  display: flex;
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.list-dense .card:last-child { border-bottom: 0; }
+.list-dense .card-thumb { flex: 0 0 7rem; }
+.list-dense .card-thumb img { aspect-ratio: 4 / 3; }
+.list-dense .card-body { flex: 1 1 auto; min-width: 0; }
+.list-dense .card-title { font-size: 1rem; }
+.list-dense .card-summary { -webkit-line-clamp: 2; font-size: 0.8125rem; }
+
+/* ---------- 글 상세 ---------- */
+
+.post-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-dim);
+}
+
+.post-title { margin: 0; font-size: 1.875rem; line-height: 1.3; }
+
+.post-tags { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 2rem; }
+.post-tags a { display: inline-block; padding: 0.125rem 0.4375rem; background: var(--color-surface);
+  border: 1px solid var(--color-border); border-radius: var(--radius); font-size: 0.75rem; }
+
+.admin-links { margin-top: 1.5rem; font-size: 0.8125rem; color: var(--color-text-dim); }
+.admin-links a { margin-right: 0.75rem; }
+
+.post-nav {
+  display: flex;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+}
+.post-nav a { flex: 1 1 0; min-width: 0; }
+.post-nav-next { text-align: right; }
+.post-nav-label { display: block; font-size: 0.75rem; color: var(--color-text-dim); }
+.post-nav-title { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.comments { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border); }
+.comments-title { margin: 0 0 1rem; font-size: 1.0625rem; }
+
+/* =========================================================================
+   본문 타이포그래피
+   ========================================================================= */
+
+.article-content { font-size: 1rem; line-height: 1.8; }
+
+/*
+   티스토리는 본문을 .tt_article_useless_p_margin 으로 감싸고 p 여백을 0 으로 만든다.
+   그 규칙이 크로스 오리진 스타일시트에서 오기 때문에 같은 특이도의 일반 규칙으로는
+   못 이긴다. !important 가 반드시 필요하다. 이걸 빼면 마크다운으로 쓴 글의 문단이
+   전부 벽처럼 붙어 버린다. 라이브 페이지에 임시 주입해 확인한 사항이다.
+*/
+.article-content p { margin-bottom: 0.875em !important; }
+
+/*
+   에디터에서 엔터로 만든 빈 줄은 빈 <p></p> 로 출력되는데, 빈 요소는 높이 0 으로
+   접혀서 줄바꿈이 통째로 사라진다. 최소 높이를 줘서 살린다.
+*/
+.article-content p:empty { min-height: 1.7em; }
+
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4 { margin: 2em 0 0.75em; line-height: 1.35; font-weight: 700; }
+.article-content h1 { font-size: 1.625em; }
+.article-content h2 { font-size: 1.375em; padding-bottom: 0.3em; border-bottom: 1px solid var(--color-border); }
+.article-content h3 { font-size: 1.1875em; }
+.article-content h4 { font-size: 1.0625em; }
+
+.article-content a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+.article-content ul, .article-content ol { padding-left: 1.375em; margin: 0 0 1em; }
+.article-content li { margin-bottom: 0.375em; }
+.article-content img { border-radius: var(--radius); }
+.article-content hr { margin: 2.5em 0; border: 0; border-top: 1px solid var(--color-border); }
+
+.article-content table { width: 100%; border-collapse: collapse; margin: 1.5em 0; font-size: 0.9375em; }
+.article-content th, .article-content td { padding: 0.5em 0.75em; border: 1px solid var(--color-border); }
+.article-content th { background: var(--color-surface); font-weight: 600; }
+
+/* 코드 */
+.article-content code {
+  padding: 0.15em 0.35em;
+  background: var(--color-surface);
+  border-radius: 3px;
+  font-family: var(--font-code);
+  font-size: 0.9em;
+}
+
+/*
+   Prism 계열 테마는 code 요소에 white-space: pre 를 건다. pre 만 pre-wrap 으로
+   바꾸면 안 먹으므로 code 쪽도 같이 덮어써야 가로 스크롤이 사라진다.
+*/
+.article-content pre {
+  margin: 1.5em 0;
+  padding: 1em 1.125em;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.article-content pre code {
+  padding: 0;
+  background: none;
+  white-space: pre-wrap;
+  font-size: 0.875em;
+  line-height: 1.6;
+}
+
+/* 코드 복사 버튼 (script.js 가 생성) */
+.code-copy {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  color: var(--color-text-dim);
+  font: inherit;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.article-content pre:hover .code-copy,
+.code-copy:focus { opacity: 1; }
+
+/* =========================================================================
+   티스토리 에디터 특수 블록
+   에디터가 고유 마크업으로 출력하는 것들. 스타일이 없으면 글 안에서
+   이 요소들만 무너져 보인다. 지우지 말 것.
+   ========================================================================= */
+
+/* 인용 3종 */
+.article-content blockquote,
+.article-content blockquote[data-ke-style] {
+  margin: 1.5em 0;
+  padding: 0.25em 0 0.25em 1em;
+  border-left: 3px solid var(--color-accent);
+  color: var(--color-text-dim);
+  font-style: normal;
+}
+.article-content blockquote p { margin-bottom: 0.5em !important; }
+.article-content blockquote[data-ke-style='style2'] { text-align: center; border-left: 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 1em 0; }
+.article-content blockquote[data-ke-style='style3'] { border-left: 0; background: var(--color-surface); padding: 1em 1.125em; border-radius: var(--radius); }
+
+/* 구분선 8종 */
+.article-content hr[data-ke-style] { margin: 2.5em auto; }
+.article-content hr[data-ke-style='style2'],
+.article-content hr[data-ke-style='style3'] { width: 30%; }
+.article-content hr[data-ke-style='style4'],
+.article-content hr[data-ke-style='style5'] { border-top-style: dashed; }
+.article-content hr[data-ke-style='style6'],
+.article-content hr[data-ke-style='style7'] { border-top-style: dotted; }
+
+/* 파일 첨부 */
+.article-content .tt_attach_file,
+.article-content figure[data-ke-type='fileblock'] a {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  margin: 1.25em 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.875em;
+}
+.article-content figure[data-ke-type='fileblock'] .filename { font-weight: 600; }
+.article-content figure[data-ke-type='fileblock'] .size { color: var(--color-text-dim); }
+
+/* 더보기 */
+.article-content .moreless_content { margin: 1.25em 0; }
+.article-content .btn_moreless {
+  display: inline-block;
+  padding: 0.4rem 0.875rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.875em;
+  cursor: pointer;
+}
+
+/* 이미지 블록 / 그리드 / 슬라이드 */
+.article-content figure[data-ke-type='imageblock'] { margin: 1.5em 0; }
+.article-content figure[data-ke-type='imageblock'] figcaption,
+.article-content figure figcaption {
+  margin-top: 0.5em;
+  color: var(--color-text-dim);
+  font-size: 0.8125em;
+  text-align: center;
+}
+.article-content figure[data-ke-type='imageblock'].alignLeft { text-align: left; }
+.article-content figure[data-ke-type='imageblock'].alignCenter { text-align: center; }
+.article-content figure[data-ke-type='imageblock'].alignRight { text-align: right; }
+
+.article-content .imageblock.imagegridblock .image-container,
+.article-content figure[data-ke-type='imagegridblock'] .image-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.5rem;
+}
+
+.article-content figure[data-ke-type='slideblock'] .slide-container {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+.article-content figure[data-ke-type='slideblock'] .slide-container img { max-width: 80%; flex: 0 0 auto; }
+
+/* 오픈그래프 카드 */
+.article-content figure[data-ke-type='opengraph'] a,
+.article-content .og-card {
+  display: block;
+  margin: 1.5em 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.article-content .og-image img { width: 100%; display: block; }
+.article-content .og-text { padding: 0.75rem 1rem; }
+.article-content .og-title { font-weight: 600; margin-bottom: 0.25rem; }
+.article-content .og-desc,
+.article-content .og-host { color: var(--color-text-dim); font-size: 0.8125em; }
+
+/* 형광펜 */
+.article-content mark,
+.article-content span[style*='background-color'] { padding: 0.05em 0.15em; border-radius: 2px; }
+
+/* =========================================================================
+   목차 (script.js 가 생성)
+   1500px 이상에서만 본문 오른쪽에 띄운다. 좁은 화면에서는 만들지 않는다.
+   ========================================================================= */
+
+.toc { display: none; }
+
+@media (min-width: 1500px) {
+  .has-toc .toc {
+    display: block;
+    position: fixed;
+    top: calc(var(--header-h) + 3rem);
+    right: 2rem;
+    width: 14rem;
+    max-height: calc(100vh - var(--header-h) - 6rem);
+    overflow-y: auto;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+  .toc-title { margin: 0 0 0.5rem; font-size: 0.6875rem; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--color-text-dim); }
+  .toc ul { margin: 0; padding: 0; list-style: none; }
+  .toc li { margin: 0.1875rem 0; }
+  .toc a { display: block; padding-left: 0.625rem; border-left: 2px solid var(--color-border);
+    color: var(--color-text-dim); }
+  .toc .toc-h3 a { padding-left: 1.25rem; }
+  .toc a.active { border-left-color: var(--color-accent); color: var(--color-accent); }
+}
+
+/* ---------- 태그 클라우드 페이지 ---------- */
+
+.tag-cloud { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 0.75rem; }
+.tag-cloud-item { color: var(--color-text-dim); }
+.tag-cloud-item:hover { color: var(--color-accent); }
+.cloud1 { font-size: 1.5rem; font-weight: 700; color: var(--color-text); }
+.cloud2 { font-size: 1.25rem; font-weight: 600; }
+.cloud3 { font-size: 1.0625rem; }
+.cloud4 { font-size: 0.9375rem; }
+.cloud5 { font-size: 0.8125rem; }
+
+/* ---------- 페이지네이션 ---------- */
+
+.paging {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+}
+.paging a {
+  min-width: 2rem;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.paging a:hover { border-color: var(--color-accent); }
+.paging .selected { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+/* 더 이동할 페이지가 없을 때 티스토리가 붙이는 클래스 */
+.paging .no_more_prev,
+.paging .no_more_next { opacity: 0.35; pointer-events: none; }
+
+/* ---------- 보호글 ---------- */
+
+.protected {
+  padding: 2.5rem 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.protected-title { margin: 0 0 0.25rem; font-weight: 600; }
+.protected-desc { margin: 0 0 1.25rem; color: var(--color-text-dim); font-size: 0.875rem; }
+.protected-form { display: flex; justify-content: center; gap: 0.5rem; }
+.protected-form input {
+  padding: 0.4rem 0.625rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font: inherit;
+}
+.protected-form button {
+  padding: 0.4rem 1rem;
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* ---------- 방명록 / 댓글 ---------- */
+/* 티스토리가 UI 를 통째로 렌더하므로 바깥 여백과 색만 맞춘다. */
+
+.guestbook { margin-top: 1rem; }
+.guestbook a { color: var(--color-accent); }
+
+/* ---------- 푸터 ---------- */
+
+.site-footer {
+  border-top: 1px solid var(--color-border);
+  font-size: 0.8125rem;
+  color: var(--color-text-dim);
+}
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 1rem var(--space);
+}
+.footer-inner p { margin: 0; }
+
+/* =========================================================================
+   반응형
+   모바일에서 사이드바는 왼쪽에서 밀려 들어오는 서랍이 된다.
+   ========================================================================= */
+
+@media (max-width: 900px) {
+  .site-body { display: block; }
+
+  .sidebar {
+    position: fixed;
+    top: var(--header-h);
+    bottom: 0;
+    left: 0;
+    z-index: 46;
+    width: min(18rem, 82vw);
+    max-height: none;
+    padding: 1.25rem;
+    background: var(--color-bg);
+    border-right: 1px solid var(--color-border);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+  .layout-sidebar-right .sidebar { left: auto; right: 0; transform: translateX(100%);
+    border-right: 0; border-left: 1px solid var(--color-border); }
+
+  .sidebar.open { transform: translateX(0); }
+
+  .sidebar-inner { padding: 0; }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: var(--header-h) 0 0;
+    z-index: 45;
+    background: rgba(0, 0, 0, 0.45);
+  }
+  .sidebar-overlay[hidden] { display: none; }
+
+  .header-search { display: none; }
+  .top-nav { display: none; }
+
+  .main-inner { padding: 1.5rem 0 3rem; }
+  .post-title { font-size: 1.5rem; }
+
+  .list-dense .card-thumb { flex-basis: 5.5rem; }
+  .post-nav { flex-direction: column; gap: 0.75rem; }
+  .post-nav-next { text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar { transition: none; }
+}

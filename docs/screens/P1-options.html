@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1 프리셋 선택 - 4안</title>
+<link rel="stylesheet" href="./wireframe.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-head">
+    <h1>P1 프리셋 선택 - 4안</h1>
+    <p>시작점을 고르는 화면. 사용자는 스킨 용어를 모르고 자기 블로그만 안다. 네 안은 그 간극을 다르게 메운다.</p>
+  </div>
+
+  <div class="meta">
+    <dl>
+      <dt>풀 문제</dt>
+      <dd>사이드바 위치나 목록 형태로 물으면 답하지 못한다. 무엇을 쓰는 블로그인지로 물어야 한다.</dd>
+      <dt>진입점</dt>
+      <dd>E1 키 등록 완료 직후</dd>
+      <dt>다음</dt>
+      <dd>W1 작업 화면</dd>
+      <dt>같이 정해지는 것</dt>
+      <dd>프리셋 개수. 안마다 감당 가능한 개수가 다르다.</dd>
+      <dt>작성일</dt>
+      <dd>2026-07-27</dd>
+    </dl>
+  </div>
+
+  <div class="options">
+
+    <!-- =============================== 보편 A =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">보편 A</span>
+        <h2>카드로 나란히</h2>
+        <p class="option-concept">네 개를 한 화면에 펼쳐 놓고 직접 비교하게 한다. 각 카드에 축소 미리보기와 어떤 블로그에 맞는지를 같이 적는다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">시작점 고르기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">시작점 고르기</span>
+          <span class="appbar-spacer"></span>
+          <span class="status"><span class="token">{모델}</span></span>
+        </div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body">
+            <p style="margin:0 0 16px; font-size:12px; color:var(--c-2)">고른 뒤에도 대화로 바꿀 수 있다</p>
+            <div class="mini-grid" style="grid-template-columns:repeat(2,1fr); gap:12px">
+
+              <div class="card card--selected">
+                <div class="mini" style="margin-bottom:8px">
+                  <div class="mini-bar"></div>
+                  <div class="mini-row">
+                    <div class="mini-side" style="min-height:60px">사이드</div>
+                    <div class="mini-main">
+                      <div class="mini-item" style="padding:4px"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                      <div class="mini-item" style="padding:4px"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    </div>
+                  </div>
+                </div>
+                <div style="font-weight:600; font-size:13px">코드</div>
+                <div style="font-size:12px; color:var(--c-2)">개발, 기술 정리, 튜토리얼</div>
+                <div style="margin-top:8px"><span class="btn btn--sm btn--primary">선택됨</span></div>
+              </div>
+
+              <div class="card">
+                <div class="mini" style="margin-bottom:8px">
+                  <div class="mini-bar"></div>
+                  <div class="mini-main">
+                    <div class="mini-item" style="padding:4px"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div><div class="mini-line mini-line--short"></div></div>
+                    <div class="mini-item" style="padding:4px"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                  </div>
+                </div>
+                <div style="font-weight:600; font-size:13px">칼럼</div>
+                <div style="font-size:12px; color:var(--c-2)">에세이, 긴 글, 서평</div>
+                <div style="margin-top:8px"><span class="btn btn--sm">선택</span></div>
+              </div>
+
+              <div class="card">
+                <div class="mini" style="margin-bottom:8px">
+                  <div class="mini-bar"></div>
+                  <div class="mini-grid">
+                    <div class="img-ph" style="min-height:28px"><span></span></div>
+                    <div class="img-ph" style="min-height:28px"><span></span></div>
+                    <div class="img-ph" style="min-height:28px"><span></span></div>
+                  </div>
+                </div>
+                <div style="font-weight:600; font-size:13px">그리드</div>
+                <div style="font-size:12px; color:var(--c-2)">사진, 여행, 포트폴리오</div>
+                <div style="margin-top:8px"><span class="btn btn--sm">선택</span></div>
+              </div>
+
+              <div class="card">
+                <div class="mini" style="margin-bottom:8px">
+                  <div class="mini-bar"></div>
+                  <div class="mini-row">
+                    <div class="mini-main">
+                      <div class="mini-item" style="padding:3px; display:flex; gap:4px">
+                        <div class="img-ph" style="width:26px; min-height:20px"><span></span></div>
+                        <div style="flex:1"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                      </div>
+                      <div class="mini-item" style="padding:3px; display:flex; gap:4px">
+                        <div class="img-ph" style="width:26px; min-height:20px"><span></span></div>
+                        <div style="flex:1"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                      </div>
+                    </div>
+                    <div class="mini-side" style="min-height:60px">사이드</div>
+                  </div>
+                </div>
+                <div style="font-weight:600; font-size:13px">다이제스트</div>
+                <div style="font-size:12px; color:var(--c-2)">정보 정리, 리뷰, 생활 팁</div>
+                <div style="margin-top:8px"><span class="btn btn--sm">선택</span></div>
+              </div>
+
+            </div>
+          </div>
+          <div class="pane-foot" style="display:flex; align-items:center; gap:8px">
+            <span style="flex:1; font-size:12px; color:var(--c-2)">크게 보기</span>
+            <span class="btn btn--primary">이걸로 시작</span>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>선택지 전체가 한눈에 들어온다. 무엇을 포기하는지 알고 고른다.</dd>
+        <dt>약점</dt>
+        <dd>축소 미리보기가 작아 실제 느낌을 못 준다. 넷 다 비슷해 보이면 아무거나 누르게 된다.</dd>
+        <dt>적정 개수</dt>
+        <dd>4개. 6개를 넘기면 비교가 아니라 훑기가 된다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 보편 B =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">보편 B</span>
+        <h2>용도를 먼저 묻고 하나를 권함</h2>
+        <p class="option-concept">스킨을 고르게 하지 않고 블로그를 묻는다. 답에 맞는 하나를 크게 권하고 나머지는 접어 둔다. 고르는 부담을 서비스가 진다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">시작점 고르기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">어떤 글을 쓰시나요</span>
+          <span class="appbar-spacer"></span>
+          <span class="status">1 / 1</span>
+        </div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px">
+              <span class="btn btn--primary">개발</span>
+              <span class="btn">에세이</span>
+              <span class="btn">사진</span>
+              <span class="btn">리뷰</span>
+              <span class="btn btn--ghost">잘 모르겠음</span>
+            </div>
+
+            <hr class="rule" style="margin:16px 0">
+
+            <div class="card card--selected">
+              <div style="font-size:11px; color:var(--c-2); margin-bottom:6px">권장</div>
+              <div style="display:flex; gap:16px; flex-wrap:wrap">
+                <div class="mini" style="flex:1; min-width:220px">
+                  <div class="mini-bar"></div>
+                  <div class="mini-row">
+                    <div class="mini-side" style="min-height:90px">사이드</div>
+                    <div class="mini-main">
+                      <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                      <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    </div>
+                  </div>
+                </div>
+                <div style="flex:1; min-width:200px">
+                  <div style="font-weight:600; font-size:14px">코드</div>
+                  <ul class="list" style="margin-top:8px">
+                    <li>왼쪽 사이드바</li>
+                    <li>본문 목차</li>
+                    <li>코드 구문 강조</li>
+                    <li>어두운 화면</li>
+                  </ul>
+                  <div style="margin-top:12px"><span class="btn btn--primary">이걸로 시작</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px; font-size:12px; color:var(--c-2)">다른 시작점 3개 보기</div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>사용자가 아는 언어로 묻는다. 답 하나로 끝나고, 권한 것의 특징을 글로 읽을 수 있어 축소 그림의 한계를 보완한다.</dd>
+        <dt>약점</dt>
+        <dd>권한 것이 마음에 안 들면 결국 나머지를 다시 펼쳐 봐야 한다. 한 단계가 늘어난 셈이 된다.</dd>
+        <dt>적정 개수</dt>
+        <dd>제한 없음. 답과 프리셋을 짝지어 두면 개수를 늘려도 사용자 부담은 그대로다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 실험 A =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">실험 A</span>
+        <h2>고르지 않고 바로 시작</h2>
+        <p class="option-concept">시작점 고르기 자체가 부담이라는 발상. 중립 상태로 바로 대화에 들어가고, 프리셋은 대화 중에 필요할 때 제안한다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280 - W1 과 같은 화면으로 바로 진입</div>
+        <div class="chrome"><span class="chrome-url">스킨 만들기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">시작점 없음</span>
+          <span class="appbar-spacer"></span>
+          <span class="btn btn--sm">시작점 고르기</span>
+        </div>
+
+        <div class="work work--split">
+          <div class="pane">
+            <div class="pane-head">대화</div>
+            <div class="pane-body">
+              <div class="msg msg--sys">
+                <div class="msg-body">어떤 블로그인지 한 줄로 말해 주세요. 예를 들어 개발 기록, 사진 모음.</div>
+              </div>
+              <div class="msg msg--user">
+                <div class="msg-role">나</div>
+                <div class="msg-body">개발하면서 막힌 것들 기록하는 블로그</div>
+              </div>
+              <div class="msg">
+                <div class="msg-role">응답</div>
+                <div class="msg-body">
+                  코드 시작점으로 잡았습니다. 왼쪽 사이드바와 본문 목차가 들어갑니다.
+                  <div style="margin-top:8px; display:flex; gap:6px">
+                    <span class="btn btn--sm">그대로</span>
+                    <span class="btn btn--sm btn--ghost">다른 것 보기</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="pane-foot">
+              <input class="input" placeholder="바꿀 내용 입력">
+            </div>
+          </div>
+          <div class="pane">
+            <div class="pane-head">미리보기 <span class="select">홈</span></div>
+            <div class="pane-body">
+              <div class="mini" style="min-height:180px">
+                <div class="mini-bar"></div>
+                <div class="mini-row">
+                  <div class="mini-side">사이드바</div>
+                  <div class="mini-main">
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>화면이 하나 줄고 사용자는 자기 말로 시작한다. 프리셋 이름을 몰라도 된다.</dd>
+        <dt>약점</dt>
+        <dd>첫 응답에 API 호출이 한 번 더 든다. 사용자 지갑에서 나가는 비용이라 가볍게 볼 수 없다. 그리고 무엇을 고를 수 있었는지 사용자가 끝까지 모를 수 있다.</dd>
+        <dt>적정 개수</dt>
+        <dd>사용자에게 개수를 보이지 않으므로 자유롭다. 다만 모델이 골라야 해서 프리셋 설명을 지시문에 넣어야 한다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 실험 B =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">실험 B</span>
+        <h2>둘씩 겨루기</h2>
+        <p class="option-concept">넷을 한 번에 비교하는 것보다 둘 중 하나가 훨씬 쉽다. 두 라운드로 좁히고, 그 과정에서 드러난 취향이 작업 화면의 첫 지시로 그대로 넘어간다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">시작점 고르기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">어느 쪽이 나은가요</span>
+          <span class="appbar-spacer"></span>
+          <span class="status">1 라운드 / 2</span>
+          <span class="btn btn--sm btn--ghost">건너뛰기</span>
+        </div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px">
+              <div class="card">
+                <div class="mini" style="margin-bottom:8px">
+                  <div class="mini-bar"></div>
+                  <div class="mini-row">
+                    <div class="mini-side" style="min-height:110px">사이드</div>
+                    <div class="mini-main">
+                      <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                      <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                      <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    </div>
+                  </div>
+                </div>
+                <span class="btn btn--block">왼쪽</span>
+              </div>
+              <div class="card">
+                <div class="mini" style="margin-bottom:8px">
+                  <div class="mini-bar"></div>
+                  <div class="mini-main">
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div><div class="mini-line mini-line--short"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div><div class="mini-line mini-line--short"></div></div>
+                  </div>
+                </div>
+                <span class="btn btn--block">오른쪽</span>
+              </div>
+            </div>
+
+            <div style="margin-top:16px; font-size:12px; color:var(--c-2)">
+              고른 이유를 한 줄로 남기면 첫 지시로 넘어갑니다
+            </div>
+            <input class="input" style="margin-top:6px" placeholder="예: 목록이 촘촘한 게 좋다">
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>비교 부담이 가장 적다. 고른 이유가 첫 지시가 되어 작업 화면 진입 시점에 이미 한 걸음 나가 있다.</dd>
+        <dt>약점</dt>
+        <dd>화면이 두 번 반복되어 진입이 길어진다. 무엇을 고르고 있는지 이름을 안 보여주면 나중에 되짚기 어렵다.</dd>
+        <dt>적정 개수</dt>
+        <dd>2의 거듭제곱이라야 깔끔하다. 4개면 2라운드, 8개면 3라운드. 홀수면 부전승이 생겨 어색해진다.</dd>
+      </dl>
+    </section>
+
+  </div>
+
+  <hr class="rule">
+
+  <div class="notes" style="position:static; max-width:none">
+    <h3>네 안이 갈리는 지점</h3>
+    <ul>
+      <li>보편 A - 선택지를 다 보여주고 사용자가 고른다.</li>
+      <li>보편 B - 블로그를 묻고 서비스가 골라 준다.</li>
+      <li>실험 A - 고르는 단계를 없애고 대화가 대신한다.</li>
+      <li>실험 B - 비교의 단위를 넷에서 둘로 줄인다.</li>
+    </ul>
+
+    <h3>프리셋 개수에 대한 함의</h3>
+    <p>어느 안을 고르느냐에 따라 감당 가능한 개수가 달라진다. 보편 A는 4개가 상한, 보편 B는 제한 없음, 실험 B는 4개 또는 8개.</p>
+    <p>골격을 하나로 공유하면 프리셋을 늘리는 비용은 목록 마크업과 디자인 토큰뿐이다. 치환자 검증을 다시 할 필요가 없다.</p>
+
+    <h3>미정</h3>
+    <ul>
+      <li>혼합 가능. 보편 B로 하나를 권하되 그 아래에 보편 A의 카드 넷을 펼쳐 두는 식.</li>
+      <li>"잘 모르겠음"을 골랐을 때 무엇을 줄지.</li>
+      <li>고른 뒤 바꾸고 싶어지면 W1에서 프리셋을 갈아탈 수 있는지. 갈아타면 그동안의 대화가 무효가 된다.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

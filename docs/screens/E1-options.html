@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E1 진입 / 키 등록 - 4안</title>
+<link rel="stylesheet" href="./wireframe.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-head">
+    <h1>E1 진입 / 키 등록 - 4안</h1>
+    <p>처음 온 사람에게 API 키를 요구하는 화면. 신뢰가 관건이고, 키가 없는 사람은 발급받아 와야 한다.</p>
+  </div>
+
+  <div class="meta">
+    <dl>
+      <dt>풀 문제</dt>
+      <dd>낯선 페이지에 키를 넣어도 되는지 사용자가 판단할 수 있어야 한다. 그리고 키가 없으면 받아 와야 한다.</dd>
+      <dt>진입점</dt>
+      <dd>첫 방문. 또는 S1에서 키 교체</dd>
+      <dt>다음</dt>
+      <dd>P1 시작점 고르기</dd>
+      <dt>제약</dt>
+      <dd>서버 없음. 키는 브라우저 메모리에만 두고 해당 제공자 엔드포인트로만 나간다. 저장은 명시적 선택일 때만</dd>
+      <dt>작성일</dt>
+      <dd>2026-07-27</dd>
+    </dl>
+  </div>
+
+  <div class="options">
+
+    <!-- =============================== 보편 A =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">보편 A</span>
+        <h2>한 화면에 전부</h2>
+        <p class="option-concept">소개와 입력을 한 화면에 놓고 스크롤 한 번으로 끝낸다. 무엇을 요구하는지와 왜 안전한지가 입력칸 바로 옆에 있다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">티스토리 스킨 만들기</span></div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body">
+            <h2 style="font-size:18px; margin-bottom:6px">티스토리 스킨 만들기</h2>
+            <p style="margin:0 0 4px; font-size:13px; color:var(--c-1)">대화로 자기 스킨을 만들어 내려받습니다.</p>
+            <p style="margin:0 0 20px; font-size:12px; color:var(--c-2)">서버가 없습니다. 키는 브라우저에만 있고 고른 제공자로만 나갑니다.</p>
+
+            <div class="field">
+              <span class="field-label">제공자</span>
+              <div style="display:flex; gap:8px; flex-wrap:wrap">
+                <span class="btn btn--primary">Anthropic</span>
+                <span class="btn">OpenAI</span>
+                <span class="btn">Google</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field-label">API 키</span>
+              <input class="input input--mono" placeholder="sk-ant-">
+              <div style="margin-top:6px; font-size:11px; color:var(--c-2)">
+                키 발급받기 · 대화 한 번에 <span class="token">{비용}</span> 정도
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field-label">모델</span>
+              <span class="select">Claude Opus 5</span>
+              <span class="select">Claude Sonnet 5</span>
+            </div>
+
+            <div class="field">
+              <label style="font-size:12px; color:var(--c-1)">
+                <span class="btn btn--sm btn--ghost">off</span>
+                이 브라우저에 키 저장
+              </label>
+              <div style="margin-top:4px; font-size:11px; color:var(--c-2)">끄면 새로고침할 때마다 다시 넣어야 합니다</div>
+            </div>
+          </div>
+          <div class="pane-foot">
+            <span class="btn btn--primary">시작</span>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>한 화면에서 전체를 파악한다. 뒤로 가기 없이 끝나고 만들기도 가장 단순하다.</dd>
+        <dt>약점</dt>
+        <dd>처음 온 사람에게 입력칸 세 개와 키 요구가 한꺼번에 보인다. 무엇을 주는 서비스인지 모른 채 키부터 내라는 인상이 된다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 보편 B =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">보편 B</span>
+        <h2>한 번에 하나씩</h2>
+        <p class="option-concept">제공자, 키, 모델을 단계로 쪼갠다. 고른 제공자에 맞춰 키 형식과 발급처 안내가 달라지므로 물어볼 것도 줄어든다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280 - 2단계</div>
+        <div class="chrome"><span class="chrome-url">티스토리 스킨 만들기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">키 넣기</span>
+          <span class="appbar-spacer"></span>
+          <span class="status">2 / 3</span>
+          <span class="btn btn--sm">이전</span>
+        </div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body">
+            <div style="font-size:12px; color:var(--c-2); margin-bottom:16px">Anthropic 선택됨</div>
+
+            <div class="field">
+              <span class="field-label">API 키</span>
+              <input class="input input--mono" placeholder="sk-ant-">
+            </div>
+
+            <div class="card">
+              <div style="font-size:12px; font-weight:600; margin-bottom:6px">키가 없으면</div>
+              <ul class="list">
+                <li>console.anthropic.com 에서 발급</li>
+                <li>결제 수단 등록 필요</li>
+                <li>대화 한 번에 <span class="token">{비용}</span> 정도</li>
+              </ul>
+            </div>
+
+            <div style="margin-top:16px; font-size:11px; color:var(--c-2)">
+              키는 이 브라우저 밖으로 나가지 않습니다. 서버가 없습니다.
+            </div>
+          </div>
+          <div class="pane-foot">
+            <span class="btn btn--primary">다음</span>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>한 번에 하나만 판단한다. 제공자별 안내를 정확히 줄 수 있어 키 발급에서 막히는 사람이 준다.</dd>
+        <dt>약점</dt>
+        <dd>단계가 셋이라 진입이 길다. 아직 아무것도 보지 못한 채 화면을 세 번 넘겨야 한다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 실험 A =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">실험 A</span>
+        <h2>먼저 만져 보고 나중에 키</h2>
+        <p class="option-concept">키 없이 완성된 스킨 예시를 실제로 조작해 보게 한다. 무엇을 받는지 손으로 확인한 뒤에 키를 요구한다. 신뢰를 말로 설득하지 않고 결과물로 준다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">티스토리 스킨 만들기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">둘러보기</span>
+          <span class="status">예시</span>
+          <span class="appbar-spacer"></span>
+          <span class="btn btn--sm btn--primary">내 스킨 만들기</span>
+        </div>
+
+        <div class="work work--split">
+          <div class="pane">
+            <div class="pane-head">예시 대화</div>
+            <div class="pane-body">
+              <div class="msg msg--user"><div class="msg-role">나</div><div class="msg-body">사이드바를 오른쪽으로</div></div>
+              <div class="msg"><div class="msg-role">응답</div><div class="msg-body">사이드바를 오른쪽으로 옮겼습니다.</div></div>
+              <div class="msg msg--sys"><div class="msg-body">미리 만들어 둔 예시입니다. 직접 지시하려면 키가 필요합니다.</div></div>
+            </div>
+            <div class="pane-foot">
+              <input class="input" placeholder="키를 넣으면 여기에 입력할 수 있습니다">
+            </div>
+          </div>
+          <div class="pane">
+            <div class="pane-head">미리보기 <span class="select">홈</span></div>
+            <div class="pane-body">
+              <div class="mini" style="min-height:180px">
+                <div class="mini-bar"></div>
+                <div class="mini-row">
+                  <div class="mini-main">
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                  </div>
+                  <div class="mini-side">사이드바</div>
+                </div>
+              </div>
+              <div style="margin-top:8px; font-size:11px; color:var(--c-2)">페이지 전환과 모바일 보기는 지금도 됩니다</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>키를 요구하기 전에 무엇을 받는지 손으로 확인시킨다. 이 종류의 서비스에서 가장 큰 이탈 지점을 정면으로 다룬다.</dd>
+        <dt>약점</dt>
+        <dd>예시 대화와 예시 스킨을 따로 만들어 유지해야 한다. 골격이 바뀌면 예시도 같이 갱신해야 하는데 잊기 쉽다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 실험 B =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">실험 B</span>
+        <h2>순서를 뒤집어 키를 마지막에</h2>
+        <p class="option-concept">P1의 질문부터 시작한다. 용도와 컨셉을 답하고 4안 만들기를 누르는 순간에만 키를 받는다. 비용이 실제로 드는 그 지점에서 요구한다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280 - P1 질문 위에 덮음</div>
+        <div class="chrome"><span class="chrome-url">시작점 고르기</span></div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body">
+            <div style="font-size:12px; color:var(--c-3); margin-bottom:12px">개발 / 담백하고 글에 집중되는</div>
+
+            <div class="card card--selected">
+              <div style="font-weight:600; font-size:13px; margin-bottom:4px">키가 필요합니다</div>
+              <p style="margin:0 0 12px; font-size:12px; color:var(--c-2)">
+                4안을 만드는 데 <span class="token">{비용}</span> 정도가 듭니다. 사용자 계정에서 결제됩니다.
+              </p>
+
+              <div class="field">
+                <span class="field-label">제공자</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap">
+                  <span class="btn btn--sm btn--primary">Anthropic</span>
+                  <span class="btn btn--sm">OpenAI</span>
+                  <span class="btn btn--sm">Google</span>
+                </div>
+              </div>
+
+              <div class="field">
+                <span class="field-label">API 키</span>
+                <input class="input input--mono" placeholder="sk-ant-">
+                <div style="margin-top:4px; font-size:11px; color:var(--c-2)">키 발급받기 · 서버 없음, 브라우저에만 저장</div>
+              </div>
+
+              <div style="display:flex; gap:6px; margin-top:12px">
+                <span class="btn btn--primary">4안 만들기</span>
+                <span class="btn btn--ghost">취소</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>키를 왜 요구하는지가 그 자리에서 자명하다. 답을 이미 적어 둔 상태라 그냥 나가기 아까워지는 효과도 있다.</dd>
+        <dt>약점</dt>
+        <dd>답을 다 적고 나서야 키가 없다는 걸 알게 되면 헛수고가 된다. 발급받아 오는 동안 답이 날아가면 안 되므로 상태를 붙들고 있어야 한다.</dd>
+      </dl>
+    </section>
+
+  </div>
+
+  <hr class="rule">
+
+  <div class="notes" style="position:static; max-width:none">
+    <h3>네 안이 갈리는 지점</h3>
+    <ul>
+      <li>보편 A - 한 화면에 다 보여주고 빨리 끝낸다.</li>
+      <li>보편 B - 판단을 하나씩 나눠 제공자별 안내를 정확히 준다.</li>
+      <li>실험 A - 신뢰를 말이 아니라 결과물로 준다. 만져 보고 나서 키.</li>
+      <li>실험 B - 요구 시점을 비용이 실제로 드는 순간으로 옮긴다.</li>
+    </ul>
+
+    <h3>어느 안이든 들어가야 하는 것</h3>
+    <ul>
+      <li>서버가 없다는 사실. 키가 브라우저 밖으로 나가지 않는다는 것</li>
+      <li>제공자 3종과 각각의 키 발급처</li>
+      <li>대략의 비용. 누르기 전에 알아야 한다</li>
+      <li>키 저장은 기본 꺼짐. 켜는 것은 명시적 선택</li>
+      <li>등록 후에는 뒤 4자리만 표시</li>
+      <li>키가 틀렸을 때의 실패 표시. 401 과 네트워크 오류를 구분</li>
+    </ul>
+
+    <h3>미정</h3>
+    <ul>
+      <li>혼합 가능. 실험 A로 둘러보게 하되 키 입력은 보편 A 형태로 한 화면에 두는 식.</li>
+      <li>키 유효성을 미리 확인할지. 확인하려면 호출이 한 번 들고 그것도 사용자 비용이다.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

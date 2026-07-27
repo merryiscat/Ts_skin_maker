@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P2 세부 정하기 - 4안</title>
+<link rel="stylesheet" href="./wireframe.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-head">
+    <h1>P2 세부 정하기 - 4안</h1>
+    <p>고른 컨셉 안에서 사이드바 위치, 목록 형태, 색, 글꼴 같은 세부를 정하는 화면.</p>
+  </div>
+
+  <div class="meta">
+    <dl>
+      <dt>풀 문제</dt>
+      <dd>컨셉은 정해졌고 이제 구체적인 값을 정해야 한다. 항목이 열 개가 넘는데 사용자는 대부분에 관심이 없다. 관심 있는 몇 개만 건드리게 해야 한다.</dd>
+      <dt>진입점</dt>
+      <dd>P1 에서 컨셉을 고른 직후. 고른 컨셉과 "섞고 싶은 것"이 함께 넘어온다</dd>
+      <dt>다음</dt>
+      <dd>W1 작업 화면</dd>
+      <dt>정할 것</dt>
+      <dd>사이드바 위치와 표시 항목 / 목록 형태와 표시 항목 / 본문 폭과 목차 / 배경 밝기와 강조색 / 본문 글꼴과 코드 글꼴 / 검색과 구독 버튼</dd>
+      <dt>가정</dt>
+      <dd>모든 항목에 컨셉이 정한 기본값이 이미 채워져 있다. 아무것도 안 건드려도 진행된다</dd>
+      <dt>작성일</dt>
+      <dd>2026-07-27</dd>
+    </dl>
+  </div>
+
+  <div class="options">
+
+    <!-- =============================== 보편 A =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">보편 A</span>
+        <h2>한 화면에 전부, 미리보기는 옆에</h2>
+        <p class="option-concept">항목을 왼쪽에 쭉 세우고 오른쪽에 도식을 붙인다. 바꾸면 도식이 즉시 반응한다. 전체를 한눈에 보며 건드리고 싶은 것만 건드린다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">세부 정하기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">세부 정하기</span>
+          <span class="status">방해되는 걸 전부 뺀다</span>
+          <span class="appbar-spacer"></span>
+          <span class="btn btn--sm">컨셉 다시 고르기</span>
+          <span class="btn btn--sm btn--primary">이대로 시작</span>
+        </div>
+
+        <div class="work work--split" style="grid-template-columns:1fr 300px">
+          <div class="pane">
+            <div class="pane-head">항목</div>
+            <div class="pane-body">
+              <div class="field">
+                <span class="field-label">사이드바</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap">
+                  <span class="btn btn--sm btn--primary">왼쪽</span>
+                  <span class="btn btn--sm">오른쪽</span>
+                  <span class="btn btn--sm">없음</span>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">사이드바에 넣을 것</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap">
+                  <span class="btn btn--sm btn--primary">프로필</span>
+                  <span class="btn btn--sm btn--ghost">카테고리</span>
+                  <span class="btn btn--sm btn--ghost">태그</span>
+                  <span class="btn btn--sm btn--ghost">공지</span>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">글 목록</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap">
+                  <span class="btn btn--sm btn--primary">표준</span>
+                  <span class="btn btn--sm">단순</span>
+                  <span class="btn btn--sm">그리드</span>
+                  <span class="btn btn--sm">밀집</span>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">목록에 넣을 것</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap">
+                  <span class="btn btn--sm btn--ghost">썸네일</span>
+                  <span class="btn btn--sm btn--primary">요약</span>
+                  <span class="btn btn--sm btn--ghost">태그</span>
+                  <span class="btn btn--sm btn--ghost">댓글 수</span>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">본문 폭</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center">
+                  <span class="btn btn--sm btn--primary">좁게</span>
+                  <span class="btn btn--sm">보통</span>
+                  <span class="btn btn--sm">넓게</span>
+                  <span style="font-size:11px; color:var(--c-2)">한 줄 45자</span>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">배경</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap">
+                  <span class="btn btn--sm">밝게</span>
+                  <span class="btn btn--sm btn--primary">어둡게</span>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">강조색</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap">
+                  <span class="btn btn--sm btn--primary">기본</span>
+                  <span class="btn btn--sm">직접 고르기</span>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">글꼴</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap">
+                  <span class="select">본문 고딕</span>
+                  <span class="select">코드 고정폭</span>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">기능</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap">
+                  <span class="btn btn--sm btn--primary">목차</span>
+                  <span class="btn btn--sm btn--primary">검색</span>
+                  <span class="btn btn--sm btn--ghost">구독 버튼</span>
+                  <span class="btn btn--sm btn--primary">구문 강조</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pane">
+            <div class="pane-head">도식 <span style="flex:1"></span><span class="select">홈</span></div>
+            <div class="pane-body">
+              <div class="mini" style="min-height:200px">
+                <div class="mini-bar"></div>
+                <div class="mini-row">
+                  <div class="mini-side" style="width:20%; min-height:140px">프로필</div>
+                  <div class="mini-main">
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div><div class="mini-line mini-line--short"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top:8px; font-size:11px; color:var(--c-2)">바꾸면 바로 반영됩니다</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>전체가 한눈에 들어와 무엇을 정할 수 있는지 안다. 관심 있는 항목만 골라 건드리기 쉽다.</dd>
+        <dt>약점</dt>
+        <dd>항목이 아홉 줄이라 처음 보면 부담스럽다. 컨셉을 고르고 왔는데 또 결정할 게 많다는 인상을 준다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 보편 B =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">보편 B</span>
+        <h2>묶음별로 한 번에 하나씩</h2>
+        <p class="option-concept">항목을 네 묶음으로 나눠 순서대로 준다. 한 묶음에 두세 개만 나오므로 매번 결정이 가볍다. 도식은 옆에서 계속 따라 바뀐다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280 - 2번째 묶음</div>
+        <div class="chrome"><span class="chrome-url">세부 정하기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">글 목록</span>
+          <span class="appbar-spacer"></span>
+          <span class="status">2 / 4</span>
+          <span class="btn btn--sm">이전</span>
+        </div>
+
+        <div class="work work--split" style="grid-template-columns:1fr 300px">
+          <div class="pane">
+            <div class="pane-body">
+              <div class="field">
+                <span class="field-label">어떻게 보여줄까요</span>
+                <div style="display:flex; flex-direction:column; gap:6px">
+                  <span class="btn btn--primary">표준 - 제목과 요약</span>
+                  <span class="btn">단순 - 제목만 크게</span>
+                  <span class="btn">그리드 - 썸네일 격자</span>
+                  <span class="btn">밀집 - 한 화면에 많이</span>
+                </div>
+              </div>
+              <div class="field" style="margin-top:20px">
+                <span class="field-label">같이 보여줄 것</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap">
+                  <span class="btn btn--sm btn--ghost">썸네일</span>
+                  <span class="btn btn--sm btn--primary">요약</span>
+                  <span class="btn btn--sm btn--ghost">태그</span>
+                  <span class="btn btn--sm btn--ghost">댓글 수</span>
+                </div>
+              </div>
+            </div>
+            <div class="pane-foot" style="display:flex; gap:8px; align-items:center">
+              <span style="flex:1; font-size:11px; color:var(--c-2)">레이아웃 - 글 목록 - 색과 글꼴 - 기능</span>
+              <span class="btn btn--primary">다음</span>
+            </div>
+          </div>
+
+          <div class="pane">
+            <div class="pane-head">도식</div>
+            <div class="pane-body">
+              <div class="mini" style="min-height:180px">
+                <div class="mini-bar"></div>
+                <div class="mini-row">
+                  <div class="mini-side" style="width:20%; min-height:130px"></div>
+                  <div class="mini-main">
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>매번 결정이 가볍고 선택지마다 설명을 붙일 수 있다. 무엇을 고르는지 모르는 채 지나가는 일이 줄어든다.</dd>
+        <dt>약점</dt>
+        <dd>네 번 넘겨야 끝난다. 사이드바 하나만 바꾸고 싶은 사람에게는 세 화면이 낭비다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 실험 A =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">실험 A</span>
+        <h2>도식 위에서 직접 바꾸기</h2>
+        <p class="option-concept">항목 목록을 없앤다. 도식에서 사이드바를 누르면 그 자리에서 위치와 내용이 나오고, 목록을 누르면 목록 설정이 나온다. 어디를 바꾸는지 눈으로 보면서 고른다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">세부 정하기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">세부 정하기</span>
+          <span class="status">방해되는 걸 전부 뺀다</span>
+          <span class="appbar-spacer"></span>
+          <span class="btn btn--sm btn--primary">이대로 시작</span>
+        </div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body">
+            <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap">
+              <div class="mini" style="flex:1; min-width:260px; min-height:240px">
+                <div class="mini-bar"></div>
+                <div class="mini-row">
+                  <div class="mini-side" style="width:22%; min-height:180px; border:2px solid var(--c-0)">
+                    사이드바
+                    <div style="margin-top:4px"><span class="btn btn--sm">선택됨</span></div>
+                  </div>
+                  <div class="mini-main">
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card card--selected" style="flex:0 0 220px">
+                <div style="font-weight:600; font-size:13px; margin-bottom:8px">사이드바</div>
+                <div class="field">
+                  <span class="field-label">위치</span>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap">
+                    <span class="btn btn--sm btn--primary">왼쪽</span>
+                    <span class="btn btn--sm">오른쪽</span>
+                    <span class="btn btn--sm">없음</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <span class="field-label">넣을 것</span>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap">
+                    <span class="btn btn--sm btn--primary">프로필</span>
+                    <span class="btn btn--sm btn--ghost">카테고리</span>
+                    <span class="btn btn--sm btn--ghost">태그</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px; font-size:11px; color:var(--c-2)">
+              도식에서 바꾸고 싶은 곳을 누르세요. 색과 글꼴은 아래에 있습니다.
+            </div>
+            <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap">
+              <span class="btn btn--sm">배경과 강조색</span>
+              <span class="btn btn--sm">글꼴</span>
+              <span class="btn btn--sm">기능</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>무엇을 바꾸는지 눈으로 보면서 고른다. 용어를 몰라도 위치로 찾을 수 있다. W1 에서 보류했던 직접 지목을 여기서는 싸게 쓸 수 있다. 항목이 유한하고 도식이 우리 것이라 대응표 유지 비용이 낮다.</dd>
+        <dt>약점</dt>
+        <dd>색, 글꼴처럼 도식의 특정 영역에 속하지 않는 것은 결국 아래에 따로 둬야 한다. 무엇을 정할 수 있는지 전체 목록이 안 보인다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 실험 B =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">실험 B</span>
+        <h2>이 화면을 만들지 않는다</h2>
+        <p class="option-concept">컨셉이 이미 세부를 다 정했다. 그대로 작업 화면으로 보내고, 바꾸고 싶으면 거기서 말하거나 세부 패널을 열게 한다. 화면 하나를 줄이는 대신 W1 이 조금 무거워진다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280 - W1 안의 세부 패널</div>
+        <div class="chrome"><span class="chrome-url">스킨 만들기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">방해되는 걸 전부 뺀다</span>
+          <span class="appbar-spacer"></span>
+          <span class="btn btn--sm btn--primary">세부</span>
+          <span class="btn btn--sm">설정</span>
+        </div>
+
+        <div class="work work--split">
+          <div class="pane">
+            <div class="pane-head">대화</div>
+            <div class="pane-body">
+              <div class="msg msg--sys">
+                <div class="msg-body">
+                  컨셉대로 만들었습니다. 바꾸고 싶은 것을 말하거나 위의 세부 버튼을 누르세요.
+                </div>
+              </div>
+              <div class="msg msg--user"><div class="msg-role">나</div><div class="msg-body">사이드바를 오른쪽으로</div></div>
+            </div>
+            <div class="pane-foot">
+              <input class="input" placeholder="바꿀 내용 입력">
+            </div>
+          </div>
+          <div class="pane">
+            <div class="pane-head">미리보기 <span class="select">홈</span></div>
+            <div class="pane-body">
+              <div class="mini" style="min-height:190px">
+                <div class="mini-bar"></div>
+                <div class="mini-row">
+                  <div class="mini-side" style="width:20%; min-height:140px"></div>
+                  <div class="mini-main">
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>진입이 가장 짧다. 컨셉을 고르면 곧바로 결과를 본다. 세부에 관심 없는 사람에게 결정을 강요하지 않는다.</dd>
+        <dt>약점</dt>
+        <dd>무엇을 바꿀 수 있는지 모른 채 대화만 하게 된다. "사이드바 위치를 바꿀 수 있다"는 사실 자체를 알려주는 자리가 없어지고, 그 결과 매번 API 를 태워 가며 물어보게 된다.</dd>
+      </dl>
+    </section>
+
+  </div>
+
+  <hr class="rule">
+
+  <div class="notes" style="position:static; max-width:none">
+    <h3>네 안이 갈리는 지점</h3>
+    <ul>
+      <li>보편 A - 전부 펼쳐 놓고 관심 있는 것만 건드리게 한다.</li>
+      <li>보편 B - 묶음으로 쪼개 매번 가볍게 결정하게 한다.</li>
+      <li>실험 A - 항목 목록을 없애고 도식 위에서 지목하게 한다.</li>
+      <li>실험 B - 이 화면의 존재 자체를 묻는다. 컨셉이 다 정했으면 넘어가면 된다.</li>
+    </ul>
+
+    <h3>어느 안이든 들어가야 하는 것</h3>
+    <ul>
+      <li>모든 항목에 컨셉이 정한 기본값이 채워져 있을 것. 빈칸에서 시작하면 컨셉을 고른 의미가 없다</li>
+      <li>아무것도 안 건드려도 진행될 것</li>
+      <li>바꾼 것이 도식에 즉시 반영될 것. 반영이 안 보이면 무엇을 고른 건지 알 수 없다</li>
+      <li>P1 의 "섞고 싶은 것"이 미리 반영돼 있을 것</li>
+      <li>컨셉 다시 고르기로 P1 에 돌아가는 길. 세부를 만지다 컨셉이 틀렸다고 느낄 수 있다</li>
+      <li>여기서는 API 를 쓰지 않는다. 전부 플래그 조작이라 비용이 들지 않는다는 점이 W1 과 다르다</li>
+    </ul>
+
+    <h3>미정</h3>
+    <ul>
+      <li>혼합 가능. 보편 A 로 전부 펼치되 도식의 영역을 누르면 해당 항목으로 스크롤되는 식.</li>
+      <li>항목을 아홉 개 다 보일지, 컨셉이 건드린 것만 앞에 두고 나머지는 접을지.</li>
+      <li>여기서 정한 값을 W1 에서 다시 바꿀 수 있는지. 대화로도 되고 세부 패널로도 되면 두 경로가 생긴다.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

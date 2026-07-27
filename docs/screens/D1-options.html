@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D1 내려받기 / 설치 안내 - 4안</title>
+<link rel="stylesheet" href="./wireframe.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-head">
+    <h1>D1 내려받기 / 설치 안내 - 4안</h1>
+    <p>만든 스킨을 티스토리에 올리는 화면. 설치가 두 곳으로 갈라져 있고 한쪽을 빠뜨리면 레이아웃이 통째로 깨진다.</p>
+  </div>
+
+  <div class="meta">
+    <dl>
+      <dt>풀 문제</dt>
+      <dd>파일을 주는 것으로 끝나지 않는다. skin.html 과 style.css 는 스킨 편집 화면에 붙여넣고, images 아래 파일은 파일업로드 탭에서 따로 올려야 한다. 뒤쪽을 빠뜨리면 404 가 나면서 화면이 무너진다.</dd>
+      <dt>진입점</dt>
+      <dd>W1 상단 내려받기 버튼</dd>
+      <dt>다음</dt>
+      <dd>W1 으로 돌아가기. 또는 종료</dd>
+      <dt>가정</dt>
+      <dd>사용자가 티스토리 관리자 화면을 처음 볼 수도 있다</dd>
+      <dt>작성일</dt>
+      <dd>2026-07-27</dd>
+    </dl>
+  </div>
+
+  <div class="options">
+
+    <!-- =============================== 보편 A =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">보편 A</span>
+        <h2>파일 목록과 절차를 한 화면에</h2>
+        <p class="option-concept">파일마다 무엇을 어디에 넣는지 옆에 적는다. 전체를 한눈에 보여주고 사용자가 알아서 순서를 잡는다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">내려받기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">내려받기</span>
+          <span class="appbar-spacer"></span>
+          <span class="btn btn--sm">작업으로 돌아가기</span>
+        </div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body">
+            <div style="margin-bottom:16px">
+              <span class="btn btn--primary">전체 ZIP 받기</span>
+              <span style="margin-left:8px; font-size:11px; color:var(--c-2)">보관용. 설치는 아래 절차를 따라야 합니다</span>
+            </div>
+
+            <div style="font-size:11px; color:var(--c-2); margin-bottom:6px">스킨 편집 화면에 붙여넣기</div>
+            <div class="card">
+              <div style="display:flex; align-items:center; gap:8px">
+                <span class="token">skin.html</span>
+                <span style="flex:1; font-size:11px; color:var(--c-2)">HTML 탭</span>
+                <span class="btn btn--sm">복사</span>
+              </div>
+            </div>
+            <div class="card">
+              <div style="display:flex; align-items:center; gap:8px">
+                <span class="token">style.css</span>
+                <span style="flex:1; font-size:11px; color:var(--c-2)">CSS 탭</span>
+                <span class="btn btn--sm">복사</span>
+              </div>
+            </div>
+
+            <div style="font-size:11px; color:var(--c-2); margin:16px 0 6px">파일업로드 탭에서 올리기</div>
+            <div class="card">
+              <div style="display:flex; align-items:center; gap:8px">
+                <span class="token">images/script.js</span>
+                <span style="flex:1; font-size:11px; color:var(--c-2)">기존 파일 지우고 올릴 것</span>
+                <span class="btn btn--sm">받기</span>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:16px; border-style:dashed">
+              <div style="font-size:12px; font-weight:600; margin-bottom:4px">index.xml</div>
+              <div style="font-size:12px; color:var(--c-2)">스킨 옵션 정의. 스킨을 새로 등록할 때만 필요합니다.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>전체 구조가 한눈에 들어온다. 두 번째 설치부터는 가장 빠르다.</dd>
+        <dt>약점</dt>
+        <dd>처음 하는 사람에게는 항목이 많아 보인다. 파일업로드 탭을 못 찾으면 그 자리에서 막힌다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 보편 B =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">보편 B</span>
+        <h2>체크리스트로 순서 강제</h2>
+        <p class="option-concept">순서가 있는 일이므로 순서대로 준다. 각 단계를 체크해야 다음이 열린다. 빠뜨림을 구조로 막는다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">내려받기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">설치</span>
+          <span class="status">2 / 4 완료</span>
+          <span class="appbar-spacer"></span>
+          <span class="btn btn--sm">작업으로 돌아가기</span>
+        </div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body">
+            <div class="card">
+              <div style="display:flex; gap:8px; align-items:flex-start">
+                <span class="btn btn--sm btn--primary">완료</span>
+                <div style="flex:1">
+                  <div style="font-weight:600; font-size:13px">1. 스킨 편집 열기</div>
+                  <div style="font-size:12px; color:var(--c-2)">티스토리 관리자 - 꾸미기 - 스킨 편집 - html 편집</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div style="display:flex; gap:8px; align-items:flex-start">
+                <span class="btn btn--sm btn--primary">완료</span>
+                <div style="flex:1">
+                  <div style="font-weight:600; font-size:13px">2. HTML 붙여넣기</div>
+                  <div style="font-size:12px; color:var(--c-2)">기존 내용을 전부 지우고 붙여넣습니다</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card card--selected">
+              <div style="display:flex; gap:8px; align-items:flex-start">
+                <span class="btn btn--sm">지금</span>
+                <div style="flex:1">
+                  <div style="font-weight:600; font-size:13px">3. CSS 붙여넣기</div>
+                  <div style="font-size:12px; color:var(--c-2); margin-bottom:8px">CSS 탭으로 옮겨 같은 방식으로 붙여넣습니다</div>
+                  <span class="btn btn--sm">복사</span>
+                  <span class="btn btn--sm btn--primary">했음</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="opacity:0.45">
+              <div style="display:flex; gap:8px; align-items:flex-start">
+                <span class="btn btn--sm btn--ghost">대기</span>
+                <div style="flex:1">
+                  <div style="font-weight:600; font-size:13px">4. 파일 올리기</div>
+                  <div style="font-size:12px; color:var(--c-2)">파일업로드 탭. 이 단계를 빠뜨리면 화면이 깨집니다</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>빠뜨림을 구조로 막는다. 가장 위험한 4단계가 반드시 마지막에 남아 건너뛸 수 없다.</dd>
+        <dt>약점</dt>
+        <dd>두 번째 설치부터는 답답하다. 체크는 자기 신고라서 실제로 했는지 확인할 방법이 없다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 실험 A =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">실험 A</span>
+        <h2>관리자 화면 도식으로 짚어주기</h2>
+        <p class="option-concept">말로 설명하지 않고 티스토리 관리자 화면을 도식으로 그려 어디를 누르는지 표시한다. 화면을 처음 보는 사람이 막히는 지점은 설명이 아니라 위치다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">내려받기</span></div>
+
+        <div class="work work--split">
+          <div class="pane">
+            <div class="pane-head">할 일</div>
+            <div class="pane-body">
+              <div class="card card--selected">
+                <div style="font-weight:600; font-size:13px; margin-bottom:4px">파일 올리기</div>
+                <div style="font-size:12px; color:var(--c-2); margin-bottom:8px">파일업로드 탭에서 기존 파일을 지우고 새로 올립니다</div>
+                <span class="btn btn--sm">script.js 받기</span>
+              </div>
+              <ul class="list" style="margin-top:12px">
+                <li>1. 스킨 편집 열기</li>
+                <li>2. HTML 붙여넣기</li>
+                <li>3. CSS 붙여넣기</li>
+                <li><strong>4. 파일 올리기</strong></li>
+                <li>5. 저장</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="pane">
+            <div class="pane-head">티스토리 관리자 화면</div>
+            <div class="pane-body">
+              <div class="mini" style="min-height:200px">
+                <div style="border:1px solid var(--c-4); padding:4px; margin-bottom:6px; font-size:10px">관리자 상단</div>
+                <div class="mini-row">
+                  <div class="mini-side" style="min-height:150px; font-size:10px">
+                    <div style="padding:2px">콘텐츠</div>
+                    <div style="padding:2px; border:1px solid var(--c-0)">꾸미기</div>
+                    <div style="padding:2px">플러그인</div>
+                  </div>
+                  <div class="mini-main">
+                    <div style="display:flex; gap:4px; font-size:10px; margin-bottom:6px">
+                      <span style="padding:2px 4px; border:1px solid var(--c-4)">HTML</span>
+                      <span style="padding:2px 4px; border:1px solid var(--c-4)">CSS</span>
+                      <span style="padding:2px 4px; border:2px solid var(--c-0); font-weight:600">파일업로드</span>
+                    </div>
+                    <div class="mini-item" style="min-height:100px; font-size:10px; color:var(--c-2)">
+                      여기에 파일 목록이 나옵니다
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top:8px; font-size:11px; color:var(--c-2)">굵은 테두리가 지금 눌러야 할 곳입니다</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>처음 하는 사람이 실제로 막히는 지점을 정확히 푼다. 파일업로드 탭이 어디 있는지가 이 화면의 최대 난관이다.</dd>
+        <dt>약점</dt>
+        <dd>티스토리 관리자 화면이 바뀌면 도식이 거짓말이 된다. 우리가 통제할 수 없는 남의 화면을 그려야 한다.</dd>
+      </dl>
+    </section>
+
+    <!-- =============================== 실험 B =============================== -->
+    <section>
+      <div class="option-head">
+        <span class="option-kind">실험 B</span>
+        <h2>지금 할 것만 크게</h2>
+        <p class="option-concept">한 번에 하나만 보여준다. 나머지는 아예 안 보인다. 복사 버튼을 누르면 자동으로 다음으로 넘어가 사용자가 순서를 관리하지 않아도 된다.</p>
+      </div>
+
+      <div class="frame frame--web">
+        <div class="frame-label">데스크탑 1280</div>
+        <div class="chrome"><span class="chrome-url">내려받기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title">설치</span>
+          <span class="appbar-spacer"></span>
+          <span class="status">3 / 5</span>
+          <span class="btn btn--sm">전체 보기</span>
+        </div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body" style="text-align:center; padding:32px 16px">
+            <div style="font-size:11px; color:var(--c-2); margin-bottom:8px">3 단계</div>
+            <h2 style="font-size:20px; margin-bottom:8px">CSS 붙여넣기</h2>
+            <p style="margin:0 auto 20px; max-width:420px; font-size:13px; color:var(--c-1)">
+              스킨 편집 화면에서 CSS 탭으로 옮기고, 기존 내용을 전부 지운 뒤 붙여넣습니다.
+            </p>
+            <div>
+              <span class="btn btn--primary">복사하고 다음</span>
+            </div>
+            <div style="margin-top:12px; font-size:11px; color:var(--c-2)">
+              <span class="btn btn--sm btn--ghost">이전</span>
+              <span class="btn btn--sm btn--ghost">건너뛰기</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="option-notes">
+        <dt>강점</dt>
+        <dd>지금 무엇을 할지 헷갈릴 수 없다. 복사와 진행이 한 버튼이라 순서를 잘못 밟기 어렵다.</dd>
+        <dt>약점</dt>
+        <dd>전체가 몇 단계인지 감이 안 와 끝이 안 보인다. 중간에 티스토리 화면을 왔다 갔다 하다 어디였는지 잃기 쉽다.</dd>
+      </dl>
+    </section>
+
+  </div>
+
+  <hr class="rule">
+
+  <div class="notes" style="position:static; max-width:none">
+    <h3>네 안이 갈리는 지점</h3>
+    <ul>
+      <li>보편 A - 전체를 펼쳐 놓고 사용자가 순서를 잡는다.</li>
+      <li>보편 B - 순서를 강제해 빠뜨림을 구조로 막는다.</li>
+      <li>실험 A - 막히는 원인이 설명이 아니라 위치라고 보고 남의 화면을 그려 짚는다.</li>
+      <li>실험 B - 한 번에 하나만 보여 판단 자체를 없앤다.</li>
+    </ul>
+
+    <h3>어느 안이든 들어가야 하는 것</h3>
+    <ul>
+      <li>설치가 두 곳으로 갈라진다는 사실. skin.html 과 style.css 는 붙여넣기, images 아래는 파일 올리기</li>
+      <li>파일업로드 탭에서는 기존 파일을 지우고 다시 올려야 한다는 것</li>
+      <li>그 단계를 빠뜨리면 어떻게 되는지. 화면이 깨진 모습을 미리 알려야 나중에 원인을 찾는다</li>
+      <li>ZIP 은 보관용이고 그것만으로는 설치가 안 된다는 것</li>
+      <li>index.xml 은 스킨을 새로 등록할 때만 필요하다는 것</li>
+      <li>작업 화면으로 돌아가기. 설치해 보고 더 고치고 싶어질 수 있다</li>
+    </ul>
+
+    <h3>미정</h3>
+    <ul>
+      <li>혼합 가능. 보편 B의 체크리스트에 실험 A의 관리자 도식을 각 단계마다 붙이는 식.</li>
+      <li>설치 후 확인 방법을 줄지. "이렇게 보이면 성공, 이렇게 보이면 파일 올리기를 빠뜨린 것" 같은 대조.</li>
+      <li>티스토리 관리자 화면이 바뀌었을 때 누가 알아채고 고칠지.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
