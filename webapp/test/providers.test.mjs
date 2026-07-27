@@ -122,7 +122,7 @@ const OKBODY = {
   },
 };
 
-const MODEL = { anthropic: 'claude-opus-5', openai: 'gpt-x', google: 'gemini-x' };
+const MODEL = { anthropic: 'claude-opus-4-8', openai: 'gpt-x', google: 'gemini-x' };
 
 /* ------------------------------------------------------------------ */
 
@@ -275,7 +275,7 @@ section('Anthropic 요청 본문 — 최신 API 규칙');
   const calls = stubFetch(() => res(200, OKBODY.anthropic));
   await createStructured('anthropic', KEYS.anthropic, {
     ...ARGS,
-    model: 'claude-opus-5',
+    model: 'claude-opus-4-8',
     effort: 'high',
   });
   const body = calls[0].body;
@@ -288,7 +288,7 @@ section('Anthropic 요청 본문 — 최신 API 규칙');
   ok(!flat.includes('"thinking"'), '본문에 thinking 설정이 없다');
 
   ok(body.max_tokens >= 8000, 'max_tokens 가 8000 이상이다', String(body.max_tokens));
-  ok(body.model === 'claude-opus-5', '모델 ID 를 그대로 보낸다');
+  ok(body.model === 'claude-opus-4-8', '모델 ID 를 그대로 보낸다');
   ok(body.system === ARGS.system, 'system 은 최상위 필드다');
   ok(body.output_config?.format?.type === 'json_schema', 'output_config.format 이 json_schema');
   ok(same(body.output_config?.format?.schema, SCHEMA), '스키마를 그대로 넣는다');
@@ -299,8 +299,77 @@ section('Anthropic 요청 본문 — 최신 API 규칙');
 // effort 를 주지 않으면 넣지 않는다
 {
   const calls = stubFetch(() => res(200, OKBODY.anthropic));
-  await createStructured('anthropic', KEYS.anthropic, { ...ARGS, model: 'claude-opus-5' });
+  await createStructured('anthropic', KEYS.anthropic, { ...ARGS, model: 'claude-opus-4-8' });
   ok(!('effort' in calls[0].body.output_config), 'effort 가 없으면 보내지 않는다');
+}
+
+/* ------------------------------------------------------------------ */
+
+section('systemParts — Anthropic 프롬프트 캐싱');
+
+const SYSTEM_PARTS = ['공통 프리픽스 지침', '이번 태스크 규칙'];
+
+// Anthropic: systemParts 가 있으면 2블록 배열 + 프리픽스에만 cache_control
+{
+  const calls = stubFetch(() => res(200, OKBODY.anthropic));
+  await createStructured('anthropic', KEYS.anthropic, {
+    ...ARGS,
+    model: 'claude-opus-4-8',
+    systemParts: SYSTEM_PARTS,
+  });
+  const sys = calls[0].body.system;
+
+  ok(Array.isArray(sys) && sys.length === 2, 'system 이 2블록 배열이다', JSON.stringify(sys));
+  ok(sys?.[0]?.type === 'text' && sys?.[0]?.text === SYSTEM_PARTS[0], '첫 블록은 프리픽스 텍스트');
+  ok(
+    same(sys?.[0]?.cache_control, { type: 'ephemeral' }),
+    '프리픽스 블록에 cache_control: ephemeral 이 붙는다',
+    JSON.stringify(sys?.[0]),
+  );
+  ok(sys?.[1]?.type === 'text' && sys?.[1]?.text === SYSTEM_PARTS[1], '둘째 블록은 태스크규칙 텍스트');
+  ok(!('cache_control' in (sys?.[1] || {})), '태스크규칙 블록에는 cache_control 이 없다');
+}
+
+// Anthropic: systemParts 가 없으면 기존처럼 문자열 system (하위 호환)
+{
+  const calls = stubFetch(() => res(200, OKBODY.anthropic));
+  await createStructured('anthropic', KEYS.anthropic, { ...ARGS, model: 'claude-opus-4-8' });
+  ok(calls[0].body.system === ARGS.system, 'systemParts 없으면 문자열 system 유지');
+  ok(!JSON.stringify(calls[0].body).includes('cache_control'), 'systemParts 없으면 cache_control 도 없다');
+}
+
+// OpenAI: systemParts 를 무시하고 문자열 system 을 메시지로 보낸다 (자동 프리픽스 캐싱)
+{
+  const calls = stubFetch(() => res(200, OKBODY.openai));
+  await createStructured('openai', KEYS.openai, {
+    ...ARGS,
+    model: 'gpt-x',
+    systemParts: SYSTEM_PARTS,
+  });
+  const body = calls[0].body;
+  ok(
+    body.messages[0].role === 'system' && body.messages[0].content === ARGS.system,
+    'OpenAI 는 systemParts 를 무시하고 문자열 system 을 쓴다',
+    JSON.stringify(body.messages[0]),
+  );
+  ok(!JSON.stringify(body).includes('cache_control'), 'OpenAI 본문에 cache_control 이 없다');
+}
+
+// Google: systemParts 를 무시하고 systemInstruction 문자열 그대로 (자동 캐싱)
+{
+  const calls = stubFetch(() => res(200, OKBODY.google));
+  await createStructured('google', KEYS.google, {
+    ...ARGS,
+    model: 'gemini-x',
+    systemParts: SYSTEM_PARTS,
+  });
+  const body = calls[0].body;
+  ok(
+    body.systemInstruction?.parts?.[0]?.text === ARGS.system,
+    'Google 은 systemParts 를 무시하고 문자열 system 을 쓴다',
+    JSON.stringify(body.systemInstruction),
+  );
+  ok(!JSON.stringify(body).includes('cache_control'), 'Google 본문에 cache_control 이 없다');
 }
 
 /* ------------------------------------------------------------------ */
@@ -368,14 +437,14 @@ for (const id of ['anthropic', 'openai', 'google']) {
 // 구조화 출력을 걸었는데도 JSON 이 아니면 api 오류다
 {
   stubFetch(() => res(200, { content: [{ type: 'text', text: '죄송하지만 도와드릴 수 없습니다' }] }));
-  const r = await createStructured('anthropic', KEYS.anthropic, { ...ARGS, model: 'claude-opus-5' });
+  const r = await createStructured('anthropic', KEYS.anthropic, { ...ARGS, model: 'claude-opus-4-8' });
   ok(r.ok === false && r.error.kind === 'api', 'JSON 파싱 실패는 api', JSON.stringify(r.error));
 }
 
 // 빈 응답
 {
   stubFetch(() => res(200, { content: [] }));
-  const r = await createStructured('anthropic', KEYS.anthropic, { ...ARGS, model: 'claude-opus-5' });
+  const r = await createStructured('anthropic', KEYS.anthropic, { ...ARGS, model: 'claude-opus-4-8' });
   ok(r.ok === false && r.error.kind === 'api', '빈 응답은 api', JSON.stringify(r.error));
 }
 
@@ -384,10 +453,10 @@ for (const id of ['anthropic', 'openai', 'google']) {
 section('모델 목록');
 
 {
-  stubFetch(() => res(200, { data: [{ id: 'claude-opus-5', display_name: 'Claude Opus 5' }] }));
+  stubFetch(() => res(200, { data: [{ id: 'claude-opus-4-8', display_name: 'Claude Opus 4.8' }] }));
   const r = await listModels('anthropic', KEYS.anthropic);
-  ok(r.ok === true && r.models[0].id === 'claude-opus-5', 'Anthropic 목록을 읽는다', JSON.stringify(r));
-  ok(r.models[0].label === 'Claude Opus 5', 'Anthropic display_name 을 라벨로 쓴다');
+  ok(r.ok === true && r.models[0].id === 'claude-opus-4-8', 'Anthropic 목록을 읽는다', JSON.stringify(r));
+  ok(r.models[0].label === 'Claude Opus 4.8', 'Anthropic display_name 을 라벨로 쓴다');
 }
 
 {
@@ -423,18 +492,21 @@ section('모델 목록');
 section('비용 추정');
 
 {
-  // 백만 토큰당 입력 $5 / 출력 $25
-  const c = estimateCost('anthropic', 'claude-opus-5', { input: 1_000_000, output: 1_000_000 });
-  ok(c === 30, 'Opus 5 단가를 계산한다', String(c));
+  // 백만 토큰당: Opus 4.8 입력 $5 / 출력 $25, Sonnet 4.6 $3 / $15, Fable 5 $10 / $50
+  const c = estimateCost('anthropic', 'claude-opus-4-8', { input: 1_000_000, output: 1_000_000 });
+  ok(c === 30, 'Opus 4.8 단가를 계산한다', String(c));
 
-  const s = estimateCost('anthropic', 'claude-sonnet-5', { input: 1_000_000, output: 1_000_000 });
-  ok(s === 18, 'Sonnet 5 단가를 계산한다', String(s));
+  const s = estimateCost('anthropic', 'claude-sonnet-4-6', { input: 1_000_000, output: 1_000_000 });
+  ok(s === 18, 'Sonnet 4.6 단가를 계산한다', String(s));
 
-  ok(estimateCost('anthropic', 'claude-opus-5', { input: 0, output: 0 }) === 0, '0 토큰은 0');
-  ok(estimateCost('anthropic', 'claude-opus-5', undefined) === 0, 'usage 가 없으면 0');
+  const f = estimateCost('anthropic', 'claude-fable-5', { input: 1_000_000, output: 1_000_000 });
+  ok(f === 60, 'Fable 5 단가를 계산한다', String(f));
+
+  ok(estimateCost('anthropic', 'claude-opus-4-8', { input: 0, output: 0 }) === 0, '0 토큰은 0');
+  ok(estimateCost('anthropic', 'claude-opus-4-8', undefined) === 0, 'usage 가 없으면 0');
 }
 
-ok(estimateCost('anthropic', 'claude-opus-4-8', { input: 1000, output: 1000 }) === null,
+ok(estimateCost('anthropic', 'claude-haiku-4-5', { input: 1000, output: 1000 }) === null,
   '모르는 Anthropic 모델은 null');
 ok(estimateCost('openai', 'gpt-5.2', { input: 1000, output: 1000 }) === null,
   'OpenAI 는 단가를 몰라 null');

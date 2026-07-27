@@ -149,7 +149,19 @@
      좁은 화면에서는 아예 만들지 않는다 (CSS 로 숨기는 게 아니라 DOM 을 안 만든다).
   */
 
-  var TOC_MIN_WIDTH = 1500;
+  /*
+     기본 1500 은 왼쪽 사이드바 레이아웃 기준이다. 오른쪽 사이드바 레이아웃에서는
+     TOC 가 붙는 오른쪽 자리에 사이드바가 이미 있어서 기준을 올려야 한다.
+
+     산정 근거 (style.css 실측값, 1rem = 16px):
+       .site-body 최대폭 76rem 이 가운데 정렬 → 사이드바 오른쪽 끝은
+       뷰포트 중앙 + 38rem - 1rem(패딩) = 중앙 + 37rem.
+       TOC 는 오른쪽 끝에서 2rem(right) + 14rem(width) = 16rem 을 차지.
+       겹치지 않으려면 W - 16rem >= W/2 + 37rem, 즉 W >= 106rem = 1696px.
+     1696 은 딱 닿는 값이라 여유 약 6.5rem 을 더해 1800 으로 잡는다.
+     style.css 의 .toc 미디어 쿼리도 같은 값으로 맞춰져 있다 (창 축소 대응).
+  */
+  var TOC_MIN_WIDTH = body.classList.contains('layout-sidebar-right') ? 1800 : 1500;
 
   function buildToc() {
     if (pageType !== 'tt-body-page') return;

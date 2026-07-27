@@ -144,6 +144,10 @@ export function setProvider(provider) {
 
 export function setApiKey(key) {
   set({ apiKey: key, keyChecked: false, models: [], model: '' });
+  // 키를 비우거나 바꾸는 순간 저장소의 옛 키는 낡은 값이다. 남겨 두면 rememberKey 를 켠 채
+  // 교체한 뒤 새로고침했을 때 restore 가 버린 키를 되살린다. 저장은 확인이 끝난
+  // setKeyChecked(persistKey) 에서만 하고, 여기서는 낡은 것을 지우기만 한다
+  localStorage.removeItem(KEY_STORAGE);
 }
 
 /** 키 확인이 끝났을 때. 모델 목록이 같이 들어온다. */

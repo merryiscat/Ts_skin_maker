@@ -294,6 +294,8 @@ export function mount(root, ctx) {
     const res = await createStructured(state.provider, state.apiKey, {
       model: state.model,
       system: prompt.system,
+      // 프리픽스/태스크 분리본. 없으면 undefined 그대로 넘어가고 제공자 쪽에서 system 만 쓴다
+      systemParts: prompt.systemParts,
       messages: prompt.messages,
       schema: prompt.schema,
       effort: prompt.effort,

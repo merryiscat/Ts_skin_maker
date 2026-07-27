@@ -230,6 +230,10 @@ export function detailsToPreset(details, meta = {}) {
     showCategories: blocks.has('categories'),
     showTagCloud: blocks.has('tags'),
     showRecentNotice: blocks.has('notice'),
+    // 사이드바 Menu 섹션(방명록/태그 바로가기). sidebarBlocks 에 'menu' 옵션이
+    // 있는데도 플래그로 안 옮겨 골격이 켜고 끌 방법이 없었다. skeleton 쪽 게이트는
+    // p.showMenu 를 보기로 합의됐다.
+    showMenu: blocks.has('menu'),
 
     showToc: feats.has('toc'),
     showSearch: feats.has('search'),

@@ -119,14 +119,17 @@ function colorControl(field, state, emit) {
   const input = el('input', 'color');
   input.type = 'color';
   input.value = state[field.id] || field.default;
-  input.addEventListener('input', () => {
-    state[field.id] = input.value;
-    emit();
-  });
   const code = el('span', 'color-code');
   code.textContent = input.value;
+  // 드래그 중에는 옆의 코드 표시만 따라간다. input 마다 emit 하면 폼이 통째로
+  // 다시 그려져 이 input 요소가 제거되고, 네이티브 컬러 피커가 도중에 닫힌다
   input.addEventListener('input', () => {
     code.textContent = input.value;
+  });
+  // 값 확정(피커를 닫거나 드래그를 놓은) 시점에만 밖으로 알린다
+  input.addEventListener('change', () => {
+    state[field.id] = input.value;
+    emit();
   });
   row.append(input, code);
   return row;

@@ -12,6 +12,9 @@
  * 없는 치환자가 나왔고 라이브 확인 전까지 안 잡혔다. 1.8.0 골격에서는 공지 블록
  * 안에 article_rep_*를 쓰면 안 되고 notice_rep_*를 써야 하는데, 이건 문법적으로
  * 멀쩡해 보여서 정적 검사 없이는 티스토리에 올려야만 드러난다.
+ *
+ * 참고 출처: 티스토리 스킨 공식 가이드 https://tistory.github.io/document-tistory-skin/
+ * (치환자의 실존 여부가 의심되면 이 문서를 기준으로 판정한다)
  */
 
 /** 페이지 타입. body_id 값과 1:1 대응한다. */
@@ -130,7 +133,9 @@ export const VALUE_PLACEHOLDERS = {
   tag_link:  { scope: ['tagPage', 'randomTags', 'article', 'list'], desc: '태그 URL' },
   tag_name:  { scope: ['tagPage', 'randomTags', 'article', 'list'], desc: '태그 이름' },
   tag_class: { scope: ['tagPage'], desc: '빈도별 클래스 cloud1~cloud5. 태그 페이지에서만' },
-  tag:       { scope: ['head'], desc: '블로그 전체 태그. meta keywords용' },
+  // [##_tag_##] 은 존재하지 않는다. 공식 가이드에 없을 뿐 아니라 라이브 블로그에서
+  // meta keywords 가 리터럴 그대로 출력되는 것을 확인했다(2026-07, src 1.9.0 에서 제거).
+  // meta keywords 는 검색엔진이 무시한 지 오래라 대체 치환자도 두지 않는다.
 
   // --- 보호글 ---
   article_password: { scope: ['protectedArticle'], desc: '비밀번호 입력창의 id/name' },
@@ -439,15 +444,24 @@ export function auditGroupTags(html) {
 
     if (!GROUP_TAGS[tag]) unknown.add(tag);
 
+    // <s_x /> 같은 self-closing 은 그 자리에서 열리고 닫힌 것이다. 예전에는 open 만
+    // +1 해서 self-closing 이 하나라도 있으면 항상 불균형으로 오검출됐다.
+    // scopesAt 이 self-closing 을 스택에 안 올리는 것(no-op)과 맞추어, 여기서도
+    // 열림/닫힘을 동시에 센 것으로 본다.
     if (!counts.has(tag)) counts.set(tag, { open: 0, close: 0 });
-    counts.get(tag)[isClose ? 'close' : 'open']++;
-
-    if (selfClosing) continue;
+    if (selfClosing) {
+      counts.get(tag).open++;
+      counts.get(tag).close++;
+    } else {
+      counts.get(tag)[isClose ? 'close' : 'open']++;
+    }
 
     if (isClose) {
       const at = stack.lastIndexOf(tag);
       if (at !== -1) stack.splice(at, 1);
     } else {
+      // self-closing 도 여는 태그처럼 부모 필요 검사는 받는다. 스택에는 올리지
+      // 않는다 - 그 자리에서 닫혔으므로 자식을 가질 수 없다.
       const meta = GROUP_TAGS[tag];
       if (meta?.requiresParent && !meta.requiresParent.some((par) => stack.includes(par))) {
         parentErrors.push({
@@ -457,7 +471,7 @@ export function auditGroupTags(html) {
             `밖에 있다. 티스토리가 이 블록을 렌더하지 않는다.`,
         });
       }
-      stack.push(tag);
+      if (!selfClosing) stack.push(tag);
     }
   }
 

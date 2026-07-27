@@ -174,6 +174,17 @@ export async function copyToClipboard(text) {
  * 라이브러리를 하나 끼워 넣는 것보다 이쪽이 낫다고 봤다.
  * 저장 방식 ZIP 은 표준이라 어느 압축 프로그램에서나 열린다.
  */
+/*
+   ZIP 항목의 DOS 날짜/시간.
+   0x0000 을 그대로 두면 "1980년 0월 0일" 이 되는데 월/일 0 은 규격상 무효한 값이라
+   일부 압축 도구가 이상하게 표시하거나 거부할 수 있다. 그렇다고 Date.now 를 쓰면
+   같은 입력에서도 만들 때마다 바이트가 달라져 산출물 비교(빌드 재현성)가 깨진다.
+   그래서 유효한 고정 상수 2026-01-01 00:00:00 을 쓴다.
+   DOS 형식: 날짜 = (연-1980)<<9 | 월<<5 | 일, 시간 = 시<<11 | 분<<5 | 초/2
+*/
+const DOS_DATE = ((2026 - 1980) << 9) | (1 << 5) | 1; // 2026-01-01
+const DOS_TIME = 0; // 00:00:00 (시간은 0 이 유효하다)
+
 export function makeZip(files) {
   const enc = new TextEncoder();
   const entries = [];
@@ -191,8 +202,8 @@ export function makeZip(files) {
     lv.setUint16(4, 20, true); // 필요 버전
     lv.setUint16(6, 0x0800, true); // 파일명 UTF-8 표시
     lv.setUint16(8, 0, true); // 압축 없음
-    lv.setUint16(10, 0, true); // 시간
-    lv.setUint16(12, 0, true); // 날짜
+    lv.setUint16(10, DOS_TIME, true); // 시간 (고정, 위 주석 참고)
+    lv.setUint16(12, DOS_DATE, true); // 날짜 (고정, 위 주석 참고)
     lv.setUint32(14, crc, true);
     lv.setUint32(18, data.length, true);
     lv.setUint32(22, data.length, true);
@@ -214,8 +225,8 @@ export function makeZip(files) {
     cv.setUint16(6, 20, true);
     cv.setUint16(8, 0x0800, true);
     cv.setUint16(10, 0, true);
-    cv.setUint16(12, 0, true);
-    cv.setUint16(14, 0, true);
+    cv.setUint16(12, DOS_TIME, true); // 시간 (로컬 헤더와 같은 고정값)
+    cv.setUint16(14, DOS_DATE, true); // 날짜 (로컬 헤더와 같은 고정값)
     cv.setUint32(16, e.crc, true);
     cv.setUint32(20, e.size, true);
     cv.setUint32(24, e.size, true);

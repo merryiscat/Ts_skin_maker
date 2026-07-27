@@ -75,11 +75,18 @@ function drawBar(state) {
   }
 }
 
+// 화면 전환 순번. 동적 import 를 기다리는 동안 다른 전환이 겹치면
+// 늦게 끝난 쪽이 화면을 덮고, 먼저 mount 된 화면은 unmount 를 못 받아
+// 리스너(W1 의 matchMedia 등)가 샌다. 순번이 다르면 그 결과는 버린다
+let showSeq = 0;
+
 async function show(state) {
   if (current?.id === state.screen) {
     current.api.update?.(state);
     return;
   }
+
+  const my = ++showSeq;
 
   current?.api.unmount?.();
   root.textContent = '';
@@ -92,6 +99,9 @@ async function show(state) {
   }
 
   const mod = await loader();
+  // 기다리는 사이 더 새 전환이 시작됐으면 mount 하지 않는다. 그쪽이 화면을 책임진다
+  if (my !== showSeq) return;
+
   const api = mod.mount(root, { state: actions.getState(), actions, shared, toast, go: actions.go });
   current = { id: state.screen, api };
   api.update?.(actions.getState());

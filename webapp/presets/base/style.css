@@ -586,6 +586,18 @@ a:hover { color: var(--color-accent); }
   .toc a.active { border-left-color: var(--color-accent); color: var(--color-accent); }
 }
 
+/*
+   오른쪽 사이드바 레이아웃은 TOC 자리(오른쪽 고정)에 사이드바가 이미 있다.
+   site-body 76rem 가운데 정렬 기준으로 사이드바 오른쪽 끝이 뷰포트 중앙 + 37rem,
+   TOC 가 오른쪽 끝에서 16rem(right 2rem + width 14rem)을 차지하므로
+   W >= 106rem = 1696px 이어야 겹치지 않는다. 여유를 더해 1800px 미만에서는 숨긴다.
+   script.js 는 애초에 1800px 미만이면 TOC 를 만들지 않지만, 넓은 창에서 만들어진
+   뒤 창을 줄이는 경우는 CSS 만이 막을 수 있어서 이 규칙이 꼭 필요하다.
+*/
+@media (min-width: 1500px) and (max-width: 1799.98px) {
+  .layout-sidebar-right .toc { display: none; }
+}
+
 /* ---------- 태그 클라우드 페이지 ---------- */
 
 .tag-cloud { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 0.75rem; }

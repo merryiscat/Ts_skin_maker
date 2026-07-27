@@ -58,18 +58,25 @@ export const PROVIDERS = {
  * 그때까지는 listModels 가 받아온 실제 목록을 sortModels 로 정렬해서 쓴다.
  */
 export const RECOMMENDED = {
+  // 모델 ID/단가 출처: claude-api 스킬 문서 (카탈로그 캐시 2026-06-04 기준)
   anthropic: [
     {
-      id: 'claude-opus-5',
-      label: 'Claude Opus 5',
+      id: 'claude-opus-4-8',
+      label: 'Claude Opus 4.8',
       note: '가장 정확합니다',
       price: { input: 5, output: 25 },
     },
     {
-      id: 'claude-sonnet-5',
-      label: 'Claude Sonnet 5',
+      id: 'claude-sonnet-4-6',
+      label: 'Claude Sonnet 4.6',
       note: '더 싸고 빠릅니다',
       price: { input: 3, output: 15 },
+    },
+    {
+      id: 'claude-fable-5',
+      label: 'Claude Fable 5',
+      note: '최상위 성능, 가장 비쌉니다',
+      price: { input: 10, output: 50 },
     },
   ],
   openai: [],
@@ -215,14 +222,30 @@ const ADAPTERS = {
     messageUrl() {
       return 'https://api.anthropic.com/v1/messages';
     },
-    messageBody({ model, system, messages, schema, effort }) {
+    messageBody({ model, system, systemParts, messages, schema, effort }) {
       const outputConfig = { format: { type: 'json_schema', schema } };
       if (effort) outputConfig.effort = effort;
+
+      // 프롬프트 캐싱: systemParts 는 [프리픽스, 태스크규칙] 2요소 배열.
+      // Anthropic 캐시는 접두사 일치라, 요청마다 변하지 않는 프리픽스 블록에만
+      // cache_control 을 붙인다. 태스크규칙은 요청마다 달라질 수 있어 캐시 밖에 둔다.
+      // systemParts 가 없으면 기존 문자열 system 을 그대로 쓴다 (하위 호환 —
+      // 화면 쪽 수정은 별도 작업이라 아직 안 넘어올 수 있음).
+      let systemField = null;
+      if (Array.isArray(systemParts) && systemParts.length === 2) {
+        systemField = [
+          { type: 'text', text: systemParts[0], cache_control: { type: 'ephemeral' } },
+          { type: 'text', text: systemParts[1] },
+        ];
+      } else if (system) {
+        systemField = system;
+      }
+
       // temperature / top_p / top_k 와 thinking.budget_tokens 는 400 이다. 넣지 않는다.
       return {
         model,
         max_tokens: ANTHROPIC_MAX_TOKENS,
-        ...(system ? { system } : {}),
+        ...(systemField ? { system: systemField } : {}),
         messages: messages.map((m) => ({ role: m.role, content: m.content })),
         output_config: outputConfig,
       };
@@ -258,6 +281,8 @@ const ADAPTERS = {
     },
     messageBody({ model, system, messages, schema }) {
       // effort 는 제공자마다 이름과 값이 달라 확인 전까지 보내지 않는다.
+      // systemParts 는 받아도 무시한다 — OpenAI 는 프리픽스 자동 캐싱이라
+      // 명시적 캐시 마커가 없고, 문자열 system 그대로 보내면 알아서 캐싱된다.
       return {
         model,
         messages: [
@@ -299,6 +324,8 @@ const ADAPTERS = {
       return `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
     },
     messageBody({ system, messages, schema }) {
+      // systemParts 는 받아도 무시한다 — Google(Gemini) 도 암시적 프리픽스 캐싱이
+      // 기본이라 요청 본문에 캐시 지시를 넣을 게 없다. 문자열 system 그대로 보낸다.
       return {
         ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
         contents: messages.map((m) => ({
@@ -418,8 +445,11 @@ export async function listModels(providerId, key) {
  *
  * messages 는 [{role:'user'|'assistant', content}] 형태의 제공자 중립 모양이고,
  * 각 어댑터가 자기 모양으로 바꾼다.
+ *
+ * systemParts 는 [프리픽스, 태스크규칙] 2요소 문자열 배열 (선택).
+ * Anthropic 만 프롬프트 캐싱에 쓰고, OpenAI/Google 은 자동 캐싱이라 무시한다.
  */
-export async function createStructured(providerId, key, { model, system, messages, schema, effort } = {}) {
+export async function createStructured(providerId, key, { model, system, systemParts, messages, schema, effort } = {}) {
   const a = ADAPTERS[providerId];
   if (!a) return err('api', '모르는 제공자입니다');
 
@@ -430,7 +460,7 @@ export async function createStructured(providerId, key, { model, system, message
   const res = await call(providerId, a.messageUrl(model), {
     method: 'POST',
     headers: { ...a.authHeaders(key.trim()), 'content-type': 'application/json' },
-    body: JSON.stringify(a.messageBody({ model, system, messages: messages || [], schema, effort })),
+    body: JSON.stringify(a.messageBody({ model, system, systemParts, messages: messages || [], schema, effort })),
   });
   if (!res.ok) return res;
 

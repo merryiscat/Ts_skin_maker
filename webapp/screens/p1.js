@@ -100,7 +100,10 @@ export function mount(root, ctx) {
     for (const m of MOODS) {
       moodsEl.append(
         button(m, false, () => {
-          const next = state.mood ? `${state.mood}, ${m}` : m;
+          // drawAsk 시점의 state 스냅샷을 읽으면 그 뒤에 직접 타이핑한 내용이 사라진다.
+          // 클릭하는 순간의 최신 값을 읽어서 이어 붙인다
+          const cur = actions.getState().mood;
+          const next = cur ? `${cur}, ${m}` : m;
           moodEl.value = next;
           actions.setQuestion({ mood: next });
         }, 'ghost'),
@@ -178,6 +181,8 @@ export function mount(root, ctx) {
     const res = await createStructured(st.provider, st.apiKey, {
       model: st.model,
       system: prompt.system,
+      // 프리픽스/태스크 분리본. 없으면 undefined 그대로 넘어가고 제공자 쪽에서 system 만 쓴다
+      systemParts: prompt.systemParts,
       messages: prompt.messages,
       schema: prompt.schema,
       effort: prompt.effort,
@@ -465,7 +470,12 @@ export function mount(root, ctx) {
         const purposesEl = body.querySelector('#purposes');
         if (purposesEl) {
           for (const b of purposesEl.children) {
-            b.classList.toggle('on', b.textContent === state.purpose && !custom);
+            // custom 모드에서는 "직접 입력" 버튼이 켜져 있어야 한다.
+            // 값 비교만 하면 직접 입력 중에는 아무 버튼도 안 켜진다
+            const on = custom
+              ? b.textContent === '직접 입력'
+              : b.textContent === state.purpose;
+            b.classList.toggle('on', on);
           }
         }
         updateAsk(state);

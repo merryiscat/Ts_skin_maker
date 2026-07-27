@@ -126,6 +126,14 @@ buildAndAudit(
   '전부 켜고 오른쪽 사이드바 + 밀집',
 );
 
+section('menu 블록이 골격 플래그로 배선되는가');
+{
+  // sidebarBlocks 에 'menu' 옵션이 있는데 detailsToPreset 이 플래그로 안 옮겨
+  // 골격이 켜고 끌 방법이 없던 회귀. skeleton 쪽 게이트는 p.showMenu 를 본다.
+  ok(detailsToPreset({ ...defaultDetails(), sidebarBlocks: ['menu'] }).showMenu === true, 'menu 를 켜면 showMenu 가 true');
+  ok(detailsToPreset({ ...defaultDetails(), sidebarBlocks: [] }).showMenu === false, 'menu 를 끄면 showMenu 가 false');
+}
+
 section('잘못된 세부 값을 잡는가');
 ok(validateDetails({ ...defaultDetails(), sidebar: 'top' }).length > 0, '없는 사이드바 위치');
 ok(validateDetails({ ...defaultDetails(), accent: 'red' }).length > 0, '색 형식 오류');

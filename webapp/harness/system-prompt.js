@@ -94,7 +94,9 @@ const SHAPE_KEYS = '사이드바(sidebar), 목록 형태(listStyle), 목록 항�
  * 걸리고, 앞부분이 흔들리면 캐시가 매번 새로 써진다. P1 과 W1 이 같은 프리픽스를
  * 쓰는 것도 의도한 것이다. P1 에서 한 번 써 둔 캐시를 W1 의 반복 호출이 계속 재사용한다.
  *
- * 캐시는 512 토큰부터 걸린다. 계약서와 함정 목록만으로 그 몇 배가 되므로 문제없다.
+ * 캐시 최소 길이는 제공자와 모델에 따라 다르다. Anthropic 은 모델별 최소 1024~4096
+ * 토큰(Opus 계열이 4096으로 가장 크다), OpenAI 는 1024 토큰. 이 프리픽스는 계약서와
+ * 함정 목록만으로 약 6천 토큰이라 가장 큰 최소치(4096)도 여유 있게 넘는다.
  */
 export function cacheableSystemPrefix() {
   return [
@@ -120,7 +122,12 @@ export function cacheableSystemPrefix() {
     '',
     '## 정할 수 있는 세부 항목',
     '',
-    '여기 없는 것은 바꿀 수 없다. 글자 크기, 모서리 둥글기, 줄 간격처럼 목록에 없는 것을',
+    // 거절 예시는 반드시 DETAIL_FIELDS 에 없는 것만 적을 것. 예전에 "글자 크기"를
+    // 예시로 적었는데 스펙에 fontSize(글자 크기)가 추가되면서 프롬프트가 스스로
+    // 모순됐다. 하드코딩된 예시는 스펙을 따라가지 못하므로, 스펙에 항목을 더할 때
+    // 이 줄과 editTaskRules 의 같은 예시가 새 항목과 겹치지 않는지 확인해야 한다.
+    // (테스트가 거절 예시 줄과 항목 라벨의 충돌을 잡는다.)
+    '여기 없는 것은 바꿀 수 없다. 모서리 둥글기, 그림자, 애니메이션처럼 목록에 없는 것을',
     '요청받으면 비슷한 항목으로 대신 바꾸지 말고 할 수 없다고 말할 것.',
     '값은 반드시 아래 적힌 것 중에서 고른다.',
     '',
@@ -209,11 +216,17 @@ function askedFor(purpose, mood) {
  * 실험 A 와 B 가 겹친다. 상호 차별화는 생성 시점에 보장돼야 한다.
  *
  * @param {{purpose?: string, mood?: string}} input
- * @returns {{system: string, messages: {role: string, content: string}[], schema: object, effort: string}}
+ * @returns {{system: string, systemParts: [string, string], messages: {role: string, content: string}[], schema: object, effort: string}}
  */
 export function buildConceptPrompt({ purpose, mood } = {}) {
+  // systemParts 는 [고정 프리픽스, 태스크 규칙] 2요소 배열이다. providers 쪽이
+  // Anthropic 에 system 을 두 블록으로 나눠 보내고 첫 블록에만 cache_control 을
+  // 걸기 위한 인터페이스다. system 은 기존 호출부를 위해 그대로 유지하며,
+  // system === systemParts.join('\n\n') 이 항상 성립해야 한다(테스트가 검사한다).
+  const systemParts = [cacheableSystemPrefix(), conceptTaskRules()];
   return {
-    system: `${cacheableSystemPrefix()}\n\n${conceptTaskRules()}`,
+    system: systemParts.join('\n\n'),
+    systemParts,
     messages: [
       {
         role: 'user',
@@ -295,8 +308,12 @@ export function buildRetryConceptPrompt({ purpose, mood, kind, others } = {}) {
       : '보편안이다. 안정적으로 만들되 살아남은 안과 관점이 달라야 한다.',
   ].join('\n');
 
+  // 재시도 전용 규칙은 태스크 규칙 쪽에 합친다. 프리픽스는 입력에 따라 달라지면
+  // 캐시가 깨지므로 첫 요소는 항상 cacheableSystemPrefix() 그대로여야 한다.
+  const systemParts = [cacheableSystemPrefix(), `${conceptTaskRules()}\n\n${rules}`];
   return {
-    system: `${cacheableSystemPrefix()}\n\n${conceptTaskRules()}\n\n${rules}`,
+    system: systemParts.join('\n\n'),
+    systemParts,
     messages: [
       {
         role: 'user',
@@ -375,7 +392,8 @@ function editTaskRules() {
     '것만 바뀌었다고 믿고 미리보기를 본다.',
     '',
     '표현할 수 없는 요청:',
-    '- 정할 수 있는 세부 항목에 없는 것 (글자 크기, 줄 간격, 모서리 둥글기 등)',
+    // 거절 예시는 DETAIL_FIELDS 에 없는 것만. 프리픽스 쪽 같은 예시의 주석 참고.
+    '- 정할 수 있는 세부 항목에 없는 것 (모서리 둥글기, 그림자, 애니메이션 등)',
     '- 티스토리가 주지 않는 것 (조회수 등. 함정 목록 참고)',
     '이럴 때는 비슷한 항목으로 대신 바꾸지 말고, details 를 현재 값 그대로 두고',
     'changes 를 비운 뒤 reply 에서 할 수 없다고 말한다. 왜 안 되는지 한 문장 덧붙인다.',
@@ -420,8 +438,11 @@ function trimTurns(recentTurns) {
 export function buildEditPrompt({ currentDetails, recentTurns, userMessage } = {}) {
   const turns = trimTurns(recentTurns);
 
+  // buildConceptPrompt 와 같은 인터페이스. 프리픽스가 첫 요소.
+  const systemParts = [cacheableSystemPrefix(), editTaskRules()];
   return {
-    system: `${cacheableSystemPrefix()}\n\n${editTaskRules()}`,
+    system: systemParts.join('\n\n'),
+    systemParts,
     messages: [
       ...turns,
       {

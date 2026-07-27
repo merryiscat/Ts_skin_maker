@@ -152,6 +152,14 @@ ok(zip[0] === 0x50 && zip[1] === 0x4b && zip[2] === 0x03 && zip[3] === 0x04, 'ZI
   const dv = new DataView(zip.buffer, zip.byteOffset, zip.byteLength);
   ok((dv.getUint16(6, true) & 0x0800) !== 0, 'UTF-8 파일명 비트가 켜짐');
   ok(dv.getUint16(8, true) === 0, '압축 없이 저장 방식');
+
+  // 날짜 0x0000 은 "1980년 0월 0일" 이라 규격상 무효하다.
+  // 유효한 고정 상수(2026-01-01, 재현성 때문에 Date.now 미사용)가 들어가야 한다.
+  const expectedDate = ((2026 - 1980) << 9) | (1 << 5) | 1;
+  ok(dv.getUint16(12, true) === expectedDate, '로컬 헤더 DOS 날짜가 유효한 고정값', `0x${dv.getUint16(12, true).toString(16)}`);
+  const month = (dv.getUint16(12, true) >> 5) & 0x0f;
+  const day = dv.getUint16(12, true) & 0x1f;
+  ok(month >= 1 && day >= 1, 'DOS 날짜의 월/일이 1 이상 (0 은 무효)');
 }
 
 console.log('--- ZIP 이 실제로 열리는가 ---');

@@ -11,7 +11,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { PRESET_IDS, PRESETS, buildPresetFiles } from '../presets/index.js';
+import { PRESET_IDS, PRESETS, buildPresetFiles, LAYOUTS } from '../presets/index.js';
+import { buildSkinHtml } from '../presets/base/skeleton.js';
 import { auditPlaceholders, auditGroupTags, PAGE_TYPES } from '../harness/contract.js';
 import { checkPitfalls } from '../harness/pitfalls.js';
 
@@ -95,6 +96,28 @@ for (const id of PRESET_IDS) {
 
   console.log('');
 }
+
+// showMenu 게이트. spec 의 sidebarBlocks 'menu' 가 이 플래그로 넘어온다.
+// 켜면 메뉴 블록(방명록/태그 클라우드 링크)이 있고 끄면 없어야 한다.
+console.log('--- showMenu 게이트 ---');
+{
+  const on = buildSkinHtml({ ...PRESETS.code, showMenu: true });
+  const off = buildSkinHtml({ ...PRESETS.code, showMenu: false });
+  ok(on.includes('class="side-menu"'), 'showMenu 켜면 메뉴 블록이 나온다');
+  ok(on.includes('[##_guestbook_link_##]'), 'showMenu 켜면 방명록 링크가 있다');
+  ok(!off.includes('class="side-menu"'), 'showMenu 끄면 메뉴 블록이 사라진다');
+  // 사이드바 레이아웃에서 방명록 링크는 메뉴 블록에만 있으므로 같이 사라져야 한다
+  ok(!off.includes('[##_guestbook_link_##]'), 'showMenu 끄면 방명록 링크도 없다');
+
+  // 게이트가 생기기 전 산출물에는 메뉴 블록이 항상 있었다. 사이드바 있는
+  // 프리셋이 명시적으로 켜 두지 않으면 기존 사용자 산출물이 바뀐다.
+  for (const id of PRESET_IDS) {
+    if (PRESETS[id].layout !== LAYOUTS.NO_SIDEBAR) {
+      ok(PRESETS[id].showMenu === true, `${id}: 사이드바 프리셋에 showMenu 명시`);
+    }
+  }
+}
+console.log('');
 
 // 프리셋끼리 실제로 다른지. 색만 바꾼 프리셋은 있을 이유가 없다.
 const shapes = PRESET_IDS.map((id) => {

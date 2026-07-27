@@ -99,7 +99,8 @@ export function mount(root, ctx) {
             <div class="field-label">API 키</div>
 
             <div class="row" id="key-edit">
-              <input type="text" class="mono" id="key" style="flex:1 1 200px;min-width:0" autocomplete="off" spellcheck="false">
+              <input type="password" class="mono" id="key" style="flex:1 1 200px;min-width:0" autocomplete="off" spellcheck="false">
+              <button id="key-show" type="button">보기</button>
               <button id="check">확인</button>
               <span class="busy" id="check-busy" hidden>확인 중</span>
             </div>
@@ -202,6 +203,14 @@ export function mount(root, ctx) {
   $('check').addEventListener('click', () => runCheck());
   $('recheck').addEventListener('click', () => runCheck());
 
+  // 타이핑 중 어깨너머 노출을 막으려고 기본은 password 다. 오타 확인이 필요할 때만 잠깐 연다
+  $('key-show').addEventListener('click', () => {
+    const input = $('key');
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    $('key-show').textContent = show ? '가리기' : '보기';
+  });
+
   $('replace').addEventListener('click', () => {
     unlocked = true;
     failure = null;
@@ -242,6 +251,10 @@ export function mount(root, ctx) {
    * 기다림만 늘고 얻는 것이 없다.
    */
   async function runCheck() {
+    // 확인이 진행 중일 때 재클릭이나 Enter 연타가 들어오면 listModels 가 병렬로 나간다.
+    // 늦게 온 응답이 attempt 검사로 버려지긴 하지만 요청 자체가 낭비라 입구에서 막는다
+    if (checking) return;
+
     const state = actions.getState();
     const key = (locked(state) ? state.apiKey : $('key').value).trim();
 

@@ -43,6 +43,7 @@ const DEFAULTS = {
   showCategories: true,
   showTagCloud: true,
   showRecentNotice: true,
+  showMenu: true,
   showSubscribe: true,
   showPrevNext: true,
   bodyFont: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif",
@@ -165,16 +166,23 @@ function sidebar(p) {
         </div>`
     : '';
 
-  return `
-    <aside id="sidebar" class="sidebar">
-      <nav class="sidebar-inner">${search}${profile}${notice}
+  // 방명록/태그 클라우드 바로가기. spec 의 sidebarBlocks 'menu' 옵션이
+  // detailsToPreset 에서 showMenu 로 넘어와 여기서 갈린다. 무조건 렌더하면
+  // 사용자가 메뉴를 뺐는데도 산출물에 남는다.
+  const menu = p.showMenu
+    ? `
         <div class="side-block">
           <h3 class="side-title">메뉴</h3>
           <div class="side-menu">
             <a href="[##_guestbook_link_##]">방명록</a>
             <a href="[##_taglog_link_##]">태그 클라우드</a>
           </div>
-        </div>${categories}${tagCloud}
+        </div>`
+    : '';
+
+  return `
+    <aside id="sidebar" class="sidebar">
+      <nav class="sidebar-inner">${search}${profile}${notice}${menu}${categories}${tagCloud}
       </nav>
     </aside>
     <div id="sidebar-overlay" class="sidebar-overlay" hidden></div>`;
@@ -256,7 +264,6 @@ export function buildSkinHtml(preset) {
 
   <title>[##_page_title_##]</title>
   <meta name="description" content="[##_desc_##]">
-  <meta name="keywords" content="[##_tag_##]">
   <meta name="author" content="[##_blogger_##]">
 
   <meta property="og:title" content="[##_page_title_##]">

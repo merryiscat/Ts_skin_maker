@@ -4,7 +4,7 @@
  * 실행: node webapp/test/harness.test.mjs   (저장소 루트에서)
  *
  * 두 방향으로 검사한다.
- *   긍정 - 이미 디버깅이 끝난 src/1.8.0 은 전부 통과해야 한다.
+ *   긍정 - 이미 디버깅이 끝난 src/1.9.0 은 전부 통과해야 한다.
  *          검사기가 과하면 여기서 걸린다.
  *   부정 - 일부러 망가뜨린 것은 반드시 잡혀야 한다.
  *          검사기가 무르면 여기서 걸린다.
@@ -25,7 +25,7 @@ import {
 } from '../harness/contract.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const ref = path.resolve(here, '../../src/1.8.0');
+const ref = path.resolve(here, '../../src/1.9.0');
 const read = (p) => fs.readFileSync(path.join(ref, p), 'utf8');
 
 const files = {
@@ -51,7 +51,7 @@ function audit(html) {
   };
 }
 
-console.log('--- 긍정: 검증된 1.8.0 은 통과해야 한다 ---');
+console.log('--- 긍정: 검증된 1.9.0 은 통과해야 한다 ---');
 
 const clean = checkPitfalls(files);
 ok(clean.length === 0, '함정 검사 0건', clean.map((f) => `${f.id}: ${f.message}`).join(' | '));
@@ -158,6 +158,23 @@ ok(
   auditGroupTags(files['skin.html'].replace('</s_guest>', ''))
     .unbalanced.some((x) => x.tag === 's_guest'),
   '닫는 태그 누락',
+);
+
+// self-closing 그룹 태그(<s_x />)는 그 자리에서 열리고 닫힌 것이다.
+// 예전에는 open 만 세어 self-closing 이 하나라도 있으면 항상 불균형으로
+// 오검출됐다. scopesAt 은 self-closing 을 no-op 으로 보므로 모순이었다.
+{
+  const r = auditGroupTags('<s_t3><s_ad_div /></s_t3>');
+  ok(r.unbalanced.length === 0, 'self-closing 태그는 불균형이 아니다',
+    r.unbalanced.map((x) => `${x.tag} ${x.open}/${x.close}`).join(', '));
+}
+ok(
+  auditGroupTags('<s_t3><s_article_views /></s_t3>').unknown.includes('s_article_views'),
+  'self-closing 이어도 없는 그룹 태그는 잡는다',
+);
+ok(
+  auditGroupTags('<s_t3><s_paging_rep /></s_t3>').parentErrors.some((e) => e.tag === 's_paging_rep'),
+  'self-closing 이어도 부모 필요 검사는 받는다',
 );
 
 // 회귀 방지: 주석 안에서 치환자를 설명하는 것은 정상이다.

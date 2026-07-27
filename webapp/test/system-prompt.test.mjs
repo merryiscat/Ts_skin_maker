@@ -255,10 +255,51 @@ section('캐시 프리픽스');
   }
   ok(concept.slice(0, a.length) === concept2.slice(0, a.length), '입력이 달라도 앞부분이 같다');
 
-  // 한국어는 대략 문자 수의 절반이 토큰 수다. 512 토큰이면 1024 자.
+  // 한국어는 대략 문자 수의 절반이 토큰 수다. 캐시 최소치는 Anthropic 이 모델별
+  // 1024~4096 토큰(Opus 계열 4096), OpenAI 가 1024 토큰이므로 가장 큰 최소치를
+  // 기준으로 본다. 여기서 걸리면 프리픽스가 짧아진 것 - 캐시가 조용히 안 걸린다.
   const approxTokens = Math.round(a.length / 2);
-  ok(approxTokens >= 512, '캐시가 걸릴 만큼 길다', `${a.length} 자, 약 ${approxTokens} 토큰`);
+  ok(approxTokens >= 4096, '캐시가 걸릴 만큼 길다', `${a.length} 자, 약 ${approxTokens} 토큰`);
   console.log(`캐시 프리픽스 ${a.length} 자, 약 ${approxTokens} 토큰`);
+}
+
+section('systemParts 가 프리픽스/태스크 규칙으로 나뉘어 반환되는가');
+{
+  // providers 가 Anthropic 에 system 을 2블록 + cache_control 로 보내기 위한
+  // 인터페이스. 첫 요소는 반드시 캐시 프리픽스 그대로여야 하고,
+  // system === systemParts.join('\n\n') 불변식이 깨지면 두 경로(합친 문자열/블록)가
+  // 서로 다른 프롬프트를 보내게 된다.
+  const prefix = cacheableSystemPrefix();
+  const prompts = [
+    ['4안', buildConceptPrompt({ purpose: '개발', mood: '따뜻한' })],
+    ['재시도', buildRetryConceptPrompt({ purpose: '리뷰', kind: '실험 A', others: [] })],
+    ['편집', buildEditPrompt({ currentDetails: defaultDetails(), userMessage: 'x' })],
+  ];
+  for (const [label, p] of prompts) {
+    ok(Array.isArray(p.systemParts) && p.systemParts.length === 2, `${label}: systemParts 는 2요소 배열이다`);
+    ok(p.systemParts[0] === prefix, `${label}: 첫 요소가 캐시 프리픽스다`);
+    ok(p.system === p.systemParts.join('\n\n'), `${label}: system 은 systemParts 를 합친 것과 같다`);
+  }
+}
+
+section('거절 예시가 스펙과 모순되지 않는가');
+{
+  // 예전에 거절 예시로 "글자 크기"를 적었는데 스펙에 fontSize(글자 크기)가 있어
+  // 프롬프트가 "있는 항목을 거절하라"고 가르쳤다. 하드코딩 예시가 스펙을 못
+  // 따라가는 회귀를 잡는다: 거절 예시가 나오는 줄에 실제 항목 라벨이 있으면 실패.
+  const labels = DETAIL_FIELDS.map((f) => f.label);
+  const texts = [
+    ['프리픽스', cacheableSystemPrefix()],
+    ['편집 규칙', buildEditPrompt({ currentDetails: defaultDetails(), userMessage: 'x' }).system],
+  ];
+  for (const [label, text] of texts) {
+    const rejectLines = text.split('\n').filter((l) => /없는 것/.test(l));
+    ok(rejectLines.length > 0, `${label}: 거절 안내 줄이 존재한다`);
+    for (const line of rejectLines) {
+      const clash = labels.filter((lb) => line.includes(lb));
+      ok(clash.length === 0, `${label}: 거절 예시에 스펙 항목 라벨이 없다`, `${clash.join(',')} :: ${line}`);
+    }
+  }
 }
 
 section('이모지가 없는가');
