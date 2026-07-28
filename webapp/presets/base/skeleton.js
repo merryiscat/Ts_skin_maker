@@ -34,7 +34,6 @@ const DEFAULTS = {
   listStyle: LIST_STYLES.LIST,
   showThumbnail: true,
   showSummary: true,
-  showTags: true,
   showCommentCount: true,
   showToc: false,
   syntaxHighlight: false,
@@ -78,14 +77,18 @@ function articleListItem(p) {
             <p class="card-summary">[##_article_rep_summary_##]</p>`
     : '';
 
-  const tags = p.showTags
-    ? `
-            <div class="card-tags">
-              <s_article_rep_tag>
-                <a class="tag" href="[##_tag_link_##]">#[##_tag_name_##]</a>
-              </s_article_rep_tag>
-            </div>`
-    : '';
+  /*
+    목록 항목에는 태그를 넣지 않는다.
+
+    티스토리는 목록 안에서 태그를 반복 출력하는 방법을 제공하지 않는다. 공식 문서의
+    목록 페이지(list.html)에는 태그 관련 치환자가 아예 없고, 글 태그는 상세에서
+    <s_tag_label> 과 [##_tag_label_rep_##] 로만 낸다.
+
+    예전에는 여기서 <s_article_rep_tag> 를 썼는데 그런 태그는 존재하지 않는다.
+    치환자 계약서에도 올라가 있어서 검사기가 통과시켜 줬고, 그래서 업로드해도
+    조용히 아무것도 안 나오는 상태였다.
+  */
+  const tags = '';
 
   const rpCount = p.showCommentCount
     ? `
@@ -356,12 +359,11 @@ ${p.layout === LAYOUTS.NO_SIDEBAR ? '' : sidebar(p)}
 
         <s_article_rep>
 
-        <s_not_index_article_rep>
-          <div class="empty">
-            <p class="empty-title">작성된 글이 없습니다</p>
-          </div>
-        </s_not_index_article_rep>
-
+        <!--
+          글이 없을 때는 위 <s_list_empty> 가 맡는다. 예전에는 여기에
+          <s_not_index_article_rep> 을 뒀는데 그런 그룹 태그는 존재하지 않는다.
+          s_list_empty 는 라이브 블로그에서 실제로 렌더되는 것을 확인했다.
+        -->
         <s_index_article_rep>${articleListItem(p)}
         </s_index_article_rep>
 

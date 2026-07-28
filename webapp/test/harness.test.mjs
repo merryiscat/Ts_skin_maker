@@ -177,6 +177,43 @@ ok(
   'self-closing 이어도 부모 필요 검사는 받는다',
 );
 
+// 지어낸 것으로 확인된 그룹 태그.
+//
+// [##_tag_##] 가 라이브 블로그의 meta keywords 에 리터럴로 찍혀 있는 것을 보고
+// 계약서를 공식 문서 24개 페이지와 전수 대조했다. 아래 둘은 공식 문서에도,
+// 제3자 프로덕션 스킨(Odyssey, BookClub)에도 없었다. 이 프로젝트가 초기에
+// 지어내 쓰던 것이 계약서에까지 올라가 있었고, 화이트리스트에 있으니
+// 검사기가 통과시켜 줘서 업로드해도 조용히 아무것도 안 나오는 상태였다.
+{
+  const r = auditGroupTags('<s_t3><s_article_rep_tag><a>x</a></s_article_rep_tag></s_t3>');
+  ok(
+    r.blacklisted.some((x) => x.tag === 's_article_rep_tag'),
+    '없는 s_article_rep_tag 를 잡는다',
+  );
+  ok(
+    r.blacklisted[0]?.why.includes('s_tag_label'),
+    '대신 무엇을 쓸지까지 알려준다',
+    r.blacklisted[0]?.why,
+  );
+}
+{
+  const r = auditGroupTags('<s_t3><s_not_index_article_rep>없음</s_not_index_article_rep></s_t3>');
+  ok(
+    r.blacklisted.some((x) => x.tag === 's_not_index_article_rep'),
+    '없는 s_not_index_article_rep 를 잡는다',
+  );
+}
+// 손으로 만든 src/ 스킨은 아직 이 태그들을 쓰고 있다. 그것은 여기서 단언하지 않고
+// 사실만 알린다. src/ 를 고치려면 버전 폴더를 새로 만들어야 해서 별개의 일이다.
+{
+  const g = auditGroupTags(files['skin.html']);
+  if (g.blacklisted.length) {
+    console.log(
+      `      참고: 기준 스킨이 아직 쓰는 없는 태그 - ${g.blacklisted.map((x) => x.tag).join(', ')}`,
+    );
+  }
+}
+
 // 회귀 방지: 주석 안에서 치환자를 설명하는 것은 정상이다.
 // 1.8.0 은 각 블록 위 주석에 치환자를 적어 두는데, 마스킹하지 않으면 오탐이 9건 난다.
 {

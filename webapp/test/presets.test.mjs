@@ -73,6 +73,13 @@ for (const id of PRESET_IDS) {
 
   const g = auditGroupTags(html);
   ok(g.unknown.length === 0, `${id}: 미등록 그룹 태그 없음`, g.unknown.join(', '));
+  // 우리가 만드는 산출물에는 지어낸 태그가 하나도 없어야 한다.
+  // 계약서만 고치고 골격을 안 고치면 여기서 걸린다.
+  ok(
+    g.blacklisted.length === 0,
+    `${id}: 존재하지 않는 그룹 태그 없음`,
+    g.blacklisted.map((x) => x.tag).join(', '),
+  );
   ok(
     g.unbalanced.length === 0,
     `${id}: 그룹 태그 여닫이 균형`,

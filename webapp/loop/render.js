@@ -84,9 +84,6 @@ function groupPlan(tag, ctx) {
       if (ctx.inProtected) return { mode: 'drop' };
       return isPermalink ? { mode: 'once', item: { item: ARTICLES[0], permalink: true } } : { mode: 'drop' };
 
-    case 's_not_index_article_rep':
-      return { mode: 'drop' }; // 글이 있는 상태를 보여 준다
-
     case 's_list':
       // 홈에서도 나온다. 카테고리와 검색에서만 나올 것이라고 보면 안 된다.
       // 실제 블로그에 올려 보고서야 확인한 사항이고, 그전까지 미리보기가
@@ -115,10 +112,6 @@ function groupPlan(tag, ctx) {
     case 's_random_tags':
       return { mode: 'repeat', items: TAGS.slice(0, 8).map((t) => ({ tag: t })) };
 
-    case 's_article_rep_tag': {
-      const tags = ctx.item?.tags || [];
-      return { mode: 'repeat', items: tags.map((name) => ({ tag: { name, cls: 'cloud3' } })) };
-    }
 
     case 's_article_rep_thumbnail':
       return ctx.item?.thumb ? { mode: 'unwrap' } : { mode: 'drop' };

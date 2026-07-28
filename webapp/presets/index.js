@@ -42,7 +42,6 @@ export const PRESETS = {
     listStyle: LIST_STYLES.LIST,
     showThumbnail: false,
     showToc: true,
-    showTags: true,
     showCommentCount: false,
     // 스킨 골격에 showMenu 게이트가 생겼다. 기존 산출물(메뉴 블록 포함)을
     // 유지하기 위해 사이드바 있는 프리셋은 명시적으로 켜 둔다.
@@ -68,7 +67,6 @@ export const PRESETS = {
     listStyle: LIST_STYLES.PLAIN,
     showThumbnail: false,
     showSummary: true,
-    showTags: false,
     showCommentCount: false,
     showToc: false,
     tokens: {
@@ -91,7 +89,6 @@ export const PRESETS = {
     listStyle: LIST_STYLES.GRID,
     showThumbnail: true,
     showSummary: false,
-    showTags: false,
     showCommentCount: false,
     showToc: false,
     tokens: {
@@ -116,7 +113,6 @@ export const PRESETS = {
     listStyle: LIST_STYLES.DENSE,
     showThumbnail: true,
     showSummary: true,
-    showTags: false,
     showCommentCount: true,
     showToc: true,
     // code 프리셋과 같은 이유. 골격의 showMenu 게이트에 대해 기존 산출물 유지.

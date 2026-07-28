@@ -116,7 +116,7 @@ buildAndAudit(
     sidebar: 'right',
     sidebarBlocks: ['profile', 'categories', 'tags', 'notice', 'menu'],
     listStyle: 'dense',
-    listItems: ['thumbnail', 'summary', 'tags', 'commentCount'],
+    listItems: ['thumbnail', 'summary', 'commentCount'],
     contentWidth: 'narrow',
     background: 'dark',
     accent: '#4a9eff',
@@ -167,7 +167,7 @@ const good = [
     differences: ['카테고리를 사이드바 맨 위에', '목록을 밀집형으로', '태그를 앞세움'],
     tradeoff: '한 글에 집중하기는 어려워진다.',
     details: { ...defaultDetails(), sidebar: 'left', sidebarBlocks: ['categories', 'tags', 'menu'],
-      listStyle: 'dense', listItems: ['summary', 'tags'], contentWidth: 'normal', background: 'dark',
+      listStyle: 'dense', listItems: ['summary', 'commentCount'], contentWidth: 'normal', background: 'dark',
       accent: '#4a9eff', bodyFont: 'sans', features: ['search'] },
   },
   {

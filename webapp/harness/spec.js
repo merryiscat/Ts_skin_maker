@@ -89,7 +89,8 @@ export const DETAIL_FIELDS = [
     options: [
       { value: 'thumbnail', label: '썸네일' },
       { value: 'summary', label: '요약' },
-      { value: 'tags', label: '태그' },
+      // 태그 옵션은 뺐다. 티스토리가 목록 안에서 태그를 반복 출력하는 방법을
+      // 제공하지 않아 켜도 아무것도 나오지 않는다. 골격 주석 참조.
       { value: 'commentCount', label: '댓글 수' },
     ],
   },
@@ -223,7 +224,8 @@ export function detailsToPreset(details, meta = {}) {
 
     showThumbnail: items.has('thumbnail'),
     showSummary: items.has('summary'),
-    showTags: items.has('tags'),
+    // showTags 는 더 이상 켜지지 않는다. 골격이 목록 태그 마크업을 내지 않으므로
+    // 남겨 두면 켤 수 있는 것처럼 보인다.
     showCommentCount: items.has('commentCount'),
 
     showProfile: blocks.has('profile'),

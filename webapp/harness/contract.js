@@ -177,10 +177,8 @@ export const GROUP_TAGS = {
   s_article_rep:           { scope: 'anywhere', desc: '글 공통 래퍼' },
   s_index_article_rep:     { scope: 'anywhere', requiresParent: ['s_article_rep', 's_notice_rep'], desc: '목록형 반복' },
   s_permalink_article_rep: { scope: 'anywhere', requiresParent: ['s_article_rep', 's_notice_rep', 's_article_protected'], desc: '상세 페이지' },
-  s_not_index_article_rep: { scope: 'anywhere', requiresParent: ['s_article_rep'], desc: '글이 없을 때' },
 
   s_article_rep_thumbnail: { scope: 'anywhere', desc: '썸네일이 있을 때만' },
-  s_article_rep_tag:       { scope: 'anywhere', desc: '글의 태그 반복. 목록/상세 양쪽에서 쓸 수 있다' },
   s_rp_count:              { scope: 'anywhere', desc: '댓글 수가 있을 때만' },
   s_rp:                    { scope: 'anywhere', desc: '글 댓글 영역' },
   s_tag_label:             { scope: 'anywhere', requiresParent: ['s_permalink_article_rep'], desc: '글 태그' },
@@ -249,6 +247,29 @@ export const BLACKLIST = {
   article_rep_comment_cnt: 'article_rep_rp_cnt가 올바른 이름이며 s_rp_count 안에서만 쓴다.',
   search_keyword:       '검색어는 s_list 안의 [##_list_conform_##]로 얻는다.',
   article_rep_modify_date: '수정일 치환자는 없다.',
+};
+
+/**
+ * 존재하지 않는 그룹 태그.
+ *
+ * 아래 것들은 이 프로젝트가 초기 버전에서 지어내 쓰다가 계약서에까지 올라왔던 것이다.
+ * 공식 문서(tistory.github.io/document-tistory-skin) 24개 페이지 전수 대조와
+ * 제3자 프로덕션 스킨(Odyssey, BookClub) 확인에서 모두 나오지 않았다.
+ *
+ * 계약서가 틀리면 검사기도 같이 틀린다. 화이트리스트에 올라 있으면 검사기가
+ * 통과시켜 주기 때문에 업로드해도 조용히 아무것도 안 나온다. [##_tag_##] 가
+ * meta keywords 에 리터럴로 찍혀 있던 것을 라이브에서 발견하고서야 이 대조를 했다.
+ */
+export const TAG_BLACKLIST = {
+  s_article_rep_tag:
+    '목록 항목 안에서 태그를 반복 출력하는 그룹 태그는 없다. ' +
+    '글 태그는 상세에서 <s_tag_label> 과 [##_tag_label_rep_##] 로만 낸다. ' +
+    '공식 목록 문서(list.html)에는 태그 관련 치환자가 아예 없다.',
+  s_not_index_article_rep:
+    '글이 없을 때를 나타내는 그룹 태그는 없다. <s_list> 안의 <s_list_empty> 를 쓸 것. ' +
+    's_list_empty 는 라이브 블로그에서 실제로 렌더되는 것을 확인했다.',
+  s_page_rep:
+    '페이지(고정 문서) 기능은 현재 골격이 지원하지 않는다. 쓰려면 골격에 먼저 추가할 것.',
 };
 
 /** 치환자 이름을 뽑는 정규식. [##_name_##] */
@@ -428,6 +449,7 @@ export function auditPlaceholders(html) {
 export function auditGroupTags(html) {
   const masked = maskComments(html);
   const unknown = new Set();
+  const blacklisted = new Map();
   const counts = new Map(); // tag -> {open, close}
   const parentErrors = [];
   const stack = [];
@@ -442,7 +464,10 @@ export function auditGroupTags(html) {
     // 조건부 변수 태그는 index.xml 쪽에서 따로 검증한다
     if (/^s_(?:if|not)_var_/.test(tag)) continue;
 
-    if (!GROUP_TAGS[tag]) unknown.add(tag);
+    // 지어낸 것으로 확인된 태그는 "모르는 태그" 와 나눠서 알린다.
+    // 왜 안 되는지와 대신 무엇을 쓸지까지 말해 줘야 같은 실수가 반복되지 않는다.
+    if (TAG_BLACKLIST[tag]) blacklisted.set(tag, TAG_BLACKLIST[tag]);
+    else if (!GROUP_TAGS[tag]) unknown.add(tag);
 
     // <s_x /> 같은 self-closing 은 그 자리에서 열리고 닫힌 것이다. 예전에는 open 만
     // +1 해서 self-closing 이 하나라도 있으면 항상 불균형으로 오검출됐다.
@@ -481,7 +506,12 @@ export function auditGroupTags(html) {
     if (c.open !== c.close) unbalanced.push({ tag, open: c.open, close: c.close });
   }
 
-  return { unknown: [...unknown], unbalanced, parentErrors };
+  return {
+    unknown: [...unknown],
+    blacklisted: [...blacklisted].map(([tag, why]) => ({ tag, why })),
+    unbalanced,
+    parentErrors,
+  };
 }
 
 /**
