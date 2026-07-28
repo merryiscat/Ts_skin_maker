@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P2 세부 정하기</title>
+<link rel="stylesheet" href="./design.css">
+</head>
+<body>
+
+<div class="spec">
+
+  <div class="spec-head">
+    <div class="eyebrow">P2</div>
+    <h1>세부 정하기</h1>
+    <p>같은 골격. 항목은 대화 안 인라인 폼으로, 결과는 오른쪽 도식으로 즉시 본다. 여기서는 API 를 쓰지 않아 마음껏 눌러도 비용이 0 이다.</p>
+    <nav class="spec-nav">
+      <a href="./E1.html">E1 키 등록</a>
+      <a href="./P1.html">P1 컨셉</a>
+      <a href="./P2.html" class="on">P2 세부</a>
+      <a href="./W1.html">W1 작업</a>
+      <a href="./D1.html">D1 내려받기</a>
+      <a href="./S1.html">S1 설정</a>
+      <a href="./palettes.html">팔레트</a>
+    </nav>
+    <div class="themebar"></div>
+  </div>
+
+  <!-- ===================================================================
+       상태 1. 목록
+       구조: .chatshell. 와이어의 "목록 / 도식" 두 상태를 한 화면에 합쳤다.
+       왼쪽이 목록, 오른쪽이 도식이므로 전환 버튼이 필요 없다.
+       (와이어에서 전환을 둔 이유는 폭이 모자랐기 때문이고, 이 골격에서는
+        둘이 동시에 들어간다. 모바일에서는 탭으로 나뉜다.)
+       =================================================================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 1</b> 항목과 도식 - 와이어의 목록·도식 두 상태를 합쳤다</figcaption>
+    <div class="spec-frame">
+      <div class="chatshell">
+
+        <div class="chatpane">
+          <div class="chat-head">
+            <span class="mark">T</span><span class="name">스킨 만들기</span>
+            <span class="spacer"></span>
+            <span class="badge">비용 0</span>
+            <button class="sm">설정</button>
+          </div>
+          <div class="steprail">
+            <span class="done"><span class="num">1</span> 키</span>
+            <span class="done"><span class="num">2</span> 컨셉</span>
+            <span class="on"><span class="num">3</span> 세부</span>
+            <span><span class="num">4</span> 작업</span>
+            <span><span class="num">5</span> 내려받기</span>
+          </div>
+
+          <div class="chat-body">
+            <div class="msg sys">
+              <div class="msg-body">
+                <span class="strong">보편 A</span> · 방해되는 걸 전부 뺀다. 컨셉이 정한 값이 채워져 있습니다.
+              </div>
+            </div>
+
+            <div class="msg">
+              <div class="msg-role">안내</div>
+              <div class="msg-body">
+                건드리지 않아도 됩니다. 바꾸면 오른쪽 도식에 바로 반영됩니다.
+                <div class="tiny dim" style="margin-top:6px">여기서는 API 를 쓰지 않아 비용이 들지 않습니다. <span class="from-concept">컨셉</span> 표시가 붙은 것이 컨셉이 정한 항목입니다.</div>
+
+                <div class="msg-form">
+                  <div class="field">
+                    <div class="field-label">사이드바 <span class="from-concept">컨셉</span></div>
+                    <div class="opts">
+                      <button type="button" class="opt sm on">왼쪽</button>
+                      <button type="button" class="opt sm">오른쪽</button>
+                      <button type="button" class="opt sm">없음</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">사이드바에 넣을 것 <span class="from-concept">컨셉</span></div>
+                    <div class="opts">
+                      <button type="button" class="opt sm on">프로필</button>
+                      <button type="button" class="opt sm ghost">카테고리</button>
+                      <button type="button" class="opt sm ghost">태그</button>
+                      <button type="button" class="opt sm ghost">공지</button>
+                      <button type="button" class="opt sm on">메뉴</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">글 목록</div>
+                    <div class="opts">
+                      <button type="button" class="opt sm on">표준</button>
+                      <button type="button" class="opt sm">단순</button>
+                      <button type="button" class="opt sm">그리드</button>
+                      <button type="button" class="opt sm">밀집</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">목록에 넣을 것 <span class="from-concept">컨셉</span></div>
+                    <div class="opts">
+                      <button type="button" class="opt sm ghost">썸네일</button>
+                      <button type="button" class="opt sm on">요약</button>
+                      <button type="button" class="opt sm ghost">태그</button>
+                      <button type="button" class="opt sm ghost">댓글 수</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">본문 폭 <span class="from-concept">컨셉</span></div>
+                    <div class="opts">
+                      <button type="button" class="opt sm on">좁게</button>
+                      <button type="button" class="opt sm">보통</button>
+                      <button type="button" class="opt sm">넓게</button>
+                      <span class="tiny dim">한 줄 45자</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">배경</div>
+                    <div class="opts">
+                      <button type="button" class="opt sm">밝게</button>
+                      <button type="button" class="opt sm on">어둡게</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">강조색</div>
+                    <div class="opts">
+                      <button type="button" class="opt sm on">기본</button>
+                      <button type="button" class="opt sm">직접 고르기</button>
+                      <input type="color" class="color" value="#0e9594">
+                      <span class="color-code">#0e9594</span>
+                    </div>
+                    <div class="field-note">링크와 강조에만 쓰입니다</div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">글꼴</div>
+                    <div class="opts">
+                      <select><option>본문 고딕</option></select>
+                      <select><option>코드 고정폭</option></select>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">기능 <span class="from-concept">컨셉</span></div>
+                    <div class="opts">
+                      <button type="button" class="opt sm on">목차</button>
+                      <button type="button" class="opt sm on">검색</button>
+                      <button type="button" class="opt sm ghost">구독 버튼</button>
+                      <button type="button" class="opt sm on">구문 강조</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-foot">
+            <div class="composer">
+              <input type="text" placeholder="항목에 없는 것은 다음 화면에서 말로 시킵니다">
+              <div class="row">
+                <span class="tiny dim">여기까지 비용 0</span>
+                <span class="spacer"></span>
+                <button class="primary">시작하기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="canvas">
+          <div class="canvas-head">
+            <span class="badge">도식</span>
+            <select><option>홈</option></select>
+            <select><option>데스크탑</option></select>
+            <span class="spacer"></span>
+            <span>바꾸고 싶은 곳을 눌러도 됩니다</span>
+          </div>
+          <div class="canvas-body">
+            <div class="shot lg" style="aspect-ratio:16/9">
+              <div class="shot-bar shot-zone"><i class="w"></i><u></u><b></b></div>
+              <div class="shot-row">
+                <div class="shot-side shot-zone on" style="padding-top:11px">
+                  <span class="zone-tag">사이드바</span>
+                  <div class="avatar"></div>
+                  <l class="xs"></l><l class="s"></l><l class="s"></l>
+                </div>
+                <div class="shot-col shot-zone" style="padding-top:11px">
+                  <span class="zone-tag">글 목록</span>
+                  <div class="item"><l class="t"></l><l></l><l class="s"></l></div>
+                  <div class="item"><l class="t2"></l><l></l><l class="s"></l></div>
+                  <div class="item"><l class="t"></l><l></l></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:16px">
+              <span class="eyebrow">도식에 없는 것</span>
+              <button class="sm">배경과 강조색</button>
+              <button class="sm">글꼴</button>
+              <button class="sm">기능</button>
+            </div>
+
+            <div class="panel" style="margin-top:24px">
+              <div class="panel-head">컨셉과 달라진 것 <span class="spacer"></span><button class="sm">전부 되돌리기</button></div>
+              <div class="panel-body">
+                <ul class="list rows small">
+                  <li><span class="spacer">사이드바 위치 <span class="token">왼쪽 → 오른쪽</span></span><button class="sm">되돌리기</button></li>
+                  <li><span class="spacer">글 목록 <span class="token">표준 → 밀집</span></span><button class="sm">되돌리기</button></li>
+                </ul>
+                <p class="tiny dim" style="margin-top:12px">많이 바꿨다면 컨셉이 맞지 않는 것일 수 있습니다</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="spec-note">와이어의 "목록 / 도식" 전환을 없앴다. 폭이 모자라 나눴던 것이므로 이 골격에서는 둘이 동시에 들어간다. 도식에서 영역을 누르면 대화의 해당 항목으로 스크롤한다 — 값을 고치는 자리는 한 곳뿐이다.</p>
+  </figure>
+
+  <!-- =================== 상태 2. 되돌아가기 확인 =================== -->
+  <div class="spec-cols two">
+
+    <figure class="spec-state">
+      <figcaption><b>상태 2</b> 컨셉 다시 고르기 - 세부가 사라진다</figcaption>
+      <div class="spec-frame">
+        <div class="chatpane" style="border-right:0">
+          <div class="chat-body">
+            <div class="msg sys">
+              <div class="msg-role">안내</div>
+              <div class="msg-body" style="border-style:solid; border-color:color-mix(in oklab, var(--danger) 30%, transparent); background:var(--danger-bg)">
+                <h3 style="font-size:var(--t-body); color:var(--danger); margin-bottom:4px">여기서 바꾼 세부가 사라집니다</h3>
+                컨셉을 다시 고르면 세부도 새 컨셉의 기본값으로 채워집니다.
+                <div class="tiny dim" style="margin-top:6px">이미 만든 4안 중에서 고르는 것은 비용이 들지 않습니다. 조건을 바꿔 다시 만들면 <span class="token">{토큰}</span> 정도가 듭니다.</div>
+                <div class="msg-actions">
+                  <button class="sm primary">4안에서 다시 고르기</button>
+                  <button class="sm">조건부터 바꾸기</button>
+                  <button class="sm ghost">취소</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="spec-state">
+      <figcaption><b>상태 3</b> 모바일 360 - 항목과 도식을 탭으로</figcaption>
+      <div class="spec-frame narrow">
+        <div class="chatpane" style="border-right:0">
+          <div class="chat-head"><span class="mark">T</span><span class="name">세부</span><span class="spacer"></span><span class="badge">3 / 5</span></div>
+          <div class="tabs" style="padding:0 16px">
+            <button class="tab on">항목</button>
+            <button class="tab">도식</button>
+          </div>
+          <div class="chat-body">
+            <div class="msg">
+              <div class="msg-role">안내</div>
+              <div class="msg-body">
+                건드리지 않아도 됩니다.
+                <div class="msg-form">
+                  <div class="field">
+                    <div class="field-label">사이드바 <span class="from-concept">컨셉</span></div>
+                    <div class="opts">
+                      <button type="button" class="opt sm on">왼쪽</button>
+                      <button type="button" class="opt sm">오른쪽</button>
+                      <button type="button" class="opt sm">없음</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">글 목록</div>
+                    <div class="opts">
+                      <button type="button" class="opt sm on">표준</button>
+                      <button type="button" class="opt sm">단순</button>
+                      <button type="button" class="opt sm">그리드</button>
+                      <button type="button" class="opt sm">밀집</button>
+                    </div>
+                  </div>
+                </div>
+                <p class="tiny faint" style="text-align:center; padding:8px 0">아래로 항목 7개 더</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-foot"><button class="primary block">시작하기</button></div>
+        </div>
+      </div>
+    </figure>
+
+  </div>
+
+</div>
+
+<script src="./theme.js"></script>
+</body>
+</html>

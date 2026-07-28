@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S1 설정</title>
+<link rel="stylesheet" href="./wireframe.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="page-head">
+    <h1>S1 설정</h1>
+    <p>작업 화면 위에 겹치는 설정 패널. 보편 A 확정 - 키 교체만 E1으로 보낸다.</p>
+  </div>
+
+  <div class="meta">
+    <dl>
+      <dt>ID</dt>
+      <dd>S1</dd>
+      <dt>목적</dt>
+      <dd>작업 맥락을 잃지 않고 모델, 사용량, 대화를 손본다</dd>
+      <dt>진입점</dt>
+      <dd>W1 상단 설정 버튼</dd>
+      <dt>다음</dt>
+      <dd>닫으면 W1 복귀. 키 교체는 E1 으로 이동</dd>
+      <dt>가정</dt>
+      <dd>키 등록 완료. 작업이 진행 중이라 패널을 닫으면 하던 일이 그대로 남아 있어야 한다</dd>
+      <dt>상태</dt>
+      <dd>기본 / 모델 바꾸기 / 되돌릴 수 없는 것 확인 / 키 교체 이동 / 모바일</dd>
+      <dt>작성일</dt>
+      <dd>2026-07-27</dd>
+    </dl>
+  </div>
+
+  <div class="layout">
+    <div>
+
+      <!-- ============ 상태 1. 기본 ============ -->
+      <div class="frame frame--web">
+        <div class="frame-label">상태 1. 기본 - 작업 화면 오른쪽에 겹침</div>
+        <div class="chrome"><span class="chrome-url">스킨 만들기</span></div>
+
+        <div class="appbar">
+          <span class="appbar-title"><span class="token">{프리셋}</span></span>
+          <span class="status status--on">검증 통과</span>
+          <span class="appbar-spacer"></span>
+          <span class="btn btn--sm btn--primary">설정</span>
+          <span class="btn btn--sm">내려받기</span>
+        </div>
+
+        <div class="work" style="grid-template-columns:1fr 300px">
+          <div class="pane" style="opacity:0.35">
+            <div class="pane-head">미리보기</div>
+            <div class="pane-body">
+              <div class="mini" style="min-height:230px">
+                <div class="mini-bar"></div>
+                <div class="mini-row">
+                  <div class="mini-side" style="min-height:150px">사이드</div>
+                  <div class="mini-main">
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                    <div class="mini-item"><div class="mini-line mini-line--mid"></div><div class="mini-line"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pane" style="border-left:2px solid var(--c-0)">
+            <div class="pane-head">설정 <span style="flex:1"></span><span class="btn btn--sm">닫기</span></div>
+            <div class="pane-body">
+
+              <div class="field">
+                <span class="field-label">모델</span>
+                <div class="card" style="padding:8px">
+                  <div style="font-weight:600; font-size:12px">Claude Opus 5</div>
+                  <div style="font-size:11px; color:var(--c-2)">대화 한 번 <span class="token">{비용}</span></div>
+                </div>
+                <span class="btn btn--sm" style="margin-top:6px">바꾸기</span>
+              </div>
+
+              <div class="field">
+                <span class="field-label">이번 작업</span>
+                <ul class="list">
+                  <li>시작점 <span class="token">{프리셋}</span></li>
+                  <li>대화 <span class="token">{횟수}</span> 회</li>
+                  <li>토큰 <span class="token">{토큰}</span></li>
+                  <li>비용 <span class="token">{비용}</span></li>
+                </ul>
+              </div>
+
+              <div class="field">
+                <span class="field-label">키</span>
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap">
+                  <span class="status status--on">Anthropic</span>
+                  <span class="token">... 4f2a</span>
+                </div>
+                <span class="btn btn--sm" style="margin-top:6px">키 관리</span>
+              </div>
+
+              <hr class="rule" style="margin:16px 0">
+
+              <div class="field">
+                <span class="field-label">작업이 사라지는 것</span>
+                <div style="display:flex; flex-direction:column; gap:6px">
+                  <span class="btn btn--sm">대화 처음부터</span>
+                  <span class="btn btn--sm">시작점 다시 고르기</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 상태 2. 모델 바꾸기 ============ -->
+      <div class="frame frame--web">
+        <div class="frame-label">상태 2. 모델 바꾸기 - 패널 안에서 펼침</div>
+
+        <div class="work" style="grid-template-columns:1fr 300px">
+          <div class="pane" style="opacity:0.35">
+            <div class="pane-head">미리보기</div>
+            <div class="pane-body"><div class="mini" style="min-height:200px"></div></div>
+          </div>
+
+          <div class="pane" style="border-left:2px solid var(--c-0)">
+            <div class="pane-head">모델 <span style="flex:1"></span><span class="btn btn--sm">뒤로</span></div>
+            <div class="pane-body">
+              <div style="font-size:11px; color:var(--c-2); margin-bottom:6px">추천</div>
+              <div class="card card--selected" style="padding:8px">
+                <div style="font-weight:600; font-size:12px">Claude Opus 5</div>
+                <div style="font-size:11px; color:var(--c-2)">대화 <span class="token">{비용}</span> · 가장 정확</div>
+              </div>
+              <div class="card" style="padding:8px">
+                <div style="font-weight:600; font-size:12px">Claude Sonnet 5</div>
+                <div style="font-size:11px; color:var(--c-2)">대화 <span class="token">{비용}</span> · 더 싸고 빠름</div>
+              </div>
+
+              <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px">
+                <span class="btn btn--sm">받아온 목록에서</span>
+                <span class="btn btn--sm">직접 입력</span>
+              </div>
+
+              <div class="card" style="margin-top:12px; border-style:dashed; padding:8px">
+                <div style="font-size:11px; color:var(--c-2)">
+                  바꿔도 지금까지의 대화는 그대로입니다. 다음 지시부터 새 모델이 씁니다.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 상태 3. 되돌릴 수 없는 것 확인 ============ -->
+      <div class="frame frame--web">
+        <div class="frame-label">상태 3. 되돌릴 수 없는 것 - 무엇이 사라지는지 먼저 말한다</div>
+
+        <div class="work" style="grid-template-columns:1fr 300px">
+          <div class="pane" style="opacity:0.35">
+            <div class="pane-head">미리보기</div>
+            <div class="pane-body"><div class="mini" style="min-height:200px"></div></div>
+          </div>
+
+          <div class="pane" style="border-left:2px solid var(--c-0)">
+            <div class="pane-head">시작점 다시 고르기</div>
+            <div class="pane-body">
+              <div class="msg msg--sys">
+                <div class="msg-body">
+                  <div style="font-weight:600; color:var(--c-0); margin-bottom:6px">지금까지의 작업이 사라집니다</div>
+                  <ul class="list">
+                    <li>대화 <span class="token">{횟수}</span> 회</li>
+                    <li>지금 미리보기에 보이는 스킨</li>
+                  </ul>
+                  <div style="margin-top:8px; color:var(--c-2)">
+                    4안을 다시 만드는 데 <span class="token">{비용}</span> 정도가 듭니다.
+                  </div>
+                  <div style="margin-top:8px; color:var(--c-2)">
+                    지금 스킨을 남기려면 먼저 내려받으세요.
+                  </div>
+                  <div style="margin-top:12px; display:flex; flex-direction:column; gap:6px">
+                    <span class="btn btn--sm">먼저 내려받기</span>
+                    <span class="btn btn--sm btn--primary">그래도 다시 고르기</span>
+                    <span class="btn btn--sm btn--ghost">취소</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 상태 4. 키 교체 이동 ============ -->
+      <div class="frame frame--web">
+        <div class="frame-label">상태 4. 키 관리 - 좁은 패널에서 하지 않고 E1 으로 보낸다</div>
+
+        <div class="work" style="grid-template-columns:1fr 300px">
+          <div class="pane" style="opacity:0.35">
+            <div class="pane-head">미리보기</div>
+            <div class="pane-body"><div class="mini" style="min-height:200px"></div></div>
+          </div>
+
+          <div class="pane" style="border-left:2px solid var(--c-0)">
+            <div class="pane-head">키</div>
+            <div class="pane-body">
+              <div class="card">
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap">
+                  <span class="status status--on">Anthropic</span>
+                  <span class="token">... 4f2a</span>
+                </div>
+                <div style="margin-top:6px; font-size:11px; color:var(--c-2)">이 브라우저에 저장됨</div>
+              </div>
+
+              <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px">
+                <span class="btn btn--sm">다시 확인</span>
+                <span class="btn btn--sm">저장된 키 지우기</span>
+              </div>
+
+              <div class="card" style="margin-top:12px; border-style:dashed; padding:8px">
+                <div style="font-size:11px; color:var(--c-2)">
+                  키를 바꾸거나 제공자를 옮기려면 등록 화면으로 갑니다. 하던 작업은 그대로 남습니다.
+                </div>
+                <span class="btn btn--sm" style="margin-top:8px">키 등록 화면으로</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 상태 5. 모바일 ============ -->
+      <div class="frame frame--web" style="max-width:420px">
+        <div class="frame-label">상태 5. 모바일 375 - 패널이 화면 전체를 덮는다</div>
+
+        <div class="appbar" style="flex-wrap:wrap">
+          <span class="appbar-title">설정</span>
+          <span class="appbar-spacer"></span>
+          <span class="btn btn--sm">닫기</span>
+        </div>
+
+        <div class="pane" style="border:0">
+          <div class="pane-body">
+            <div class="field">
+              <span class="field-label">모델</span>
+              <div class="card" style="padding:8px">
+                <div style="font-weight:600; font-size:12px">Claude Opus 5</div>
+                <div style="font-size:11px; color:var(--c-2)">대화 한 번 <span class="token">{비용}</span></div>
+              </div>
+              <span class="btn btn--sm" style="margin-top:6px">바꾸기</span>
+            </div>
+            <div class="field">
+              <span class="field-label">이번 작업</span>
+              <ul class="list">
+                <li>대화 <span class="token">{횟수}</span> 회</li>
+                <li>비용 <span class="token">{비용}</span></li>
+              </ul>
+            </div>
+            <div class="field">
+              <span class="field-label">키</span>
+              <span class="btn btn--sm">키 관리</span>
+            </div>
+            <hr class="rule" style="margin:12px 0">
+            <div class="field">
+              <span class="field-label">작업이 사라지는 것</span>
+              <div style="display:flex; flex-direction:column; gap:6px">
+                <span class="btn btn--sm">대화 처음부터</span>
+                <span class="btn btn--sm">시작점 다시 고르기</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============ 사이드 노트 ============ -->
+    <aside class="notes">
+      <h3>의도</h3>
+      <p>설정은 대부분 작업 도중에 열게 된다. 그래서 화면을 떠나지 않고 오른쪽에 겹친다. 뒤에 미리보기가 흐리게 남아 무엇을 만들던 중이었는지 잊지 않는다.</p>
+
+      <p><strong>키 교체는 패널에서 하지 않는다.</strong> 입력과 확인이 필요한 일이라 좁은 폭에서 하면 불편하다. E1 으로 보내면 제공자 전환, 형식 힌트, 확인 절차를 이미 갖춘 화면을 그대로 쓴다. 화면을 더 만들지 않고 보편 A 의 약점을 없앤다. 대신 하던 작업은 남는다고 미리 적어 이동을 망설이지 않게 한다.</p>
+
+      <p>패널에는 자주 쓰는 것만 둔다. 모델, 사용량, 대화 초기화. 자주 안 쓰는 것은 한 단계 안으로 넣는다.</p>
+
+      <p>모델을 바꿀 때 비용을 같이 보여준다. E1 에서 모델 선택이 곧 비용 선택이라고 잡았으므로 여기서도 같아야 한다. 바꿔도 대화가 유지된다는 점을 밝힌다. 모르면 바꾸기를 주저한다.</p>
+
+      <p><strong>되돌릴 수 없는 것은 무엇이 사라지는지 먼저 말한다.</strong> 확인 문구만 띄우고 예 아니오를 묻지 않는다. 대화 몇 회와 지금 스킨이 사라진다는 것, 4안 재생성에 비용이 든다는 것을 적고, <strong>먼저 내려받기</strong>를 첫 번째 선택지로 준다. 되돌릴 수 없다면 되돌릴 필요가 없게 만드는 편이 낫다.</p>
+
+      <p>시작점 다시 고르기와 대화 처음부터를 모두 둔다. 앞은 P1 으로 돌아가 4안을 다시 받고 비용이 들며, 뒤는 같은 시작점에서 대화만 지우고 비용이 들지 않는다. 다른 일이므로 합치지 않는다.</p>
+
+      <h3>대안</h3>
+      <ul>
+        <li>보편 B 독립 화면 - 항목이 늘어도 감당되지만 모델만 바꾸려 해도 왕복이 생긴다. 위험한 것을 구역으로 나누는 발상은 패널 하단 구분선으로 가져왔다.</li>
+        <li>실험 A 쓰이는 자리에 흩기 - 찾아갈 필요가 없어 좋지만 전체를 점검할 자리가 없다. 사용량을 대화 아래에 상시 노출하는 것만 W1 에 남겼다.</li>
+        <li>실험 B 사용량을 앞세우기 - 어디에 얼마 썼는지 보이는 것은 유용하지만, 비용을 계속 들이대면 마음 놓고 시키기 어려워진다. 합계만 패널에 두고 항목별 내역은 뺐다.</li>
+      </ul>
+
+      <h3>미정</h3>
+      <ul>
+        <li>항목별 비용 내역을 볼 자리를 줄지. 실험 B 의 좋은 부분인데 지금은 뺐다.</li>
+        <li>비용을 금액으로 계산할지 토큰만 보일지. 추천 밖 모델은 단가를 모른다.</li>
+        <li>결정됨 - 맥락 범위는 사용자에게 노출하지 않는다. 현재 스킨 상태와 최근 대화 몇 턴만 보내는 것으로 고정한다. W1 참조.</li>
+      </ul>
+    </aside>
+  </div>
+
+</div>
+</body>
+</html>

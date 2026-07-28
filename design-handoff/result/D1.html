@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D1 내려받기 / 설치 안내</title>
+<link rel="stylesheet" href="./design.css">
+</head>
+<body>
+
+<div class="spec">
+
+  <div class="spec-head">
+    <div class="eyebrow">D1</div>
+    <h1>내려받기 / 설치 안내</h1>
+    <p>같은 골격. 왼쪽 대화가 다섯 단계를 짚고, 오른쪽 화면이 티스토리 관리자 도식으로 위치를 가리킨다.</p>
+    <nav class="spec-nav">
+      <a href="./E1.html">E1 키 등록</a>
+      <a href="./P1.html">P1 컨셉</a>
+      <a href="./P2.html">P2 세부</a>
+      <a href="./W1.html">W1 작업</a>
+      <a href="./D1.html" class="on">D1 내려받기</a>
+      <a href="./S1.html">S1 설정</a>
+      <a href="./palettes.html">팔레트</a>
+    </nav>
+    <div class="themebar"></div>
+  </div>
+
+  <!-- =================== 상태 1. 1단계 =================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 1</b> 1단계 - 스킨 편집 열기</figcaption>
+    <div class="spec-frame">
+      <div class="chatshell">
+
+        <div class="chatpane">
+          <div class="chat-head">
+            <span class="mark">T</span><span class="name">설치</span>
+            <span class="badge">1 / 5</span>
+            <span class="spacer"></span>
+            <button class="sm primary">ZIP 받기</button>
+            <button class="sm">작업으로</button>
+          </div>
+          <div class="steprail">
+            <span class="done"><span class="num">1</span> 키</span>
+            <span class="done"><span class="num">2</span> 컨셉</span>
+            <span class="done"><span class="num">3</span> 세부</span>
+            <span class="done"><span class="num">4</span> 작업</span>
+            <span class="on"><span class="num">5</span> 내려받기</span>
+          </div>
+
+          <div class="chat-body">
+            <div class="msg sys">
+              <div class="msg-body">설치는 두 곳으로 갈라집니다. 붙여넣기와 파일 올리기입니다.</div>
+            </div>
+
+            <div class="msg">
+              <div class="msg-role">1단계</div>
+              <div class="msg-body">
+                <h3 style="font-size:var(--t-lead); margin-bottom:4px">스킨 편집 열기</h3>
+                티스토리 관리자에서 스킨 편집 화면으로 갑니다.
+                <div style="margin-top:12px"><span class="path">꾸미기 → 스킨 편집 → html 편집</span></div>
+                <div class="msg-actions"><button class="sm primary">열었음</button></div>
+              </div>
+            </div>
+
+            <div class="msg sys">
+              <div class="msg-body">
+                <div class="eyebrow" style="margin-bottom:6px">남은 단계</div>
+                <ul class="list steps-list small">
+                  <li class="now"><span class="num">1</span> 스킨 편집 열기</li>
+                  <li><span class="num">2</span> HTML 붙여넣기</li>
+                  <li><span class="num">3</span> CSS 붙여넣기</li>
+                  <li><span class="num">4</span> 파일 올리기</li>
+                  <li><span class="num">5</span> 저장하고 확인</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-foot">
+            <div class="composer">
+              <input type="text" placeholder="막히면 무엇이 다른지 적어 주세요">
+              <span class="tiny dim">다음 단계를 잠그지 않습니다. 두 번째 설치부터는 건너뛰어도 됩니다</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="canvas">
+          <div class="canvas-head">
+            <span class="badge">티스토리 관리자</span>
+            <span class="spacer"></span>
+            <span>2026-07 기준 · 굵은 테두리가 지금 누를 곳</span>
+          </div>
+          <div class="canvas-body">
+            <div class="admin">
+              <div class="admin-top">관리자</div>
+              <div class="admin-row">
+                <div class="admin-nav">
+                  <span>콘텐츠</span>
+                  <span class="now">꾸미기</span>
+                  <span>플러그인</span>
+                  <span>관리</span>
+                </div>
+                <div class="admin-body">
+                  <div class="admin-canvas">꾸미기를 누르면<br>스킨 편집이 나옵니다</div>
+                </div>
+              </div>
+            </div>
+            <div class="card dashed" style="margin-top:16px">
+              <h3 style="font-size:var(--t-body)">ZIP 은 보관용입니다</h3>
+              <p class="small dim" style="margin-top:6px">
+                받아 둔 ZIP 을 티스토리에 그대로 올릴 수는 없습니다. 나중에 같은 스킨을 다시 설치할 때 이 절차를 반복하는 데 씁니다.
+                <span class="token">index.xml</span> 은 스킨을 새로 등록할 때만 필요합니다.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="spec-note">단계마다 오른쪽 도식이 갈아치워지고, 대화는 지금 할 일 하나와 남은 단계를 남긴다. 도식은 버튼 모양이나 색이 아니라 위치 관계와 탭 이름만 그린다 — 남의 화면이라 세부를 그릴수록 빨리 틀린다.</p>
+  </figure>
+
+  <!-- =================== 상태 2. 4단계 =================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 2</b> 4단계 - 파일 올리기. 가장 많이 빠뜨리는 단계</figcaption>
+    <div class="spec-frame">
+      <div class="chatshell">
+        <div class="chatpane">
+          <div class="chat-head"><span class="mark">T</span><span class="name">설치</span><span class="badge">4 / 5</span><span class="spacer"></span><button class="sm">작업으로</button></div>
+          <div class="chat-body">
+            <div class="msg">
+              <div class="msg-role">4단계</div>
+              <div class="msg-body">
+                <h3 style="font-size:var(--t-lead); margin-bottom:4px">파일 올리기</h3>
+                파일업로드 탭에서 <span class="strong">기존 파일을 지우고</span> 새로 올립니다. 덮어쓰기가 안 되는 경우가 있습니다.
+                <div class="msg-form">
+                  <div class="row">
+                    <span class="token">script.js</span>
+                    <span class="spacer"></span>
+                    <button class="sm">받기</button>
+                  </div>
+                </div>
+                <div class="note bad" style="margin-top:12px">
+                  <p>이 단계를 빠뜨리면 목록과 사이드바가 겹쳐 보이고 메뉴가 열리지 않습니다.</p>
+                </div>
+                <div class="msg-actions"><button class="sm primary">올렸음</button></div>
+              </div>
+            </div>
+            <div class="msg sys">
+              <div class="msg-body">
+                <ul class="list steps-list small">
+                  <li class="done"><span class="num">1</span> 스킨 편집 열기</li>
+                  <li class="done"><span class="num">2</span> HTML 붙여넣기</li>
+                  <li class="done"><span class="num">3</span> CSS 붙여넣기</li>
+                  <li class="now"><span class="num">4</span> 파일 올리기</li>
+                  <li><span class="num">5</span> 저장하고 확인</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="chat-foot">
+            <div class="composer"><input type="text" placeholder="막히면 무엇이 다른지 적어 주세요"></div>
+          </div>
+        </div>
+
+        <div class="canvas">
+          <div class="canvas-head"><span class="badge">티스토리 관리자</span><span class="spacer"></span><span>2026-07 기준</span></div>
+          <div class="canvas-body">
+            <div class="admin">
+              <div class="admin-top">스킨 편집</div>
+              <div class="admin-body">
+                <div class="admin-tabs">
+                  <span>HTML</span>
+                  <span>CSS</span>
+                  <span class="now">파일업로드</span>
+                </div>
+                <div class="admin-canvas" style="min-height:150px; place-items:stretch">
+                  <div class="admin-files">
+                    <div class="eyebrow" style="padding-bottom:4px">올라간 파일</div>
+                    <div>
+                      <span class="token">script.js</span>
+                      <span class="spacer"></span>
+                      <span class="badge">삭제</span>
+                    </div>
+                    <div class="admin-drop">파일 추가</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="tiny dim" style="margin-top:12px">같은 이름 파일을 먼저 삭제한 뒤 추가합니다</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- =================== 상태 3. 5단계 대조 =================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 3</b> 5단계 - 잘 됐을 때와 빠뜨렸을 때를 대조</figcaption>
+    <div class="spec-frame">
+      <div class="chatshell">
+        <div class="chatpane">
+          <div class="chat-head"><span class="mark">T</span><span class="name">설치</span><span class="badge">5 / 5</span><span class="spacer"></span><button class="sm primary">작업으로 돌아가기</button></div>
+          <div class="chat-body">
+            <div class="msg">
+              <div class="msg-role">5단계</div>
+              <div class="msg-body">
+                <h3 style="font-size:var(--t-lead); margin-bottom:4px">저장하고 확인</h3>
+                저장한 뒤 블로그를 새로고침하고 오른쪽 두 그림과 대조해 보세요.
+                <div class="tiny dim" style="margin-top:6px">세로로 흘러내리면 4단계 파일 올리기를 빠뜨린 것입니다.</div>
+                <div class="msg-actions">
+                  <button class="sm primary">잘 됐음</button>
+                  <button class="sm">4단계로 돌아가기</button>
+                </div>
+              </div>
+            </div>
+            <div class="msg sys">
+              <div class="msg-role">안내</div>
+              <div class="msg-body">
+                <h3 style="font-size:var(--t-body); margin-bottom:4px">화면이 그림과 다른가요</h3>
+                티스토리가 관리자 화면을 바꿨을 수 있습니다. 그림 대신 메뉴 경로로 찾아가세요.
+                <div style="margin-top:10px"><span class="path">꾸미기 → 스킨 편집 → html 편집</span></div>
+                <div class="tiny dim" style="margin-top:6px">그림은 2026-07 기준입니다. 달라진 점을 알려주시면 고칩니다.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="canvas">
+          <div class="canvas-head"><span class="badge">대조</span><span class="spacer"></span><span>왼쪽이 정상, 오른쪽이 빠뜨렸을 때</span></div>
+          <div class="canvas-body">
+            <div class="split">
+              <div class="panel">
+                <div class="panel-head">잘 된 모습</div>
+                <div class="panel-body">
+                  <div class="shot lg">
+                    <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+                    <div class="shot-row">
+                      <div class="shot-side"><div class="avatar"></div><l class="xs"></l><l class="s"></l></div>
+                      <div class="shot-col">
+                        <div class="item"><l class="t"></l><l></l><l class="s"></l></div>
+                        <div class="item"><l class="t2"></l><l></l></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="panel-head">파일 올리기를 빠뜨렸을 때</div>
+                <div class="panel-body">
+                  <div class="shot lg" style="justify-content:flex-start">
+                    <div class="shot-bar"><i class="w"></i></div>
+                    <div class="shot-col" style="gap:2px">
+                      <l class="t"></l>
+                      <l class="s"></l><l class="s"></l><l class="xs"></l>
+                      <l class="t2"></l>
+                      <l class="s"></l><l class="s"></l>
+                      <l class="t2"></l>
+                      <l class="s"></l><l class="xs"></l>
+                    </div>
+                  </div>
+                  <p class="tiny dim" style="margin-top:12px">사이드바 내용, 카테고리, 글 목록이 전부 세로로 흘러내립니다</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- =================== 상태 4. 모바일 =================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 4</b> 모바일 360 - 도식은 탭 건너</figcaption>
+    <div class="spec-frame narrow">
+      <div class="chatpane" style="border-right:0">
+        <div class="chat-head"><span class="mark">T</span><span class="name">설치</span><span class="badge">4 / 5</span><span class="spacer"></span><button class="sm">ZIP</button></div>
+        <div class="tabs" style="padding:0 16px">
+          <button class="tab on">할 일</button>
+          <button class="tab">관리자 도식</button>
+        </div>
+        <div class="chat-body">
+          <div class="msg">
+            <div class="msg-role">4단계</div>
+            <div class="msg-body">
+              <h3 style="font-size:var(--t-lead); margin-bottom:4px">파일 올리기</h3>
+              파일업로드 탭에서 기존 파일을 지우고 새로 올립니다.
+              <div class="msg-actions"><button class="sm">script.js 받기</button></div>
+            </div>
+          </div>
+          <div class="msg sys">
+            <div class="msg-body">티스토리 관리자는 데스크탑에서 하는 편이 쉽습니다</div>
+          </div>
+        </div>
+        <div class="chat-foot"><button class="primary block">올렸음</button></div>
+      </div>
+    </div>
+  </figure>
+
+</div>
+
+<script src="./theme.js"></script>
+</body>
+</html>

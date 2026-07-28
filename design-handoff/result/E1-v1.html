@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E1 진입 / 키 등록</title>
+<link rel="stylesheet" href="./design.css">
+</head>
+<body>
+
+<div class="spec">
+
+  <div class="spec-head">
+    <div class="eyebrow">E1</div>
+    <h1>진입 / 키 등록</h1>
+    <p>제공자를 고르고 키를 넣는 첫 화면. 키를 요구하기 전에 무엇을 받는지 도식으로 먼저 보여준다.</p>
+    <nav class="spec-nav">
+      <a href="./E1.html" class="on">E1 키 등록</a>
+      <a href="./P1.html">P1 컨셉</a>
+      <a href="./P2.html">P2 세부</a>
+      <a href="./W1.html">W1 작업</a>
+      <a href="./D1.html">D1 내려받기</a>
+      <a href="./S1.html">S1 설정</a>
+    </nav>
+  </div>
+
+  <!-- ===================================================================
+       상태 1. 기본 - 키 확인 전
+       DOM 은 current/e1-dom-snapshot.html 구조를 유지한다.
+       .spec-* 로 감싼 부분만 명세용 껍데기이므로 포팅 시 버린다.
+       =================================================================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 1</b> 기본 - 키 확인 전에는 모델을 고를 수 없다</figcaption>
+    <div class="spec-frame">
+
+      <div class="appbar">
+        <h1>티스토리 스킨 만들기</h1>
+        <div class="steps" id="steps">
+          <span class="on">키</span><span>컨셉</span><span>세부</span><span>작업</span><span>내려받기</span>
+        </div>
+        <span class="spacer"></span>
+        <span class="tiny dim">서버 없음 · 키는 이 브라우저를 벗어나지 않습니다</span>
+      </div>
+
+      <div id="root">
+        <div class="page">
+
+          <div class="head">
+            <h2 class="big">티스토리 스킨 만들기</h2>
+            <p>어떤 블로그인지 답하면 4안을 만들어 줍니다. 고른 뒤 대화로 고쳐서 내려받습니다.</p>
+          </div>
+
+          <!-- 결과물 도식. 실제 렌더가 아니라 도식이다. -->
+          <div class="grid-4" id="shots">
+            <div>
+              <div class="shot">
+                <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+                <div class="shot-row">
+                  <div class="shot-side">
+                    <div class="avatar"></div>
+                    <l class="xs"></l><l class="s"></l><l class="s"></l>
+                    <div class="chips"><s></s><s></s><s></s></div>
+                  </div>
+                  <div class="shot-col">
+                    <div class="item"><l class="t"></l><l></l><l class="s"></l></div>
+                    <div class="item"><l class="t2"></l><l></l></div>
+                    <div class="item"><l class="t"></l><l class="s"></l></div>
+                  </div>
+                </div>
+              </div>
+              <div class="shot-caption"><b>표준</b> 사이드바와 목록</div>
+            </div>
+            <div>
+              <div class="shot">
+                <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+                <div class="shot-col">
+                  <div class="item"><l class="t"></l><l></l><l class="s"></l></div>
+                  <div class="item"><l class="t2"></l><l></l><l class="s"></l></div>
+                  <div class="item"><l class="t"></l><l></l></div>
+                </div>
+              </div>
+              <div class="shot-caption"><b>읽기 중심</b> 사이드바 없음</div>
+            </div>
+            <div>
+              <div class="shot">
+                <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+                <div class="shot-row">
+                  <div class="cells">
+                    <u></u><u></u><u></u><u></u><u></u><u></u>
+                  </div>
+                </div>
+              </div>
+              <div class="shot-caption"><b>그리드</b> 이미지 앞세움</div>
+            </div>
+            <div>
+              <div class="shot dark">
+                <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+                <div class="shot-col">
+                  <div class="rowline"><i></i><l class="t"></l></div>
+                  <div class="rowline"><i></i><l class="t2"></l></div>
+                  <div class="rowline"><i></i><l class="t"></l></div>
+                  <div class="rowline"><i></i><l class="t2"></l></div>
+                  <div class="rowline"><i></i><l class="t"></l></div>
+                </div>
+              </div>
+              <div class="shot-caption"><b>작업 로그</b> 날짜와 제목만</div>
+            </div>
+          </div>
+          <p class="tiny dim" style="margin-top:12px">답에 맞춰 매번 다른 4안이 나옵니다</p>
+
+          <hr class="rule">
+
+          <div class="panel">
+            <div class="panel-head">키 등록</div>
+            <div class="panel-body">
+
+              <div class="field aligned">
+                <div class="field-label">제공자</div>
+                <div>
+                  <div class="opts" id="providers">
+                    <button type="button" class="opt on" data-provider="anthropic">Anthropic</button>
+                    <button type="button" class="opt" data-provider="openai">OpenAI</button>
+                    <button type="button" class="opt" data-provider="google">Google</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field aligned">
+                <div class="field-label">API 키</div>
+                <div>
+                  <div class="row" id="key-edit">
+                    <input type="password" class="mono" id="key" style="flex:1 1 220px; min-width:0" autocomplete="off" spellcheck="false" placeholder="sk-ant-api03-...">
+                    <button id="key-show" type="button">보기</button>
+                    <button id="check">확인</button>
+                  </div>
+                  <div class="field-note" id="key-hint">
+                    <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Anthropic Console 에서 발급</a>
+                    · 확인은 모델 목록을 받아오는 것이라 토큰이 들지 않습니다
+                  </div>
+                </div>
+              </div>
+
+              <div class="field aligned off" id="model-field">
+                <div class="field-label">모델</div>
+                <div>
+                  <div class="small dim" id="model-off">키를 확인하면 쓸 수 있는 모델이 나옵니다</div>
+                </div>
+              </div>
+
+              <div class="field aligned">
+                <div class="field-label">키 저장</div>
+                <div>
+                  <div class="row">
+                    <button class="sm switch" id="remember">off</button>
+                    <span class="small">이 브라우저에 키 저장</span>
+                  </div>
+                  <div class="field-note">꺼 두면 새로고침할 때 다시 넣어야 합니다. 공용 기기라면 꺼 두세요.</div>
+                </div>
+              </div>
+
+              <div class="card dashed" style="margin-top:24px">
+                <ul class="list marked">
+                  <li>이 페이지에는 서버가 없습니다. 키는 브라우저를 벗어나 고른 제공자로만 갑니다.</li>
+                  <li>만든 스킨은 파일로 내려받습니다. 어디에도 올라가지 않습니다.</li>
+                  <li>요금은 사용자 계정에서 결제됩니다.</li>
+                </ul>
+              </div>
+
+            </div>
+            <div class="panel-foot">
+              <span class="tiny dim" id="foot-note">키를 확인해야 시작할 수 있습니다</span>
+              <span class="spacer"></span>
+              <button class="primary" id="start" disabled>시작</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <p class="spec-note">위계는 셋으로 잡았다. 화면 제목 27px 800, 판 라벨 11px 대문자 트래킹, 필드 라벨과 각주 11px. 폼은 720px 이상에서 라벨/값 두 단으로 정렬되고 항목마다 1px 구분선이 들어가 나열이 아니라 표로 읽힌다.</p>
+  </figure>
+
+  <!-- ===================================================================
+       상태 2·3. 확인 중 / 확인됨
+       =================================================================== -->
+  <div class="spec-cols two">
+
+    <figure class="spec-state">
+      <figcaption><b>상태 2</b> 확인 중</figcaption>
+      <div class="spec-frame">
+        <div class="page flush">
+          <div class="panel">
+            <div class="panel-body">
+              <div class="field">
+                <div class="field-label">API 키</div>
+                <div class="row">
+                  <input type="password" class="mono" style="flex:1 1 160px; min-width:0" value="sk-ant-api03-xxxxxxxxxxxx4f2a" readonly>
+                  <span class="busy" id="check-busy">확인 중</span>
+                </div>
+                <div class="field-note">모델 목록을 받아오는 중입니다</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="spec-state">
+      <figcaption><b>상태 5</b> 키 오류 - 세 가지를 구분</figcaption>
+      <div class="spec-frame">
+        <div class="page flush">
+          <div class="panel">
+            <div class="panel-body">
+              <div class="field">
+                <div class="field-label">API 키</div>
+                <div class="row">
+                  <input type="password" class="mono bad" style="flex:1 1 160px; min-width:0" placeholder="sk-ant-">
+                  <button id="recheck-bad">다시 확인</button>
+                </div>
+              </div>
+              <div id="error">
+                <div class="note bad">
+                  <h3>키가 거부되었습니다</h3>
+                  <p>제공자가 이 키를 인정하지 않습니다. 오타가 없는지, 결제 수단이 등록되어 있는지 확인하세요.</p>
+                  <span class="tiny">Anthropic 과 OpenAI 는 401, Google 은 400 으로 답합니다</span>
+                </div>
+                <div class="note">
+                  <h3>제공자에 닿지 못했습니다</h3>
+                  <p>네트워크 문제로 보입니다. 키 문제가 아닐 수 있으니 잠시 후 다시 시도하세요.</p>
+                  <span class="tiny">확장 프로그램이 요청을 막는 경우도 있습니다</span>
+                </div>
+                <div class="note">
+                  <h3>키 형식이 다릅니다</h3>
+                  <p>Anthropic 키는 <span class="token">sk-ant-</span> 로 시작합니다. 다른 제공자의 키를 넣은 것은 아닌지 확인하세요.</p>
+                  <span class="tiny">호출 전에 걸러내므로 비용이 들지 않습니다</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+  </div>
+
+  <figure class="spec-state">
+    <figcaption><b>상태 3</b> 확인됨 - 추천은 하드코딩, 전체는 받아온 목록</figcaption>
+    <div class="spec-frame">
+      <div class="page flush">
+        <div class="panel featured">
+          <div class="panel-head">키 등록 <span class="spacer"></span><span class="badge">Anthropic</span></div>
+          <div class="panel-body">
+
+            <div class="field aligned">
+              <div class="field-label">API 키</div>
+              <div>
+                <div class="row">
+                  <input type="password" class="mono" style="flex:1 1 220px; min-width:0" value="sk-ant-api03-xxxxxxxxxxxx4f2a" readonly>
+                  <span class="badge ok" id="lock-badge">확인됨</span>
+                  <button class="sm" id="replace">교체</button>
+                </div>
+                <div class="field-note" id="lock-note">뒤 4자리만 표시합니다 · <span class="token">... 4f2a</span></div>
+              </div>
+            </div>
+
+            <div class="field aligned" id="model-field">
+              <div class="field-label">모델</div>
+              <div id="model-on">
+                <div class="eyebrow" style="margin-bottom:8px">추천</div>
+                <div id="rec">
+                  <div class="card selected pick">
+                    <div class="row">
+                      <span class="card-title">Claude Opus 5</span>
+                      <span class="badge on">선택됨</span>
+                      <span class="spacer"></span>
+                      <span class="tiny dim">4안 <span class="token">{비용}</span> · 대화 <span class="token">{비용}</span></span>
+                    </div>
+                    <div class="card-sub">결과가 가장 정확합니다</div>
+                  </div>
+                  <div class="card pick">
+                    <div class="row">
+                      <span class="card-title">Claude Sonnet 5</span>
+                      <span class="spacer"></span>
+                      <span class="tiny dim">4안 <span class="token">{비용}</span> · 대화 <span class="token">{비용}</span></span>
+                    </div>
+                    <div class="card-sub">더 싸고 빠릅니다</div>
+                  </div>
+                </div>
+                <div class="row" style="margin-top:16px">
+                  <button class="sm" id="pick-list">받아온 목록에서 고르기</button>
+                  <button class="sm" id="pick-custom">직접 입력</button>
+                </div>
+                <div class="field-note" id="model-note">추천 밖 모델은 단가를 몰라 비용을 표시하지 못합니다</div>
+              </div>
+            </div>
+
+          </div>
+          <div class="panel-foot">
+            <span class="tiny dim">다음 화면에서 컨셉 4안을 만듭니다</span>
+            <span class="spacer"></span>
+            <button class="primary" id="start">시작</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="spec-note">확인이 끝난 판은 머리를 어둡게 반전해 지금 중심이 어디인지 알린다. 선택된 카드는 잉크 외곽선 + 좌측 3px 강조 바. 강조색은 이 바와 링크에만 쓴다.</p>
+  </figure>
+
+  <div class="spec-cols two">
+
+    <figure class="spec-state">
+      <figcaption><b>상태 4</b> 제공자 전환 - 확인 상태가 풀린다</figcaption>
+      <div class="spec-frame">
+        <div class="page flush">
+          <div class="panel">
+            <div class="panel-body">
+              <div class="field">
+                <div class="field-label">제공자</div>
+                <div class="opts">
+                  <button type="button" class="opt">Anthropic</button>
+                  <button type="button" class="opt">OpenAI</button>
+                  <button type="button" class="opt on">Google</button>
+                </div>
+              </div>
+              <div class="field">
+                <div class="field-label">API 키</div>
+                <div class="row">
+                  <input type="password" class="mono" style="flex:1 1 160px; min-width:0" placeholder="AIza">
+                  <button>확인</button>
+                </div>
+                <div class="field-note"><a href="#">aistudio.google.com 에서 발급</a></div>
+              </div>
+              <div class="field off">
+                <div class="field-label">모델</div>
+                <div class="small dim">제공자를 바꿔 다시 확인해야 합니다</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="spec-state">
+      <figcaption><b>상태 6</b> 등록됨 - S1 에서 다시 들어왔을 때</figcaption>
+      <div class="spec-frame">
+        <div class="appbar">
+          <h1>키</h1>
+          <span class="spacer"></span>
+          <button class="sm">작업으로 돌아가기</button>
+        </div>
+        <div class="page flush">
+          <div class="card" id="key-locked">
+            <div class="row">
+              <span class="badge ok">Anthropic</span>
+              <span class="token">sk-ant- ... 4f2a</span>
+              <span class="spacer"></span>
+              <button class="sm">다시 확인</button>
+              <button class="sm">교체</button>
+              <button class="sm danger">지우기</button>
+            </div>
+            <div class="field-note">이 브라우저에 저장됨 · 모델 <span class="token">{모델}</span></div>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+  </div>
+
+  <figure class="spec-state">
+    <figcaption><b>상태 7</b> 모바일 360 - 도식은 둘씩, 폼은 한 단</figcaption>
+    <div class="spec-frame narrow">
+      <div class="appbar">
+        <h1>스킨 만들기</h1>
+        <span class="spacer"></span>
+        <div class="steps"><span class="on">키</span><span>컨셉</span><span>세부</span></div>
+      </div>
+      <div class="page flush">
+        <div class="head" style="margin-bottom:20px">
+          <h2>티스토리 스킨 만들기</h2>
+          <p style="font-size:13px">답하면 4안을 만들어 줍니다.</p>
+        </div>
+
+        <div class="grid-4">
+          <div class="shot">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-row">
+              <div class="shot-side"><div class="avatar"></div><l class="xs"></l><l class="s"></l></div>
+              <div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div>
+            </div>
+          </div>
+          <div class="shot">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-col"><div class="item"><l class="t"></l><l></l><l class="s"></l></div><div class="item"><l class="t2"></l><l></l></div></div>
+          </div>
+          <div class="shot">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-row"><div class="cells"><u></u><u></u><u></u><u></u><u></u><u></u></div></div>
+          </div>
+          <div class="shot dark">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-col"><div class="rowline"><i></i><l class="t"></l></div><div class="rowline"><i></i><l class="t2"></l></div><div class="rowline"><i></i><l class="t"></l></div></div>
+          </div>
+        </div>
+
+        <hr class="rule" style="margin:20px 0">
+
+        <div class="field">
+          <div class="field-label">제공자</div>
+          <div class="opts">
+            <button type="button" class="opt sm on">Anthropic</button>
+            <button type="button" class="opt sm">OpenAI</button>
+            <button type="button" class="opt sm">Google</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">API 키</div>
+          <input type="password" class="mono" placeholder="sk-ant-">
+          <button class="block" style="margin-top:8px">확인</button>
+        </div>
+        <div class="field off">
+          <div class="field-label">모델</div>
+          <div class="small dim">확인 후 선택</div>
+        </div>
+        <button class="primary block" disabled>시작</button>
+      </div>
+    </div>
+  </figure>
+
+</div>
+
+</body>
+</html>

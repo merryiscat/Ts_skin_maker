@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W1 작업 화면</title>
+<link rel="stylesheet" href="./design.css">
+</head>
+<body>
+
+<div class="spec">
+
+  <div class="spec-head">
+    <div class="eyebrow">W1</div>
+    <h1>작업 화면</h1>
+    <p>앞 세 화면이 향해 온 자리. 골격은 그대로이고 오른쪽 화면만 미리보기와 코드로 바뀐다. 대화 기록이 곧 작업 기록이다.</p>
+    <nav class="spec-nav">
+      <a href="./E1.html">E1 키 등록</a>
+      <a href="./P1.html">P1 컨셉</a>
+      <a href="./P2.html">P2 세부</a>
+      <a href="./W1.html" class="on">W1 작업</a>
+      <a href="./D1.html">D1 내려받기</a>
+      <a href="./S1.html">S1 설정</a>
+      <a href="./palettes.html">팔레트</a>
+    </nav>
+    <div class="themebar"></div>
+  </div>
+
+  <!-- =================== 상태 1. 기본 =================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 1</b> 기본 - 데스크탑 1280</figcaption>
+    <div class="spec-frame">
+      <div class="chatshell">
+
+        <div class="chatpane">
+          <div class="chat-head">
+            <span class="mark">T</span><span class="name">보편 A</span>
+            <span class="badge ok">검증 통과</span>
+            <span class="spacer"></span>
+            <button class="sm">설정</button>
+            <button class="sm primary">내려받기</button>
+          </div>
+          <div class="steprail">
+            <span class="done"><span class="num">1</span> 키</span>
+            <span class="done"><span class="num">2</span> 컨셉</span>
+            <span class="done"><span class="num">3</span> 세부</span>
+            <span class="on"><span class="num">4</span> 작업</span>
+            <span><span class="num">5</span> 내려받기</span>
+          </div>
+
+          <div class="chat-body scroll">
+            <div class="msg sys">
+              <div class="msg-body"><span class="token">보편 A</span> 로 시작합니다. 바꾸고 싶은 것을 말해 주세요.</div>
+            </div>
+            <div class="msg user">
+              <div class="msg-role">나</div>
+              <div class="msg-body">사이드바를 오른쪽으로 옮기고 글자를 조금 키워줘</div>
+            </div>
+            <div class="msg">
+              <div class="msg-role">응답</div>
+              <div class="msg-body">
+                사이드바를 오른쪽으로 옮기고 본문 글자를 15px 에서 16px 로 키웠습니다.
+                <ul class="list marked small">
+                  <li>사이드바 위치 오른쪽</li>
+                  <li>본문 글자 16px</li>
+                </ul>
+              </div>
+            </div>
+            <div class="msg user">
+              <div class="msg-role">나</div>
+              <div class="msg-body">목록에 썸네일도 넣어줘</div>
+            </div>
+            <div class="msg">
+              <div class="msg-role">응답</div>
+              <div class="msg-body">
+                글 목록에 썸네일을 넣었습니다. 썸네일이 없는 글은 제목만 나옵니다.
+                <div class="msg-actions"><button class="sm">이 지점으로 되돌리기</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-foot">
+            <div class="composer">
+              <input type="text" placeholder="바꿀 내용 입력">
+              <div class="row">
+                <button class="sm">되돌리기</button>
+                <span class="spacer"></span>
+                <span class="tiny dim">이번 대화 <span class="token">{토큰}</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="canvas">
+          <div class="canvas-head">
+            <span class="badge">미리보기</span>
+            <select><option>홈</option></select>
+            <span class="spacer"></span>
+            <button class="sm">모바일</button>
+            <button class="sm">확대</button>
+            <button class="sm">코드</button>
+          </div>
+          <div class="canvas-body">
+            <div class="shot lg" style="aspect-ratio:16/10">
+              <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+              <div class="shot-row">
+                <div class="shot-col">
+                  <div class="item">
+                    <div class="row" style="gap:8px; flex-wrap:nowrap; align-items:stretch">
+                      <div class="thumb" style="min-height:24px"></div>
+                      <div style="flex:1; min-width:0"><l class="t"></l><l></l><l class="s"></l></div>
+                    </div>
+                  </div>
+                  <div class="item">
+                    <div class="row" style="gap:8px; flex-wrap:nowrap; align-items:stretch">
+                      <div class="thumb" style="min-height:24px"></div>
+                      <div style="flex:1; min-width:0"><l class="t2"></l><l></l><l class="s"></l></div>
+                    </div>
+                  </div>
+                  <div class="item"><l class="t"></l><l></l></div>
+                </div>
+                <div class="shot-side">
+                  <div class="avatar"></div>
+                  <l class="xs"></l><l class="s"></l><l class="s"></l>
+                </div>
+              </div>
+            </div>
+            <p class="tiny dim" style="margin-top:12px">치환자는 예시 값으로 채워 그립니다</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="spec-note">E1·P1·P2 와 같은 자리, 같은 마크업이다. 달라지는 것은 오른쪽 화면의 내용뿐 — 도식에서 미리보기로. 사용자가 네 화면을 하나의 작업대로 인식한다.</p>
+  </figure>
+
+  <!-- =================== 상태 2·3 =================== -->
+  <div class="spec-cols two">
+
+    <figure class="spec-state">
+      <figcaption><b>상태 2</b> 생성 중 - 미리보기는 직전 결과 유지</figcaption>
+      <div class="spec-frame">
+        <div class="chatpane" style="border-right:0">
+          <div class="chat-head"><span class="mark">T</span><span class="name">보편 A</span><span class="badge dot">생성 중</span><span class="spacer"></span><button class="sm ghost" disabled>내려받기</button></div>
+          <div class="chat-body">
+            <div class="msg user"><div class="msg-role">나</div><div class="msg-body">목록에 썸네일도 넣어줘</div></div>
+            <div class="msg">
+              <div class="msg-role">응답</div>
+              <div class="msg-body">
+                글 목록에 썸네일을 넣
+                <div class="skeleton" style="height:9px; width:62%; margin-top:8px"></div>
+                <div class="skeleton" style="height:9px; width:34%; margin-top:5px"></div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-foot">
+            <div class="composer">
+              <input type="text" placeholder="생성 중" disabled>
+              <div class="row"><button class="sm">중단</button><span class="spacer"></span><span class="tiny dim">미리보기는 직전 결과 유지</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="spec-state">
+      <figcaption><b>상태 3</b> 검증 실패 - 자동 재시도 없음</figcaption>
+      <div class="spec-frame">
+        <div class="chatpane" style="border-right:0">
+          <div class="chat-head"><span class="mark">T</span><span class="name">보편 A</span><span class="badge bad">검증 실패</span><span class="spacer"></span><button class="sm ghost" disabled>내려받기</button></div>
+          <div class="chat-body">
+            <div class="msg user"><div class="msg-role">나</div><div class="msg-body">글마다 조회수도 보여줘</div></div>
+            <div class="msg sys">
+              <div class="msg-role">응답</div>
+              <div class="msg-body" style="border-style:solid; border-color:color-mix(in oklab, var(--danger) 30%, transparent); background:var(--danger-bg)">
+                <h3 style="font-size:var(--t-body); color:var(--danger); margin-bottom:4px">적용하지 않았습니다</h3>
+                티스토리는 스킨에 조회수를 제공하지 않습니다. 존재하지 않는 치환자 <span class="token">[##_article_rep_log_cnt_##]</span> 가 쓰였습니다.
+                <div class="tiny dim" style="margin-top:6px">조회수는 티스토리 관리자 통계에서만 확인할 수 있습니다.</div>
+                <div class="msg-actions">
+                  <button class="sm">다시 시키기</button>
+                  <button class="sm ghost">그냥 두기</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-foot">
+            <div class="composer">
+              <input type="text" placeholder="바꿀 내용 입력">
+              <span class="tiny dim">직전 결과가 그대로 유지됩니다</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+  </div>
+
+  <!-- =================== 상태 4. 코드 열람 =================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 4</b> 코드 열람 - 미리보기 자리를 대체. 읽기 전용</figcaption>
+    <div class="spec-frame">
+      <div class="chatshell">
+        <div class="chatpane">
+          <div class="chat-head"><span class="mark">T</span><span class="name">보편 A</span><span class="badge ok">검증 통과</span><span class="spacer"></span><button class="sm primary">내려받기</button></div>
+          <div class="chat-body">
+            <div class="msg user"><div class="msg-role">나</div><div class="msg-body">목록에 썸네일도 넣어줘</div></div>
+            <div class="msg"><div class="msg-role">응답</div><div class="msg-body">글 목록에 썸네일을 넣었습니다.</div></div>
+            <div class="msg sys"><div class="msg-body">코드는 읽기 전용입니다. 고칠 내용은 대화로 지시하세요.</div></div>
+          </div>
+          <div class="chat-foot">
+            <div class="composer"><input type="text" placeholder="바꿀 내용 입력"></div>
+          </div>
+        </div>
+        <div class="canvas">
+          <div class="canvas-head">
+            <span class="badge">코드</span>
+            <span class="spacer"></span>
+            <button class="sm">미리보기</button>
+          </div>
+          <div class="canvas-body">
+            <div class="tabs">
+              <button class="tab mono on">skin.html</button>
+              <button class="tab mono">style.css</button>
+              <button class="tab mono">script.js</button>
+              <button class="tab mono">index.xml</button>
+            </div>
+            <pre class="code" style="margin-top:12px">&lt;<span class="c-tag">s_index_article_rep</span>&gt;
+  &lt;<span class="c-tag">article</span> <span class="c-attr">class</span>=<span class="c-str">"card"</span>&gt;
+    &lt;<span class="c-tag">s_article_rep_thumbnail</span>&gt;
+      &lt;<span class="c-tag">img</span> <span class="c-attr">src</span>=<span class="c-str">"[##_article_rep_thumbnail_url_##]"</span>&gt;
+    &lt;/<span class="c-tag">s_article_rep_thumbnail</span>&gt;
+    &lt;<span class="c-tag">h2</span>&gt;[##_article_rep_title_##]&lt;/<span class="c-tag">h2</span>&gt;
+  &lt;/<span class="c-tag">article</span>&gt;
+&lt;/<span class="c-tag">s_index_article_rep</span>&gt;</pre>
+            <p class="tiny dim" style="margin-top:12px">읽기 전용. 고칠 내용은 대화로 지시</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- =================== 상태 5. 확대 =================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 5</b> 미리보기 확대 - 대화를 접고 판단에 집중</figcaption>
+    <div class="spec-frame">
+      <div class="canvas">
+        <div class="canvas-head">
+          <span class="mark" style="display:grid; place-items:center; width:22px; height:22px; border-radius:var(--radius); background:var(--dark); color:var(--cream); font-size:10px; font-weight:800">T</span>
+          <span class="strong">보편 A</span>
+          <span class="badge ok">검증 통과</span>
+          <span class="spacer"></span>
+          <select><option>홈</option></select>
+          <select><option>데스크탑</option></select>
+          <button class="sm">대화 열기</button>
+          <button class="sm primary">내려받기</button>
+        </div>
+        <div class="canvas-body" style="background:var(--surface)">
+          <div class="shot lg" style="aspect-ratio:16/9">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-row">
+              <div class="shot-col">
+                <div class="item">
+                  <div class="row" style="gap:8px; flex-wrap:nowrap; align-items:stretch">
+                    <div class="thumb" style="min-height:30px"></div>
+                    <div style="flex:1; min-width:0"><l class="t"></l><l></l><l class="s"></l></div>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="row" style="gap:8px; flex-wrap:nowrap; align-items:stretch">
+                    <div class="thumb" style="min-height:30px"></div>
+                    <div style="flex:1; min-width:0"><l class="t2"></l><l></l><l class="s"></l></div>
+                  </div>
+                </div>
+                <div class="item"><l class="t"></l><l></l><l class="s"></l></div>
+                <div class="item"><l class="t2"></l><l></l></div>
+              </div>
+              <div class="shot-side">
+                <div class="avatar"></div>
+                <l class="xs"></l><l class="s"></l><l class="s"></l><l class="xs"></l>
+                <div class="chips"><s></s><s></s><s></s></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- =================== 상태 6. 모바일 =================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 6</b> 모바일 360 - 대화와 미리보기를 탭으로</figcaption>
+    <div class="spec-frame narrow">
+      <div class="chatpane" style="border-right:0">
+        <div class="chat-head"><span class="mark">T</span><span class="name">보편 A</span><span class="badge ok">통과</span><span class="spacer"></span><button class="sm primary">받기</button></div>
+        <div class="tabs" style="padding:0 16px">
+          <button class="tab on">대화</button>
+          <button class="tab">미리보기</button>
+        </div>
+        <div class="chat-body">
+          <div class="msg user"><div class="msg-role">나</div><div class="msg-body">목록에 썸네일도 넣어줘</div></div>
+          <div class="msg"><div class="msg-role">응답</div><div class="msg-body">글 목록에 썸네일을 넣었습니다.</div></div>
+        </div>
+        <div class="chat-foot">
+          <div class="composer">
+            <input type="text" placeholder="바꿀 내용 입력">
+            <div class="row"><button class="sm">되돌리기</button><span class="spacer"></span><span class="tiny dim">이번 대화 <span class="token">{토큰}</span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+</div>
+
+<script src="./theme.js"></script>
+</body>
+</html>

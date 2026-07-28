@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>컨셉아트 팔레트 8</title>
+<link rel="stylesheet" href="./design.css">
+<style>
+/* 팔레트마다 변수만 덮어써서 같은 조각을 그린다. 바탕·잉크·선·라운드·그림자 전부 팔레트가 정한다. */
+.pal { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--bg); color: var(--text-2); }
+.pal-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.pal-head .n { font-family: var(--font-mono); font-size: 11px; color: var(--faint); }
+.pal-head h3 { font-size: 14px; white-space: nowrap; }
+.pal-head .kind { font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
+.pal-head .why { flex: 1 1 100%; font-size: 11px; color: var(--dim); }
+.strip { display: flex; height: 34px; }
+.strip > div { flex: 1; display: flex; align-items: flex-end; padding: 3px 4px; font-family: var(--font-mono); font-size: 8px; }
+.demo { padding: 16px; background: var(--surface); color: var(--text-2); }
+.demo .tiny, .demo .dim, .demo .msg.sys .msg-body { color: var(--dim); }
+.demo a, .demo a.tiny { color: var(--accent); border-bottom-color: color-mix(in oklab, var(--accent) 40%, transparent); }
+.demo .head2 { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--dark); color: var(--cream); border-radius: var(--r-lg) var(--r-lg) 0 0; font-size: 11px; font-weight: 700; }
+.demo .head2 .mk { display: grid; place-items: center; width: 20px; height: 20px; border-radius: var(--radius); background: var(--accent); color: var(--dark); font-size: 10px; font-weight: 800; }
+.demo .head2 .abar { width: 3px; height: 14px; background: var(--accent-bright); border-radius: 100px; }
+/* 주행동 버튼은 잉킬이 아니라 강조색을 업는다. 글자색은 톤 --on-accent 이 정한다. */
+.demo button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.demo .body2 { padding: 12px; background: var(--bg); border: 1px solid var(--border); border-top: 0; border-radius: 0 0 var(--r-lg) var(--r-lg); }
+/* 미리보기 도식 - 팔레트가 만들어 줄 스킨의 인상 */
+.demo .shot { aspect-ratio: 16/7; }
+.pal-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 820px) { .pal-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="spec">
+
+  <div class="spec-head">
+    <div class="eyebrow">색 · 컨셉아트만</div>
+    <h1>컨셉아트 팔레트 8</h1>
+    <p>일반적인 안은 후보에서 뺐다. 스킨을 만들어 주는 도구가 무채색 폼처럼 보일 이유가 없다. 여덜 개 다 서로 다른 세계관이고, 잉크·바탕·선·라운드까지 팔레트가 정한다. 같은 조각(머리 · 말풍선 · 선택된 카드 · 버튼 · 배지 · 도식)에 그렸다.</p>
+    <nav class="spec-nav">
+      <a href="./E1.html">E1</a>
+      <a href="./P1.html">P1</a>
+      <a href="./P2.html">P2</a>
+      <a href="./W1.html">W1</a>
+      <a href="./D1.html">D1</a>
+      <a href="./S1.html">S1</a>
+      <a href="./palettes.html" class="on">팔레트</a>
+    </nav>
+    <div class="themebar"></div>
+  </div>
+
+  <div class="pal-grid">
+
+    <!-- 01 네온 느와르 -->
+    <div class="pal" style="--bg:#111119; --surface:#08080d; --surface-2:#1b1b27; --surface-3:#282838; --border:#242433; --border-2:#3d3d55; --text:#f2effa; --text-2:#c9c4dd; --dim:#8b85a6; --faint:#5f5a78; --dark:#05050a; --cream:#f2effa; --accent:#ff2d95; --accent-bright:#22e8f0; --accent-bg:#2a0a1c; --on-accent:#08080d; --ok:#22e8f0; --ok-bg:#062227; --danger:#ff5d5d; --danger-bg:#2a0f13; --radius:2px; --r-lg:3px">
+      <div class="pal-head">
+        <span class="n">01</span><h3>네온 느와르</h3>
+        <span class="kind" style="background:#2a0a1c; color:#ff2d95">concept</span>
+        <span class="why">자정 판에 마젠타와 시안 두 색만. 라운드 거의 0. 밤에 쓰는 장비</span>
+      </div>
+      <div class="strip">
+        <div style="background:#08080d; color:#8b85a6">08080d</div>
+        <div style="background:#111119; color:#8b85a6">111119</div>
+        <div style="background:#242433; color:#c9c4dd">242433</div>
+        <div style="background:#ff2d95; color:#08080d">ff2d95</div>
+        <div style="background:#22e8f0; color:#08080d">22e8f0</div>
+      </div>
+      <div class="demo">
+        <div class="head2"><span class="mk">T</span><span>스킨 만들기</span><span class="spacer"></span><span class="abar"></span></div>
+        <div class="body2">
+          <div class="msg" style="margin-bottom:10px"><div class="msg-role">안내</div><div class="msg-body" style="font-size:12px">키를 확인했습니다. 쓸 모델을 고르세요.</div></div>
+          <div class="card selected tight">
+            <div class="row"><span class="card-title" style="font-size:13px">보편 A</span><span class="badge on">선택됨</span><span class="spacer"></span><a href="#" class="tiny">발급 안내</a></div>
+          </div>
+          <div class="row" style="margin-top:10px"><button class="sm primary">시작</button><button class="sm">확인</button><span class="from-concept">컨셉</span><span class="badge ok">통과</span></div>
+          <div class="shot" style="margin-top:12px">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-row">
+              <div class="shot-side"><l class="xs"></l><l class="s"></l></div>
+              <div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 한지와 인주 -->
+    <div class="pal" style="--bg:#f6efdf; --surface:#eae0c9; --surface-2:#ded2b6; --surface-3:#cfc09e; --border:#cdbd9b; --border-2:#a08e6c; --text:#191412; --text-2:#3b322b; --dim:#6f6255; --faint:#9b8d7c; --dark:#191412; --cream:#f6efdf; --accent:#c0362a; --accent-bright:#e07a53; --accent-bg:#f2ddd3; --on-accent:#f6efdf; --danger:#5c1a12; --danger-bg:#efdcd6; --ok:#2f5c3a; --ok-bg:#e2e9dc; --radius:0px; --r-lg:0px; --sh-1:none; --sh-2:none">
+      <div class="pal-head">
+        <span class="n">02</span><h3>한지와 인주</h3>
+        <span class="kind" style="background:#f2ddd3; color:#c0362a">concept</span>
+        <span class="why">닥종이 결 · 먹 잉크 · 도장 빨강. 직각만 쓴다. 강조색이 빨강이라 실패색을 더 어둡게 눌렀다</span>
+      </div>
+      <div class="strip">
+        <div style="background:#f6efdf; color:#6f6255">f6efdf</div>
+        <div style="background:#eae0c9; color:#6f6255">eae0c9</div>
+        <div style="background:#cdbd9b; color:#3b322b">cdbd9b</div>
+        <div style="background:#c0362a; color:#f6efdf">c0362a</div>
+        <div style="background:#191412; color:#f6efdf">191412</div>
+      </div>
+      <div class="demo">
+        <div class="head2"><span class="mk">T</span><span>스킨 만들기</span><span class="spacer"></span><span class="abar"></span></div>
+        <div class="body2">
+          <div class="msg" style="margin-bottom:10px"><div class="msg-role">안내</div><div class="msg-body" style="font-size:12px">키를 확인했습니다. 쓸 모델을 고르세요.</div></div>
+          <div class="card selected tight">
+            <div class="row"><span class="card-title" style="font-size:13px">보편 A</span><span class="badge on">선택됨</span><span class="spacer"></span><a href="#" class="tiny">발급 안내</a></div>
+          </div>
+          <div class="row" style="margin-top:10px"><button class="sm primary">시작</button><button class="sm">확인</button><span class="from-concept">컨셉</span><span class="badge ok">통과</span></div>
+          <div class="shot" style="margin-top:12px">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-row">
+              <div class="shot-side"><l class="xs"></l><l class="s"></l></div>
+              <div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 아씨드 콘크리트 -->
+    <div class="pal" style="--bg:#e4e4de; --surface:#d4d4cc; --surface-2:#c6c6bd; --surface-3:#b5b5aa; --border:#14140f; --border-2:#14140f; --text:#14140f; --text-2:#14140f; --dim:#4f4f46; --faint:#7a7a70; --dark:#14140f; --cream:#d9ff4f; --accent:#5b0bd6; --accent-bright:#d9ff4f; --accent-bg:#d9ff4f; --on-accent:#d9ff4f; --radius:0px; --r-lg:0px; --sh-1:4px 4px 0 #14140f; --sh-2:6px 6px 0 #14140f">
+      <div class="pal-head">
+        <span class="n">03</span><h3>아씨드 콘크리트</h3>
+        <span class="kind" style="background:#d9ff4f; color:#14140f">concept</span>
+        <span class="why">콘크리트 회색 · 검은 굵은 선 · 형광 라임과 바이올렛. 그림자는 오프셋 블록</span>
+      </div>
+      <div class="strip">
+        <div style="background:#e4e4de; color:#4f4f46">e4e4de</div>
+        <div style="background:#d4d4cc; color:#4f4f46">d4d4cc</div>
+        <div style="background:#14140f; color:#d9ff4f">14140f</div>
+        <div style="background:#d9ff4f; color:#14140f">d9ff4f</div>
+        <div style="background:#5b0bd6; color:#d9ff4f">5b0bd6</div>
+      </div>
+      <div class="demo">
+        <div class="head2"><span class="mk">T</span><span>스킨 만들기</span><span class="spacer"></span><span class="abar"></span></div>
+        <div class="body2">
+          <div class="msg" style="margin-bottom:10px"><div class="msg-role">안내</div><div class="msg-body" style="font-size:12px">키를 확인했습니다. 쓸 모델을 고르세요.</div></div>
+          <div class="card selected tight">
+            <div class="row"><span class="card-title" style="font-size:13px">보편 A</span><span class="badge on">선택됨</span><span class="spacer"></span><a href="#" class="tiny">발급 안내</a></div>
+          </div>
+          <div class="row" style="margin-top:10px"><button class="sm primary">시작</button><button class="sm">확인</button><span class="from-concept">컨셉</span><span class="badge ok">통과</span></div>
+          <div class="shot" style="margin-top:12px">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-row">
+              <div class="shot-side"><l class="xs"></l><l class="s"></l></div>
+              <div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 Y2K 버블검 -->
+    <div class="pal" style="--bg:#ffffff; --surface:#e8f0ff; --surface-2:#dbe7ff; --surface-3:#c8d9ff; --border:#d3e0fb; --border-2:#9db6ee; --text:#1d1b3a; --text-2:#3b3768; --dim:#6f6a9c; --faint:#a09bc4; --dark:#2a1d5e; --cream:#ffe9f4; --accent:#ff4d9d; --accent-bright:#8be0ff; --accent-bg:#ffe4f0; --on-accent:#ffffff; --radius:100px; --r-lg:18px">
+      <div class="pal-head">
+        <span class="n">04</span><h3>Y2K 버블검</h3>
+        <span class="kind" style="background:#ffe4f0; color:#ff4d9d">concept</span>
+        <span class="why">하늘빛 판 · 캔디 핑크 · 버튼은 전부 pill. 개인 블로그의 놀이터 쪽</span>
+      </div>
+      <div class="strip">
+        <div style="background:#ffffff; color:#6f6a9c">ffffff</div>
+        <div style="background:#e8f0ff; color:#6f6a9c">e8f0ff</div>
+        <div style="background:#c8d9ff; color:#3b3768">c8d9ff</div>
+        <div style="background:#ff4d9d; color:#fff">ff4d9d</div>
+        <div style="background:#2a1d5e; color:#ffe9f4">2a1d5e</div>
+      </div>
+      <div class="demo">
+        <div class="head2"><span class="mk">T</span><span>스킨 만들기</span><span class="spacer"></span><span class="abar"></span></div>
+        <div class="body2">
+          <div class="msg" style="margin-bottom:10px"><div class="msg-role">안내</div><div class="msg-body" style="font-size:12px">키를 확인했습니다. 쓸 모델을 고르세요.</div></div>
+          <div class="card selected tight">
+            <div class="row"><span class="card-title" style="font-size:13px">보편 A</span><span class="badge on">선택됨</span><span class="spacer"></span><a href="#" class="tiny">발급 안내</a></div>
+          </div>
+          <div class="row" style="margin-top:10px"><button class="sm primary">시작</button><button class="sm">확인</button><span class="from-concept">컨셉</span><span class="badge ok">통과</span></div>
+          <div class="shot" style="margin-top:12px">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-row">
+              <div class="shot-side"><l class="xs"></l><l class="s"></l></div>
+              <div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05 몰튼 메탈 -->
+    <div class="pal" style="--bg:#1b1b1e; --surface:#111113; --surface-2:#26262a; --surface-3:#33333a; --border:#2e2e34; --border-2:#4a4a53; --text:#f1f1f3; --text-2:#c8c8ce; --dim:#8d8d97; --faint:#61616b; --dark:#0b0b0d; --cream:#f1f1f3; --accent:#ff6a1f; --accent-bright:#ffb066; --accent-bg:#2d1509; --on-accent:#111113; --ok:#a8e05f; --ok-bg:#1c2410; --danger:#ff5252; --danger-bg:#2b1111; --radius:3px; --r-lg:5px">
+      <div class="pal-head">
+        <span class="n">05</span><h3>몰튼 메탈</h3>
+        <span class="kind" style="background:#2d1509; color:#ff6a1f">concept</span>
+        <span class="why">흑연 판에 용융 주황. 쇠를 녹여 붓는 공장. 진행 표시가 가장 잘 어울린다</span>
+      </div>
+      <div class="strip">
+        <div style="background:#111113; color:#8d8d97">111113</div>
+        <div style="background:#1b1b1e; color:#8d8d97">1b1b1e</div>
+        <div style="background:#2e2e34; color:#c8c8ce">2e2e34</div>
+        <div style="background:#ff6a1f; color:#111113">ff6a1f</div>
+        <div style="background:#ffb066; color:#111113">ffb066</div>
+      </div>
+      <div class="demo">
+        <div class="head2"><span class="mk">T</span><span>스킨 만들기</span><span class="spacer"></span><span class="abar"></span></div>
+        <div class="body2">
+          <div class="msg" style="margin-bottom:10px"><div class="msg-role">안내</div><div class="msg-body" style="font-size:12px">키를 확인했습니다. 쓸 모델을 고르세요.</div></div>
+          <div class="card selected tight">
+            <div class="row"><span class="card-title" style="font-size:13px">보편 A</span><span class="badge on">선택됨</span><span class="spacer"></span><a href="#" class="tiny">발급 안내</a></div>
+          </div>
+          <div class="row" style="margin-top:10px"><button class="sm primary">시작</button><button class="sm">확인</button><span class="from-concept">컨셉</span><span class="badge ok">통과</span></div>
+          <div class="shot" style="margin-top:12px">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-row">
+              <div class="shot-side"><l class="xs"></l><l class="s"></l></div>
+              <div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 06 솔라 사막 -->
+    <div class="pal" style="--bg:#f7eeda; --surface:#eadfc2; --surface-2:#ded0ac; --surface-3:#cbba91; --border:#d3c3a0; --border-2:#a08f6b; --text:#1f2f36; --text-2:#3b4f58; --dim:#6b7f88; --faint:#9aa8ad; --dark:#1f2f36; --cream:#f7eeda; --accent:#0e9594; --accent-bright:#63d3cf; --accent-bg:#dcefec; --on-accent:#f7eeda; --radius:12px; --r-lg:16px">
+      <div class="pal-head">
+        <span class="n">06</span><h3>솔라 사막</h3>
+        <span class="kind" style="background:#dcefec; color:#0e9594">concept</span>
+        <span class="why">모래 바탕 · 청회색 잉크 · 오아시스 청록. 따뜻함과 차가움을 한 화면에서 붙인다</span>
+      </div>
+      <div class="strip">
+        <div style="background:#f7eeda; color:#6b7f88">f7eeda</div>
+        <div style="background:#eadfc2; color:#6b7f88">eadfc2</div>
+        <div style="background:#d3c3a0; color:#3b4f58">d3c3a0</div>
+        <div style="background:#0e9594; color:#f7eeda">0e9594</div>
+        <div style="background:#1f2f36; color:#f7eeda">1f2f36</div>
+      </div>
+      <div class="demo">
+        <div class="head2"><span class="mk">T</span><span>스킨 만들기</span><span class="spacer"></span><span class="abar"></span></div>
+        <div class="body2">
+          <div class="msg" style="margin-bottom:10px"><div class="msg-role">안내</div><div class="msg-body" style="font-size:12px">키를 확인했습니다. 쓸 모델을 고르세요.</div></div>
+          <div class="card selected tight">
+            <div class="row"><span class="card-title" style="font-size:13px">보편 A</span><span class="badge on">선택됨</span><span class="spacer"></span><a href="#" class="tiny">발급 안내</a></div>
+          </div>
+          <div class="row" style="margin-top:10px"><button class="sm primary">시작</button><button class="sm">확인</button><span class="from-concept">컨셉</span><span class="badge ok">통과</span></div>
+          <div class="shot" style="margin-top:12px">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-row">
+              <div class="shot-side"><l class="xs"></l><l class="s"></l></div>
+              <div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 07 심해 발광 -->
+    <div class="pal" style="--bg:#0a1c22; --surface:#051216; --surface-2:#122a31; --surface-3:#1c3b44; --border:#153036; --border-2:#27525c; --text:#e6fbfa; --text-2:#bde4e2; --dim:#7ba8a8; --faint:#4f7a7d; --dark:#020b0e; --cream:#e6fbfa; --accent:#4dfff0; --accent-bright:#ff7a6b; --accent-bg:#082a29; --on-accent:#051216; --ok:#4dfff0; --ok-bg:#082a29; --danger:#ff7a6b; --danger-bg:#2a1512; --radius:100px; --r-lg:14px">
+      <div class="pal-head">
+        <span class="n">07</span><h3>심해 발광</h3>
+        <span class="kind" style="background:#082a29; color:#4dfff0">concept</span>
+        <span class="why">심해 청록 판 · 발광 시안과 산호. 어두운데 차갑지 않다. pill 버튼</span>
+      </div>
+      <div class="strip">
+        <div style="background:#051216; color:#7ba8a8">051216</div>
+        <div style="background:#0a1c22; color:#7ba8a8">0a1c22</div>
+        <div style="background:#153036; color:#bde4e2">153036</div>
+        <div style="background:#4dfff0; color:#051216">4dfff0</div>
+        <div style="background:#ff7a6b; color:#051216">ff7a6b</div>
+      </div>
+      <div class="demo">
+        <div class="head2"><span class="mk">T</span><span>스킨 만들기</span><span class="spacer"></span><span class="abar"></span></div>
+        <div class="body2">
+          <div class="msg" style="margin-bottom:10px"><div class="msg-role">안내</div><div class="msg-body" style="font-size:12px">키를 확인했습니다. 쓸 모델을 고르세요.</div></div>
+          <div class="card selected tight">
+            <div class="row"><span class="card-title" style="font-size:13px">보편 A</span><span class="badge on">선택됨</span><span class="spacer"></span><a href="#" class="tiny">발급 안내</a></div>
+          </div>
+          <div class="row" style="margin-top:10px"><button class="sm primary">시작</button><button class="sm">확인</button><span class="from-concept">컨셉</span><span class="badge ok">통과</span></div>
+          <div class="shot" style="margin-top:12px">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-row">
+              <div class="shot-side"><l class="xs"></l><l class="s"></l></div>
+              <div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 08 이끼와 유자 -->
+    <div class="pal" style="--bg:#fbfaf2; --surface:#e9eddb; --surface-2:#dde3c9; --surface-3:#c9d2b0; --border:#d5dcbf; --border-2:#a4b088; --text:#222a17; --text-2:#3f4a2d; --dim:#6d7a55; --faint:#9aa680; --dark:#2b3a1c; --cream:#fbfaf2; --accent:#c99700; --accent-bright:#f0cd54; --accent-bg:#f8f0d4; --on-accent:#222a17; --radius:4px; --r-lg:20px">
+      <div class="pal-head">
+        <span class="n">08</span><h3>이끼와 유자</h3>
+        <span class="kind" style="background:#f8f0d4; color:#8a6a00">concept</span>
+        <span class="why">이끼 잉크 · 연한 풀빛 판 · 유자 노랑. 카드만 크게 둥글고 버튼은 각지다</span>
+      </div>
+      <div class="strip">
+        <div style="background:#fbfaf2; color:#6d7a55">fbfaf2</div>
+        <div style="background:#e9eddb; color:#6d7a55">e9eddb</div>
+        <div style="background:#d5dcbf; color:#3f4a2d">d5dcbf</div>
+        <div style="background:#c99700; color:#222a17">c99700</div>
+        <div style="background:#2b3a1c; color:#fbfaf2">2b3a1c</div>
+      </div>
+      <div class="demo">
+        <div class="head2"><span class="mk">T</span><span>스킨 만들기</span><span class="spacer"></span><span class="abar"></span></div>
+        <div class="body2">
+          <div class="msg" style="margin-bottom:10px"><div class="msg-role">안내</div><div class="msg-body" style="font-size:12px">키를 확인했습니다. 쓸 모델을 고르세요.</div></div>
+          <div class="card selected tight">
+            <div class="row"><span class="card-title" style="font-size:13px">보편 A</span><span class="badge on">선택됨</span><span class="spacer"></span><a href="#" class="tiny">발급 안내</a></div>
+          </div>
+          <div class="row" style="margin-top:10px"><button class="sm primary">시작</button><button class="sm">확인</button><span class="from-concept">컨셉</span><span class="badge ok">통과</span></div>
+          <div class="shot" style="margin-top:12px">
+            <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+            <div class="shot-row">
+              <div class="shot-side"><l class="xs"></l><l class="s"></l></div>
+              <div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="panel" style="margin-top:36px">
+    <div class="panel-head">고를 때 볼 것</div>
+    <div class="panel-body">
+      <ul class="list marked small">
+        <li>색만 바꾼 것이 아니라 <span class="strong">라운드와 그림자까지</span> 팔레트가 정한다. 03 은 오프셋 블록 그림자, 04·07 은 pill 버튼, 02 는 직각만 쓴다.</li>
+        <li>주행동 버튼(시작)이 잉크가 아니라 <span class="strong">강조색</span>을 쓴다. 앞 묶음이 서로 비슷해 보인 원인이 여기였다.</li>
+        <li>강조색과 상태색이 겹치는 후보는 상태색을 따로 눌렀다. 02 는 실패색을 더 어두운 적갈로, 통과색을 짙은 녹으로 바꿨다. 05 는 주황이라 실패 빨강과 계열이 가까워 배지 대비를 한 단 더 벌려야 한다.</li>
+        <li>도식은 팔레트를 따라간다. 어두운 판(01·05·07)에서는 도식도 어두워지므로 실제 스킨 미리보기(흰 바탕)와 대비가 세진다. 미리보기 판만 밝게 고정할지 정해야 한다.</li>
+        <li>키를 맡기는 화면이라 <span class="strong">신뢰</span>가 걸린다. 03·04 는 인상이 가장 강하지만 장난스럽게 읽힐 위험이 있다. 01·05·06 은 강한데도 도구로 읽힌다.</li>
+        <li>고른 하나로 E1 전 상태를 그려 확인한 뒤 나머지 화면에 옮깁니다. 두 개를 골라 라이트/다크 한 쌍으로 쓸 수도 있습니다(예: 06 + 05).</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script src="./theme.js"></script>
+</body>
+</html>

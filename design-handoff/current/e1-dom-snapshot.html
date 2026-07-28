@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>?곗뒪?좊━ ?ㅽ궓 留뚮뱾湲?/title>
+<meta name="description" content="?대뼡 釉붾줈洹몄씤吏 ?듯븯硫?而⑥뀎 4?덉쓣 留뚮뱾??以띾땲?? 怨좊Ⅸ ????붾줈 怨좎퀜???대젮諛쏆뒿?덈떎.">
+<link rel="stylesheet" href="./shell.css">
+<style>
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    padding: 8px 14px;
+    background: var(--text);
+    color: var(--bg);
+    border-radius: var(--radius);
+    font-size: 13px;
+    z-index: 100;
+  }
+  .toast.bad { background: var(--danger); }
+  .boot { padding: 48px 16px; text-align: center; color: var(--dim); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <h1>?곗뒪?좊━ ?ㅽ궓 留뚮뱾湲?/h1>
+  <div class="steps" id="steps"><span class="on">??/span><span>而⑥뀎</span><span>?몃?</span><span>?묒뾽</span><span>?대젮諛쏄린</span></div>
+  <span class="spacer"></span>
+  <span class="tiny dim">?쒕쾭 ?놁쓬 쨌 ?ㅻ뒗 ??釉뚮씪?곗?瑜?踰쀬뼱?섏? ?딆뒿?덈떎</span>
+</div>
+
+<div id="root">
+    <div class="page">
+      <h2 style="font-size:18px;margin-bottom:6px">?곗뒪?좊━ ?ㅽ궓 留뚮뱾湲?/h2>
+      <p class="small dim" style="margin:0 0 16px">
+        ?대뼡 釉붾줈洹몄씤吏 ?듯븯硫?4?덉쓣 留뚮뱾??以띾땲?? 怨좊Ⅸ ????붾줈 怨좎퀜???대젮諛쏆뒿?덈떎.
+      </p>
+
+      <div id="shots" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px"><div style="width:108px;background:#ffffff;border:1px solid #e2e2df;border-radius:3px;padding:5px;overflow:hidden;box-sizing:border-box"><div style="display:flex;align-items:center;gap:3px;padding-bottom:4px;margin-bottom:5px;border-bottom:1px solid #e2e2df"><div style="height:4px;width:22%;background:#24211d;border-radius:1px"></div><div style="flex:1"></div><div style="height:4px;width:18%;background:#f7f7f5;border:1px solid #e2e2df;border-radius:1px"></div></div><div style="display:flex;gap:5px;align-items:flex-start"><div style="flex:0 0 26%;padding:4px;background:#f7f7f5;border-radius:2px"><div style="width:12px;height:12px;border-radius:50%;background:#f7f7f5;border:1px solid #e2e2df;margin:0 auto 4px"></div><div style="height:2px;width:60%;background:#6b665f;border-radius:1px;margin-bottom:3px"></div><div style="height:2px;width:85%;background:#6b665f;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:70%;background:#6b665f;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:80%;background:#6b665f;border-radius:1px;margin-bottom:6px"></div><div style="height:2px;width:50%;background:#6b665f;border-radius:1px;margin-bottom:3px"></div><div style="display:flex;flex-wrap:wrap;gap:2px"><div style="width:28%;height:4px;background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px"></div><div style="width:20%;height:4px;background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px"></div><div style="width:24%;height:4px;background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px"></div></div></div><div style="flex:1;min-width:0;display:flex;gap:4px"><div style="flex:1;min-width:0"><div style="padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #e2e2df"><div style="background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px;height:20px;margin-bottom:4px"></div><div style="height:2px;width:30%;background:#2f6f4f;border-radius:1px;margin-bottom:3px"></div><div style="height:3px;width:80%;background:#24211d;border-radius:1px;margin-bottom:3px"></div><div style="height:2px;width:100%;background:#6b665f;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:55%;background:#6b665f;border-radius:1px;margin-bottom:0px"></div></div><div style="padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #e2e2df"><div style="background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px;height:20px;margin-bottom:4px"></div><div style="height:2px;width:30%;background:#2f6f4f;border-radius:1px;margin-bottom:3px"></div><div style="height:3px;width:80%;background:#24211d;border-radius:1px;margin-bottom:3px"></div><div style="height:2px;width:100%;background:#6b665f;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:55%;background:#6b665f;border-radius:1px;margin-bottom:0px"></div></div><div style="padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #e2e2df"><div style="background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px;height:20px;margin-bottom:4px"></div><div style="height:2px;width:30%;background:#2f6f4f;border-radius:1px;margin-bottom:3px"></div><div style="height:3px;width:80%;background:#24211d;border-radius:1px;margin-bottom:3px"></div><div style="height:2px;width:100%;background:#6b665f;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:55%;background:#6b665f;border-radius:1px;margin-bottom:0px"></div></div></div></div></div></div><div style="width:108px;background:#ffffff;border:1px solid #e2e2df;border-radius:3px;padding:5px;overflow:hidden;box-sizing:border-box"><div style="display:flex;align-items:center;gap:3px;padding-bottom:4px;margin-bottom:5px;border-bottom:1px solid #e2e2df"><div style="height:4px;width:22%;background:#24211d;border-radius:1px"></div><div style="flex:1"></div><div style="height:4px;width:18%;background:#f7f7f5;border:1px solid #e2e2df;border-radius:1px"></div></div><div style="display:flex;gap:5px;align-items:flex-start"><div style="flex:1;min-width:0;display:flex;gap:4px"><div style="flex:1;min-width:0"><div style="margin-bottom:9px"><div style="height:4px;width:85%;background:#24211d;border-radius:1px;margin-bottom:3px"></div></div><div style="margin-bottom:9px"><div style="height:4px;width:85%;background:#24211d;border-radius:1px;margin-bottom:3px"></div></div><div style="margin-bottom:9px"><div style="height:4px;width:85%;background:#24211d;border-radius:1px;margin-bottom:3px"></div></div></div><div style="flex:0 0 12px;display:flex;flex-direction:column;gap:2px;padding-top:2px"><div style="height:2px;width:70%;background:#e2e2df"></div><div style="height:2px;width:100%;background:#e2e2df"></div><div style="height:2px;width:85%;background:#e2e2df"></div><div style="height:2px;width:60%;background:#e2e2df"></div></div></div></div></div><div style="width:108px;background:#ffffff;border:1px solid #e2e2df;border-radius:3px;padding:5px;overflow:hidden;box-sizing:border-box"><div style="display:flex;align-items:center;gap:3px;padding-bottom:4px;margin-bottom:5px;border-bottom:1px solid #e2e2df"><div style="height:4px;width:22%;background:#24211d;border-radius:1px"></div><div style="flex:1"></div><div style="height:4px;width:18%;background:#f7f7f5;border:1px solid #e2e2df;border-radius:1px"></div></div><div style="display:flex;gap:5px;align-items:flex-start"><div style="flex:1;min-width:0;display:flex;gap:4px"><div style="flex:1;min-width:0"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px"><div style="display:flex;flex-direction:column;gap:3px"><div style="background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px;aspect-ratio:16/10"></div><div style="height:3px;width:75%;background:#24211d;border-radius:1px;margin-bottom:0px"></div></div><div style="display:flex;flex-direction:column;gap:3px"><div style="background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px;aspect-ratio:16/10"></div><div style="height:3px;width:75%;background:#24211d;border-radius:1px;margin-bottom:0px"></div></div><div style="display:flex;flex-direction:column;gap:3px"><div style="background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px;aspect-ratio:16/10"></div><div style="height:3px;width:75%;background:#24211d;border-radius:1px;margin-bottom:0px"></div></div><div style="display:flex;flex-direction:column;gap:3px"><div style="background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px;aspect-ratio:16/10"></div><div style="height:3px;width:75%;background:#24211d;border-radius:1px;margin-bottom:0px"></div></div><div style="display:flex;flex-direction:column;gap:3px"><div style="background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px;aspect-ratio:16/10"></div><div style="height:3px;width:75%;background:#24211d;border-radius:1px;margin-bottom:0px"></div></div><div style="display:flex;flex-direction:column;gap:3px"><div style="background:#f7f7f5;border:1px solid #e2e2df;border-radius:2px;aspect-ratio:16/10"></div><div style="height:3px;width:75%;background:#24211d;border-radius:1px;margin-bottom:0px"></div></div></div></div></div></div></div><div style="width:108px;background:#1e1e1e;border:1px solid #3c3c3c;border-radius:3px;padding:5px;overflow:hidden;box-sizing:border-box"><div style="display:flex;align-items:center;gap:3px;padding-bottom:4px;margin-bottom:5px;border-bottom:1px solid #3c3c3c"><div style="height:4px;width:22%;background:#d4d4d4;border-radius:1px"></div><div style="flex:1"></div><div style="height:4px;width:18%;background:#252526;border:1px solid #3c3c3c;border-radius:1px"></div></div><div style="display:flex;gap:5px;align-items:flex-start"><div style="flex:1;min-width:0;display:flex;gap:4px"><div style="flex:1;min-width:0"><div style="display:flex;gap:4px;padding-bottom:4px;margin-bottom:4px;border-bottom:1px solid #3c3c3c"><div style="background:#252526;border:1px solid #3c3c3c;border-radius:2px;flex:0 0 18px;height:14px"></div><div style="flex:1;min-width:0"><div style="height:3px;width:80%;background:#d4d4d4;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:100%;background:#9d9d9d;border-radius:1px;margin-bottom:0px"></div></div></div><div style="display:flex;gap:4px;padding-bottom:4px;margin-bottom:4px;border-bottom:1px solid #3c3c3c"><div style="background:#252526;border:1px solid #3c3c3c;border-radius:2px;flex:0 0 18px;height:14px"></div><div style="flex:1;min-width:0"><div style="height:3px;width:80%;background:#d4d4d4;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:100%;background:#9d9d9d;border-radius:1px;margin-bottom:0px"></div></div></div><div style="display:flex;gap:4px;padding-bottom:4px;margin-bottom:4px;border-bottom:1px solid #3c3c3c"><div style="background:#252526;border:1px solid #3c3c3c;border-radius:2px;flex:0 0 18px;height:14px"></div><div style="flex:1;min-width:0"><div style="height:3px;width:80%;background:#d4d4d4;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:100%;background:#9d9d9d;border-radius:1px;margin-bottom:0px"></div></div></div><div style="display:flex;gap:4px;padding-bottom:4px;margin-bottom:4px;border-bottom:1px solid #3c3c3c"><div style="background:#252526;border:1px solid #3c3c3c;border-radius:2px;flex:0 0 18px;height:14px"></div><div style="flex:1;min-width:0"><div style="height:3px;width:80%;background:#d4d4d4;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:100%;background:#9d9d9d;border-radius:1px;margin-bottom:0px"></div></div></div><div style="display:flex;gap:4px;padding-bottom:4px;margin-bottom:4px;border-bottom:1px solid #3c3c3c"><div style="background:#252526;border:1px solid #3c3c3c;border-radius:2px;flex:0 0 18px;height:14px"></div><div style="flex:1;min-width:0"><div style="height:3px;width:80%;background:#d4d4d4;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:100%;background:#9d9d9d;border-radius:1px;margin-bottom:0px"></div></div></div></div></div><div style="flex:0 0 26%;padding:4px;background:#252526;border-radius:2px"><div style="width:12px;height:12px;border-radius:50%;background:#252526;border:1px solid #3c3c3c;margin:0 auto 4px"></div><div style="height:2px;width:60%;background:#9d9d9d;border-radius:1px;margin-bottom:3px"></div><div style="height:2px;width:85%;background:#9d9d9d;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:70%;background:#9d9d9d;border-radius:1px;margin-bottom:2px"></div><div style="height:2px;width:80%;background:#9d9d9d;border-radius:1px;margin-bottom:6px"></div><div style="height:2px;width:50%;background:#9d9d9d;border-radius:1px;margin-bottom:3px"></div><div style="display:flex;flex-wrap:wrap;gap:2px"><div style="width:28%;height:4px;background:#252526;border:1px solid #3c3c3c;border-radius:2px"></div><div style="width:20%;height:4px;background:#252526;border:1px solid #3c3c3c;border-radius:2px"></div><div style="width:24%;height:4px;background:#252526;border:1px solid #3c3c3c;border-radius:2px"></div></div></div></div></div></div>
+      <p class="tiny dim" style="margin:0 0 20px">?듭뿉 留욎떠 留ㅻ쾲 ?ㅻⅨ 4?덉씠 ?섏샃?덈떎</p>
+
+      <div class="panel">
+        <div class="panel-head">???깅줉</div>
+        <div class="panel-body">
+
+          <div class="field">
+            <div class="field-label">?쒓났??/div>
+            <div class="opts" id="providers"><button type="button" class="opt on" data-provider="anthropic">Anthropic</button><button type="button" class="opt" data-provider="openai">OpenAI</button><button type="button" class="opt" data-provider="google">Google</button></div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">API ??/div>
+
+            <div class="row" id="key-edit">
+              <input type="password" class="mono" id="key" style="flex: 1 1 200px; min-width: 0px;" autocomplete="off" spellcheck="false" placeholder="sk-ant-api03-...">
+              <button id="key-show" type="button">蹂닿린</button>
+              <button id="check">?뺤씤</button>
+              <span class="busy" id="check-busy" hidden="">?뺤씤 以?/span>
+            </div>
+
+            <div class="card" id="key-locked" hidden="">
+              <div class="row">
+                <span class="badge on" id="lock-badge"></span>
+                <span class="mono small" id="lock-key"></span>
+                <span class="spacer"></span>
+                <button class="sm" id="recheck">?ㅼ떆 ?뺤씤</button>
+                <button class="sm" id="replace">援먯껜</button>
+                <button class="sm danger" id="forget">吏?곌린</button>
+              </div>
+              <div class="field-note" id="lock-note"></div>
+            </div>
+
+            <div class="field-note" id="key-hint"><a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Anthropic Console ?먯꽌 諛쒓툒</a> 쨌 ?뺤씤? 紐⑤뜽 紐⑸줉??諛쏆븘?ㅻ뒗 寃껋씠???좏겙???ㅼ? ?딆뒿?덈떎</div>
+          </div>
+
+          <div id="error" hidden="" style="margin-bottom:16px"></div>
+
+          <div class="field" id="model-field" style="opacity: 0.45;">
+            <div class="field-label">紐⑤뜽</div>
+
+            <div class="small dim" id="model-off">?ㅻ? ?뺤씤?섎㈃ ?????덈뒗 紐⑤뜽???섏샃?덈떎</div>
+
+            <div id="model-on" hidden="">
+              <div class="tiny dim" style="margin-bottom:6px">異붿쿇</div>
+              <div id="rec"></div>
+              <div class="row" style="margin-top:12px">
+                <button class="sm" id="pick-list">諛쏆븘??紐⑸줉?먯꽌 怨좊Ⅴ湲?/button>
+                <button class="sm" id="pick-custom">吏곸젒 ?낅젰</button>
+              </div>
+              <div class="row" style="margin-top:8px">
+                <select id="all" style="max-width:100%"></select>
+                <input type="text" class="mono" id="custom" hidden="" style="flex: 1 1 200px; min-width: 0px;" placeholder="紐⑤뜽 ID">
+              </div>
+              <div class="field-note" id="model-note"></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="row">
+              <button class="sm" id="remember">off</button>
+              <span class="small">??釉뚮씪?곗????????/span>
+            </div>
+            <div class="field-note">爰??먮㈃ ?덈줈怨좎묠?????ㅼ떆 ?ｌ뼱???⑸땲?? 怨듭슜 湲곌린?쇰㈃ 爰??먯꽭??</div>
+          </div>
+
+          <div class="card dashed">
+            <ul class="list">
+              <li>???섏씠吏?먮뒗 ?쒕쾭媛 ?놁뒿?덈떎. ?ㅻ뒗 釉뚮씪?곗?瑜?踰쀬뼱??怨좊Ⅸ ?쒓났?먮줈留?媛묐땲??</li>
+              <li>留뚮뱺 ?ㅽ궓? ?뚯씪濡??대젮諛쏆뒿?덈떎. ?대뵒?먮룄 ?щ씪媛吏 ?딆뒿?덈떎.</li>
+              <li>?붽툑? ?ъ슜??怨꾩젙?먯꽌 寃곗젣?⑸땲??</li>
+            </ul>
+          </div>
+
+        </div>
+        <div class="panel-foot row">
+          <span class="tiny dim" id="foot-note">?ㅻ? ?뺤씤?댁빞 ?쒖옉?????덉뒿?덈떎</span>
+          <span class="spacer"></span>
+          <button class="primary" id="start" disabled="">?쒖옉</button>
+        </div>
+      </div>
+    </div></div>
+
+<script type="module">
+import { start } from './app/app.js';
+start(document.getElementById('root'), document.getElementById('steps'));
+</script>
+
+
+</body></html>

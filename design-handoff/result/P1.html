@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1 컨셉 고르기</title>
+<link rel="stylesheet" href="./design.css">
+</head>
+<body>
+
+<div class="spec">
+
+  <div class="spec-head">
+    <div class="eyebrow">P1</div>
+    <h1>컨셉 고르기</h1>
+    <p>E1 과 같은 골격. 질문과 선택은 왼쪽 대화에서, 4안은 오른쪽 화면에서 본다. 갈리는 것은 레이아웃이 아니라 컨셉이다.</p>
+    <nav class="spec-nav">
+      <a href="./E1.html">E1 키 등록</a>
+      <a href="./P1.html" class="on">P1 컨셉</a>
+      <a href="./P2.html">P2 세부</a>
+      <a href="./W1.html">W1 작업</a>
+      <a href="./D1.html">D1 내려받기</a>
+      <a href="./S1.html">S1 설정</a>
+      <a href="./index.html">목록</a>
+    </nav>
+    <div class="themebar"></div>
+  </div>
+
+  <!-- ===================================================================
+       상태 1. 질문
+       구조: E1 과 같은 .chatshell. 질문 폼은 응답 말풍선 안 .msg-form.
+       오른쪽 화면은 아직 만들 것이 없으므로 무엇이 나오는지만 유지한다.
+       =================================================================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 1</b> 질문 - 아는 것 둘만 묻는다</figcaption>
+    <div class="spec-frame">
+      <div class="chatshell">
+
+        <div class="chatpane">
+          <div class="chat-head">
+            <span class="mark">T</span>
+            <span class="name">스킨 만들기</span>
+            <span class="spacer"></span>
+            <span class="badge">Claude Opus 5</span>
+            <button class="sm">설정</button>
+          </div>
+          <div class="steprail">
+            <span class="done"><span class="num">1</span> 키</span>
+            <span class="on"><span class="num">2</span> 컨셉</span>
+            <span><span class="num">3</span> 세부</span>
+            <span><span class="num">4</span> 작업</span>
+            <span><span class="num">5</span> 내려받기</span>
+          </div>
+
+          <div class="chat-body">
+            <div class="msg sys">
+              <div class="msg-body">키를 확인했습니다. 모델 <span class="token">Claude Opus 5</span></div>
+            </div>
+
+            <div class="msg">
+              <div class="msg-role">안내</div>
+              <div class="msg-body">
+                두 가지만 답해 주세요. 그 답으로 컨셉 4안을 만듭니다.
+
+                <div class="msg-form">
+                  <div class="field">
+                    <div class="field-label">어떤 글을 쓰시나요</div>
+                    <div class="opts">
+                      <button type="button" class="opt sm on">개발</button>
+                      <button type="button" class="opt sm">에세이</button>
+                      <button type="button" class="opt sm">사진</button>
+                      <button type="button" class="opt sm">리뷰</button>
+                      <button type="button" class="opt sm">일상</button>
+                      <button type="button" class="opt sm ghost">직접 입력</button>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <div class="field-label">어떤 느낌이면 좋겠어요</div>
+                    <input type="text" placeholder="예: 담백하고 글에 집중되는">
+                    <div class="opts" style="margin-top:8px">
+                      <button type="button" class="opt sm ghost">미니멀</button>
+                      <button type="button" class="opt sm ghost">터미널 느낌</button>
+                      <button type="button" class="opt sm ghost">잡지 같은</button>
+                      <button type="button" class="opt sm ghost">따뜻한</button>
+                      <button type="button" class="opt sm ghost">정보 밀도 높게</button>
+                      <button type="button" class="opt sm ghost">여백 많이</button>
+                    </div>
+                    <div class="field-note">비워 두면 용도만 보고 만듭니다</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-foot">
+            <div class="composer">
+              <input type="text" placeholder="말로 덧붙일 것이 있으면 여기에">
+              <div class="row">
+                <span class="tiny dim">4안을 만드는 데 <span class="token">{토큰}</span> 정도 듭니다</span>
+                <span class="spacer"></span>
+                <button class="primary">4안 만들기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="canvas">
+          <div class="canvas-head">
+            <span class="badge">4안</span>
+            <span class="spacer"></span>
+            <span>아직 만들지 않았습니다</span>
+          </div>
+          <div class="canvas-body center">
+            <div class="canvas-empty">
+              <div class="grid-4" style="grid-template-columns:1fr 1fr; opacity:0.45; margin-bottom:20px">
+                <div class="shot"><div class="shot-bar"><i class="w"></i><u></u><b></b></div><div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div></div>
+                <div class="shot"><div class="shot-bar"><i class="w"></i><u></u><b></b></div><div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div></div>
+                <div class="shot"><div class="shot-bar"><i class="w"></i><u></u><b></b></div><div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div></div>
+                <div class="shot"><div class="shot-bar"><i class="w"></i><u></u><b></b></div><div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div></div>
+              </div>
+              <p class="small">답을 넣고 4안 만들기를 누르면 넷이 한 번에 나옵니다. 넷이 서로 달라야 하므로 같이 만듭니다.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </figure>
+
+  <!-- =================== 상태 2. 생성 중 =================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 2</b> 생성 중 - 대화는 진행을 말하고 화면은 자리를 잡는다</figcaption>
+    <div class="spec-frame">
+      <div class="chatshell">
+        <div class="chatpane">
+          <div class="chat-head">
+            <span class="mark">T</span><span class="name">스킨 만들기</span>
+            <span class="spacer"></span>
+            <span class="badge dot">4안 만드는 중</span>
+            <button class="sm">중단</button>
+          </div>
+          <div class="chat-body">
+            <div class="msg user">
+              <div class="msg-role">나</div>
+              <div class="msg-body">개발 / 담백하고 글에 집중되는</div>
+            </div>
+            <div class="msg">
+              <div class="msg-role">안내</div>
+              <div class="msg-body">
+                <span class="busy">넷을 한 번에 쓰는 중입니다</span>
+                <ul class="list small" style="margin-top:8px">
+                  <li><span class="spacer">보편 A</span><span class="strong">완료</span></li>
+                  <li><span class="spacer">보편 B</span><span class="strong">완료</span></li>
+                  <li><span class="spacer">실험 A</span><span class="dim">쓰는 중</span></li>
+                  <li><span class="spacer">실험 B</span><span class="faint">대기</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="chat-foot">
+            <div class="composer"><input type="text" placeholder="생성 중" disabled></div>
+          </div>
+        </div>
+        <div class="canvas">
+          <div class="canvas-head"><span class="badge">4안</span><span class="spacer"></span><span>2 / 4</span></div>
+          <div class="canvas-body">
+            <div class="split">
+              <div class="card tight">
+                <div class="eyebrow">보편 A</div>
+                <div class="card-sub strong">방해되는 걸 전부 뺀다</div>
+                <div class="bar" style="margin-top:8px"><i style="width:100%"></i></div>
+              </div>
+              <div class="card tight">
+                <div class="eyebrow">보편 B</div>
+                <div class="card-sub strong">찾아 들어가게 한다</div>
+                <div class="bar" style="margin-top:8px"><i style="width:100%"></i></div>
+              </div>
+              <div class="card tight selected">
+                <div class="eyebrow">실험 A</div>
+                <div class="skeleton" style="height:11px; width:64%; margin-top:6px"></div>
+                <div class="bar" style="margin-top:8px"><i style="width:46%"></i></div>
+              </div>
+              <div class="card tight" style="opacity:0.5">
+                <div class="eyebrow">실험 B</div>
+                <div class="card-sub">대기</div>
+                <div class="bar" style="margin-top:8px"><i style="width:0"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- =================== 상태 3. 4안 제시 =================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 3</b> 4안 제시 - 화면에서 비교하고 대화에서 고른다</figcaption>
+    <div class="spec-frame">
+      <div class="chatshell">
+
+        <div class="chatpane">
+          <div class="chat-head">
+            <span class="mark">T</span><span class="name">스킨 만들기</span>
+            <span class="spacer"></span>
+            <span class="badge ok">4안 생성됨</span>
+          </div>
+          <div class="steprail">
+            <span class="done"><span class="num">1</span> 키</span>
+            <span class="on"><span class="num">2</span> 컨셉</span>
+            <span><span class="num">3</span> 세부</span>
+            <span><span class="num">4</span> 작업</span>
+            <span><span class="num">5</span> 내려받기</span>
+          </div>
+          <div class="chat-body">
+            <div class="msg user">
+              <div class="msg-role">나</div>
+              <div class="msg-body">개발 / 담백하고 글에 집중되는</div>
+            </div>
+            <div class="msg">
+              <div class="msg-role">안내</div>
+              <div class="msg-body">
+                넷을 만들었습니다. 오른쪽에서 읽고 하나를 고르세요.
+                <div class="msg-form">
+                  <div class="field">
+                    <div class="field-label">고른 안</div>
+                    <div class="opts">
+                      <button type="button" class="opt sm on">보편 A</button>
+                      <button type="button" class="opt sm">보편 B</button>
+                      <button type="button" class="opt sm">실험 A</button>
+                      <button type="button" class="opt sm">실험 B</button>
+                    </div>
+                    <div class="field-note">보편 A · 방해되는 걸 전부 뺀다</div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">섞고 싶은 것이 있으면 적어 주세요</div>
+                    <input type="text" placeholder="예: 보편 A로 하되 실험 A의 고정폭 글꼴을 쓰고 싶다">
+                    <div class="field-note">다음 화면의 세부 항목에 미리 반영됩니다</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="msg sys">
+              <div class="msg-body">
+                조건을 바꿔 다시 만들면 <span class="token">{토큰}</span> 정도가 더 듭니다.
+                <div class="msg-actions">
+                  <button class="sm">조건 바꾸기</button>
+                  <button class="sm">다시 만들기</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-foot">
+            <div class="composer">
+              <input type="text" placeholder="말로 덧붙일 것이 있으면 여기에">
+              <div class="row">
+                <span class="tiny dim">다음 화면에서 세부를 정합니다</span>
+                <span class="spacer"></span>
+                <button class="primary">세부 정하러 가기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="canvas">
+          <div class="canvas-head">
+            <span class="badge">4안</span>
+            <span class="badge plain">개발 / 담백하고 글에 집중되는</span>
+            <span class="spacer"></span>
+            <span>컨셉이 주인공, 도식은 보조</span>
+          </div>
+          <div class="canvas-body">
+            <div class="split">
+
+              <div class="card selected pick">
+                <div class="row" style="align-items:flex-start; flex-wrap:nowrap; gap:14px">
+                  <div style="flex:1; min-width:0">
+                    <div class="eyebrow">보편 A</div>
+                    <h3 style="font-size:var(--t-title); margin:6px 0 6px">방해되는 걸 전부 뺀다</h3>
+                    <p class="small dim">글을 읽는 것 말고는 아무것도 하지 않게 한다. 화면에 남는 것은 본문과 목차뿐.</p>
+                  </div>
+                  <div style="flex:0 0 92px">
+                    <div class="shot">
+                      <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+                      <div class="shot-row">
+                        <div class="shot-side"><div class="avatar"></div><l class="xs"></l><l class="s"></l></div>
+                        <div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="eyebrow" style="margin:14px 0 4px">무엇을 다르게 하나</div>
+                <ul class="list marked small">
+                  <li>사이드바를 프로필과 목차만 남기고 비움</li>
+                  <li>본문 폭을 한 줄 45자에 맞춤</li>
+                  <li>목록에서 썸네일과 태그를 뺌</li>
+                </ul>
+                <div class="row" style="margin-top:12px">
+                  <button class="sm on">선택됨</button>
+                  <button class="sm">크게 보기</button>
+                </div>
+              </div>
+
+              <div class="card pick">
+                <div class="row" style="align-items:flex-start; flex-wrap:nowrap; gap:14px">
+                  <div style="flex:1; min-width:0">
+                    <div class="eyebrow">보편 B</div>
+                    <h3 style="font-size:var(--t-title); margin:6px 0 6px">찾아 들어가게 한다</h3>
+                    <p class="small dim">쌓인 글이 많다는 전제. 방문자가 원하는 주제를 짚어 들어가는 동선을 앞에 둔다.</p>
+                  </div>
+                  <div style="flex:0 0 92px">
+                    <div class="shot">
+                      <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+                      <div class="shot-row">
+                        <div class="shot-side wide"><l class="xs"></l><l class="s"></l><l class="s"></l><div class="chips"><s></s><s></s><s></s></div></div>
+                        <div class="shot-col"><div class="item"><l class="t"></l></div><div class="item"><l class="t2"></l></div><div class="item"><l class="t"></l></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="eyebrow" style="margin:14px 0 4px">무엇을 다르게 하나</div>
+                <ul class="list marked small">
+                  <li>카테고리를 펼친 상태로 사이드바 맨 위에</li>
+                  <li>목록을 밀집형으로 바꿔 한 화면에 더 많이</li>
+                  <li>글마다 카테고리와 태그를 앞세움</li>
+                </ul>
+                <div class="row" style="margin-top:12px">
+                  <button class="sm">선택</button>
+                  <button class="sm">크게 보기</button>
+                </div>
+              </div>
+
+              <div class="card pick">
+                <div class="row" style="align-items:flex-start; flex-wrap:nowrap; gap:14px">
+                  <div style="flex:1; min-width:0">
+                    <div class="eyebrow">실험 A</div>
+                    <h3 style="font-size:var(--t-title); margin:6px 0 6px">블로그가 아니라 작업 로그처럼</h3>
+                    <p class="small dim">남에게 보여주는 매체가 아니라 자기 기록장으로 다룬다. 꾸미지 않는 것이 컨셉.</p>
+                  </div>
+                  <div style="flex:0 0 92px">
+                    <div class="shot dark">
+                      <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+                      <div class="shot-col">
+                        <div class="rowline"><i></i><l class="t"></l></div>
+                        <div class="rowline"><i></i><l class="t2"></l></div>
+                        <div class="rowline"><i></i><l class="t"></l></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="eyebrow" style="margin:14px 0 4px">무엇을 다르게 하나</div>
+                <ul class="list marked small">
+                  <li>전체를 고정폭 글꼴로</li>
+                  <li>목록을 날짜와 제목만 있는 한 줄짜리로</li>
+                  <li>프로필과 소개를 없앰</li>
+                </ul>
+                <div class="row" style="margin-top:12px">
+                  <button class="sm">선택</button>
+                  <button class="sm">크게 보기</button>
+                </div>
+              </div>
+
+              <div class="card pick">
+                <div class="row" style="align-items:flex-start; flex-wrap:nowrap; gap:14px">
+                  <div style="flex:1; min-width:0">
+                    <div class="eyebrow">실험 B</div>
+                    <h3 style="font-size:var(--t-title); margin:6px 0 6px">첫 화면이 곧 최신 글</h3>
+                    <p class="small dim">목록을 거치지 않는다. 들어오자마자 최신 글 전문이 펼쳐지고 방문자는 바로 읽기 시작한다.</p>
+                  </div>
+                  <div style="flex:0 0 92px">
+                    <div class="shot">
+                      <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+                      <div class="shot-col">
+                        <l class="t" style="width:74%"></l><l></l><l></l><l class="s"></l><l class="xs"></l>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="eyebrow" style="margin:14px 0 4px">무엇을 다르게 하나</div>
+                <ul class="list marked small">
+                  <li>홈에 최신 글 본문을 통째로 노출</li>
+                  <li>지난 글은 본문 아래 접힌 목록으로</li>
+                  <li>사이드바를 없애고 폭을 넓게</li>
+                </ul>
+                <div class="row" style="margin-top:12px">
+                  <button class="sm">선택</button>
+                  <button class="sm">크게 보기</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="spec-note">비교는 넓은 자리에서, 결정은 대화에서. 고른 안은 대화의 인라인 폼과 화면 카드 양쪽에서 같은 표시(잉크 외곽선 + 좌측 강조 바)를 갖는다.</p>
+  </figure>
+
+  <!-- =================== 상태 4. 크게 보기 =================== -->
+  <figure class="spec-state">
+    <figcaption><b>상태 4</b> 안 크게 보기 - 화면 자리를 한 안이 통째로 쓴다</figcaption>
+    <div class="spec-frame">
+      <div class="chatshell">
+        <div class="chatpane">
+          <div class="chat-head"><span class="mark">T</span><span class="name">스킨 만들기</span><span class="spacer"></span><span class="badge">2 / 5</span></div>
+          <div class="chat-body">
+            <div class="msg">
+              <div class="msg-role">안내</div>
+              <div class="msg-body">
+                <span class="strong">보편 A</span> 를 크게 보고 있습니다.
+                <div class="msg-actions">
+                  <button class="sm">이전 안</button>
+                  <button class="sm">다음 안</button>
+                  <button class="sm ghost">닫기</button>
+                </div>
+              </div>
+            </div>
+            <div class="msg sys">
+              <div class="msg-body">넷 다 장점만 보면 고를 근거가 없습니다. 포기하는 것을 같이 읽으세요.</div>
+            </div>
+          </div>
+          <div class="chat-foot">
+            <div class="composer">
+              <input type="text" placeholder="이 안으로 갈지 말로 답해도 됩니다">
+              <button class="primary block">이 안으로 하기</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="canvas">
+          <div class="canvas-head">
+            <span class="badge on">보편 A</span>
+            <span class="strong">방해되는 걸 전부 뺀다</span>
+            <span class="spacer"></span>
+            <span class="badge">도식</span>
+          </div>
+          <div class="canvas-body">
+            <div class="split">
+              <div class="panel featured">
+                <div class="panel-head">이 컨셉은</div>
+                <div class="panel-body">
+                  <p class="lead">방문자가 이 블로그에서 할 일은 글을 읽는 것 하나뿐이라고 본다. 그래서 읽기를 방해하는 요소를 순서대로 걷어낸다.</p>
+                  <div class="eyebrow" style="margin:20px 0 6px">구체적으로</div>
+                  <ul class="list marked small">
+                    <li>사이드바에 프로필과 목차만 남긴다. 태그 구름과 최근 글은 뺀다</li>
+                    <li>본문 폭을 한 줄 45자에 맞춘다. 눈이 줄을 놓치지 않는 길이</li>
+                    <li>목록에서 썸네일과 태그를 빼고 제목과 요약만 남긴다</li>
+                    <li>색은 본문과 배경 대비만 남기고 강조색을 링크에만 쓴다</li>
+                  </ul>
+                  <div class="note accent" style="margin-top:20px">
+                    <h3>이 컨셉이 포기하는 것</h3>
+                    <p>글이 많이 쌓였을 때 원하는 주제를 찾아 들어가기는 불편해진다. 그쪽이 중요하면 보편 B 를 보세요.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="panel-head">대략의 모습</div>
+                <div class="panel-body">
+                  <div class="shot lg">
+                    <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+                    <div class="shot-row">
+                      <div class="shot-side"><div class="avatar"></div><l class="xs"></l><l class="s"></l><l class="s"></l><l class="xs"></l></div>
+                      <div class="shot-col">
+                        <div class="item"><l class="t"></l><l></l><l class="s"></l></div>
+                        <div class="item"><l class="t2"></l><l></l><l class="s"></l></div>
+                        <div class="item"><l class="t"></l><l></l></div>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="tiny dim" style="margin-top:12px">실제 렌더가 아니라 도식입니다. 정확한 모습은 세부를 정한 뒤 작업 화면에서 봅니다.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <!-- =================== 상태 5·6 =================== -->
+  <div class="spec-cols two">
+
+    <figure class="spec-state">
+      <figcaption><b>상태 5</b> 일부 실패 - 실패한 안만 다시 만든다</figcaption>
+      <div class="spec-frame">
+        <div class="chatpane" style="border-right:0">
+          <div class="chat-body">
+            <div class="msg sys">
+              <div class="msg-role">안내</div>
+              <div class="msg-body" style="border-style:solid; border-color:rgba(163,53,42,.28); background:var(--danger-bg)">
+                <h3 style="font-size:var(--t-body); color:var(--danger); margin-bottom:4px">실험 B 가 검증을 통과하지 못했습니다</h3>
+                나온 3안 중에서 고르거나, 실험 B 만 다시 만들 수 있습니다. 다시 만들 때 나머지 셋과 겹치지 않도록 그 셋을 참고해서 만듭니다.
+                <div class="tiny dim" style="margin-top:6px">다시 만들면 <span class="token">{토큰}</span> 정도가 더 듭니다</div>
+                <div class="msg-actions">
+                  <button class="sm">실험 B 다시 만들기</button>
+                  <button class="sm ghost">3안에서 고르기</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="spec-state">
+      <figcaption><b>상태 6</b> 모바일 360 - 4안은 탭 건너 화면에서</figcaption>
+      <div class="spec-frame narrow">
+        <div class="chatpane" style="border-right:0">
+          <div class="chat-head"><span class="mark">T</span><span class="name">컨셉</span><span class="spacer"></span><span class="badge">2 / 5</span></div>
+          <div class="tabs" style="padding:0 16px">
+            <button class="tab">대화</button>
+            <button class="tab on">4안</button>
+          </div>
+          <div class="chat-body">
+            <div class="card selected">
+              <div class="eyebrow">보편 A</div>
+              <h3 style="font-size:var(--t-lead); margin:6px 0">방해되는 걸 전부 뺀다</h3>
+              <p class="small dim">글을 읽는 것 말고는 아무것도 하지 않게 한다.</p>
+              <ul class="list marked small" style="margin-top:10px">
+                <li>사이드바를 프로필과 목차만 남기고 비움</li>
+                <li>본문 폭을 한 줄 45자에 맞춤</li>
+              </ul>
+              <div class="shot" style="margin-top:10px; aspect-ratio:16/9">
+                <div class="shot-bar"><i class="w"></i><u></u><b></b></div>
+                <div class="shot-row">
+                  <div class="shot-side"><div class="avatar"></div><l class="xs"></l></div>
+                  <div class="shot-col"><div class="item"><l class="t"></l><l></l></div><div class="item"><l class="t2"></l></div></div>
+                </div>
+              </div>
+              <button class="sm on" style="margin-top:10px">선택됨</button>
+            </div>
+            <div class="card">
+              <div class="eyebrow">보편 B</div>
+              <h3 style="font-size:var(--t-lead); margin:6px 0">찾아 들어가게 한다</h3>
+              <p class="small dim">방문자가 원하는 주제를 짚어 들어가는 동선을 앞에 둔다.</p>
+            </div>
+            <p class="tiny faint" style="text-align:center; padding:10px 0">아래로 2안 더</p>
+          </div>
+          <div class="chat-foot">
+            <button class="primary block">세부 정하러 가기</button>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+  </div>
+
+</div>
+
+<script src="./theme.js"></script>
+</body>
+</html>

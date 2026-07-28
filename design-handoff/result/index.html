@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>티스토리 스킨 생성기 - 화면 디자인</title>
+<link rel="stylesheet" href="./design.css">
+</head>
+<body>
+
+<div class="spec">
+
+  <div class="spec-head">
+    <div class="eyebrow">시각 디자인</div>
+    <h1>티스토리 스킨 생성기</h1>
+    <p>여섯 화면이 하나의 골격을 쓴다 — 왼쪽 대화, 오른쪽 화면. 테마 세 가지를 버튼으로 갈아탄다. 정보 구조와 카피는 와이어를 따르고, 합친 곳은 파일 주석에 이유를 남겼다.</p>
+    <nav class="spec-nav">
+      <a href="./E1.html">E1 키 등록</a>
+      <a href="./P1.html">P1 컨셉</a>
+      <a href="./P2.html">P2 세부</a>
+      <a href="./W1.html">W1 작업</a>
+      <a href="./D1.html">D1 내려받기</a>
+      <a href="./S1.html">S1 설정</a>
+      <a href="./palettes.html">팔레트 8</a>
+    </nav>
+    <div class="themebar"></div>
+  </div>
+
+  <div class="panel" style="margin-bottom:12px">
+    <div class="panel-head">화면</div>
+    <div class="panel-body">
+      <ul class="list rows">
+        <li><a href="./E1.html" class="strong" style="flex:0 0 76px">E1</a><span class="spacer">진입 / 키 등록</span><span class="tiny dim">기본 · 확인 중 · 확인됨 · 키 오류 · 모바일</span></li>
+        <li><a href="./P1.html" class="strong" style="flex:0 0 76px">P1</a><span class="spacer">컨셉 고르기</span><span class="tiny dim">질문 · 생성 중 · 4안 · 크게 보기 · 일부 실패 · 모바일</span></li>
+        <li><a href="./P2.html" class="strong" style="flex:0 0 76px">P2</a><span class="spacer">세부 정하기</span><span class="tiny dim">항목과 도식 · 되돌아가기 · 모바일</span></li>
+        <li><a href="./W1.html" class="strong" style="flex:0 0 76px">W1</a><span class="spacer">작업 화면</span><span class="tiny dim">기본 · 생성 중 · 검증 실패 · 코드 · 확대 · 모바일</span></li>
+        <li><a href="./D1.html" class="strong" style="flex:0 0 76px">D1</a><span class="spacer">내려받기 / 설치 안내</span><span class="tiny dim">1단계 · 4단계 · 5단계 대조 · 모바일</span></li>
+        <li><a href="./S1.html" class="strong" style="flex:0 0 76px">S1</a><span class="spacer">설정</span><span class="tiny dim">기본 · 모델 · 되돌릴 수 없는 것 · 키 · 모바일</span></li>
+      </ul>
+    </div>
+    <div class="panel-foot">
+      <span class="tiny dim">이전 안: <a href="./E1-v2.html">E1 레일형</a> · <a href="./E1-v1.html">E1 폼형</a></span>
+    </div>
+  </div>
+
+  <div class="split">
+
+    <div class="panel">
+      <div class="panel-head">골격</div>
+      <div class="panel-body">
+        <ul class="list marked small">
+          <li><span class="strong">왼쪽 대화 400px + 오른쪽 화면.</span> 이 도구의 본체는 대화다. E1 부터 같은 자리·같은 마크업을 쓰고, 각 단계의 입력은 응답 말풍선 안 <span class="token">.msg-form</span> 으로 들어간다.</li>
+          <li>오른쪽 화면은 단계마다 내용만 갈린다 — E1 나오는 것 · P1 4안 · P2 도식 · W1 미리보기와 코드 · D1 관리자 도식 · S1 흐린 미리보기.</li>
+          <li>P2 는 와이어의 <span class="strong">목록·도식 두 상태를 하나로 합쳤다.</span> 폭이 모자라 나눴던 것이므로 전환 버튼을 없앴다.</li>
+          <li>S1 은 겹치는 자리를 오른쪽에서 <span class="strong">왼쪽 대화 자리로 옮겼다.</span> 결과를 보는 자리를 가리지 않는다.</li>
+          <li>단계 표시는 상단 앱바 대신 대화 머리 아래 얇은 줄(<span class="token">.steprail</span>)로 상시 노출한다.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">테마</div>
+      <div class="panel-body">
+        <ul class="list rows small">
+          <li><span class="spacer">아씨드 콘크리트</span><span class="tiny dim">직각 · 검은 굵은 선 · 형광 라임 + 바이올렛</span></li>
+          <li><span class="spacer">솔라 사막</span><span class="tiny dim">모래 판 · 청회 잉크 · 오아시스 청록 (기본)</span></li>
+          <li><span class="spacer">이끼와 유자</span><span class="tiny dim">이끼 잉크 · 풀빛 판 · 유자 노랑</span></li>
+        </ul>
+        <p class="tiny dim" style="margin-top:12px">
+          <span class="token">html[data-theme]</span> 하나로 갈린다. 색뿐 아니라 라운드·그림자까지 테마가 정한다.
+          전환은 <span class="token">theme.js</span> 30줄이고 상태는 localStorage 한 칸이다. 후보 8개는 <a href="./palettes.html">팔레트 페이지</a>에 남겼다.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="panel" style="margin-top:12px">
+    <div class="panel-head">포팅 메모</div>
+    <div class="panel-body">
+      <ul class="list marked small">
+        <li><span class="token">shell.css</span> 를 <span class="token">design.css</span> 로 갈아끼운다. <span class="token">--bg --surface --border --text --dim --accent --danger --radius</span> 변수명과 기존 클래스명(<span class="token">.field .field-label .opts .opt .card .list .panel-foot .msg .badge</span>)을 그대로 남겼다.</li>
+        <li>추가한 클래스: <span class="token">.chatshell .chatpane .chat-head .chat-body .chat-foot .steprail .canvas .canvas-head .canvas-body .msg-form .composer .shot .admin .path .drawer .tabs .tab pre.code .eyebrow .token .from-concept</span>.</li>
+        <li>도식은 이미지가 아니라 <span class="token">.shot</span> 마크업이다. 플래그에 따라 <span class="token">.shot-side</span> 위치와 <span class="token">.item</span> 구성만 바꿔 그린다.</li>
+        <li>주행동 버튼은 <span class="token">--accent</span> + <span class="token">--on-accent</span> 를 쓴다. 테마마다 글자색이 달라야 해서 짝으로 둔다.</li>
+        <li><span class="token">.spec</span> 과 <span class="token">.spec-*</span> 는 이 명세 문서용 껍데기다. 앱에는 넣지 않는다.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script src="./theme.js"></script>
+</body>
+</html>
