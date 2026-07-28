@@ -4,7 +4,7 @@
  * 실행: node webapp/test/harness.test.mjs   (저장소 루트에서)
  *
  * 두 방향으로 검사한다.
- *   긍정 - 이미 디버깅이 끝난 src/1.9.0 은 전부 통과해야 한다.
+ *   긍정 - 이미 디버깅이 끝난 src/1.10.0 은 전부 통과해야 한다.
  *          검사기가 과하면 여기서 걸린다.
  *   부정 - 일부러 망가뜨린 것은 반드시 잡혀야 한다.
  *          검사기가 무르면 여기서 걸린다.
@@ -25,7 +25,7 @@ import {
 } from '../harness/contract.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const ref = path.resolve(here, '../../src/1.9.0');
+const ref = path.resolve(here, '../../src/1.10.0');
 const read = (p) => fs.readFileSync(path.join(ref, p), 'utf8');
 
 const files = {
@@ -51,7 +51,7 @@ function audit(html) {
   };
 }
 
-console.log('--- 긍정: 검증된 1.9.0 은 통과해야 한다 ---');
+console.log('--- 긍정: 검증된 1.10.0 은 통과해야 한다 ---');
 
 const clean = checkPitfalls(files);
 ok(clean.length === 0, '함정 검사 0건', clean.map((f) => `${f.id}: ${f.message}`).join(' | '));
@@ -203,16 +203,13 @@ ok(
     '없는 s_not_index_article_rep 를 잡는다',
   );
 }
-// 손으로 만든 src/ 스킨은 아직 이 태그들을 쓰고 있다. 그것은 여기서 단언하지 않고
-// 사실만 알린다. src/ 를 고치려면 버전 폴더를 새로 만들어야 해서 별개의 일이다.
-{
-  const g = auditGroupTags(files['skin.html']);
-  if (g.blacklisted.length) {
-    console.log(
-      `      참고: 기준 스킨이 아직 쓰는 없는 태그 - ${g.blacklisted.map((x) => x.tag).join(', ')}`,
-    );
-  }
-}
+// 기준 스킨 자신도 지어낸 태그를 쓰면 안 된다. 1.9.0 까지는 쓰고 있었고
+// 1.10.0 에서 뺐다. 누가 되살리면 여기서 걸린다.
+ok(
+  g.blacklisted.length === 0,
+  '기준 스킨에 존재하지 않는 그룹 태그 없음',
+  g.blacklisted.map((x) => x.tag).join(', '),
+);
 
 // 회귀 방지: 주석 안에서 치환자를 설명하는 것은 정상이다.
 // 1.8.0 은 각 블록 위 주석에 치환자를 적어 두는데, 마스킹하지 않으면 오탐이 9건 난다.
