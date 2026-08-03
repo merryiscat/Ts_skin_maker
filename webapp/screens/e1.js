@@ -32,7 +32,7 @@
  * 화면 모듈 규약은 app/app.js 위쪽 주석에 있다.
  */
 
-import { PROVIDERS, RECOMMENDED, validateKeyFormat, listModels, estimateCost } from '../providers.js';
+import { PROVIDERS, RECOMMENDED, chatModels, validateKeyFormat, listModels, estimateCost } from '../providers.js';
 import { detailsToPreset } from '../harness/spec.js';
 import { schematic } from '../ui/schematic.js';
 
@@ -179,6 +179,9 @@ export function mount(root, ctx) {
   panes.canvasBody.innerHTML = `
     <div id="howto"></div>
 
+    <div class="eyebrow" style="margin:32px 0 12px">모델과 비용</div>
+    <div id="price"></div>
+
     <div class="eyebrow" style="margin:32px 0 12px">흐름과 비용</div>
     <div class="flow">
       ${FLOW.map(
@@ -202,6 +205,72 @@ export function mount(root, ctx) {
       ).join('')}
     </div>
     <p class="tiny dim" style="margin-top:12px">답에 맞춰 매번 다른 4안이 나옵니다</p>`;
+
+  /**
+   * 모델 비용 표.
+   *
+   * 4안 한 번과 대화 한 번이 각각 얼마인지를 고르기 전에 보여 준다. 단가만 적으면
+   * "100만 토큰당 $5" 가 이 도구에서 얼마인지 알 수 없다.
+   *
+   * 단가를 모르는 제공자는 표 대신 그 사실을 적는다. 지어낸 값을 넣으면 사용자가
+   * 그 숫자를 보고 결제 규모를 판단하게 되는데, 틀리면 실제 청구서로 돌아온다.
+   */
+  function drawPrices(provider) {
+    const recs = RECOMMENDED[provider.id] || [];
+    const box = panes.canvasBody.querySelector('#price');
+
+    if (!recs.length) {
+      box.innerHTML = `
+        <div class="card dashed">
+          <span class="strong">${esc(provider.label)} 의 단가는 아직 정리해 두지 못했습니다.</span>
+          <p class="small" style="margin:4px 0 0">키를 확인하면 쓸 수 있는 모델 목록이 나옵니다. 다만 이 도구가 단가를 모르므로 비용은 표시하지 못합니다. 요금은 ${esc(provider.label)} 콘솔에서 확인하세요.</p>
+          <p class="tiny dim" style="margin:6px 0 0">모르는 값을 지어내 보여 주지 않는 것이 이 화면의 규칙입니다.</p>
+        </div>`;
+      return;
+    }
+
+    const row = (r) =>
+      `<tr>` +
+      `<td style="padding:6px 0"><span class="strong">${esc(r.label)}</span>` +
+      `<div class="tiny dim">${esc(r.note || '')}</div></td>` +
+      `<td class="mono tiny" style="text-align:right;white-space:nowrap">$${r.price.input} / $${r.price.output}</td>` +
+      `<td class="mono tiny" style="text-align:right;white-space:nowrap">${money(estimateCost(provider.id, r.id, EST.concepts))}</td>` +
+      `<td class="mono tiny" style="text-align:right;white-space:nowrap">${money(estimateCost(provider.id, r.id, EST.turn))}</td>` +
+      `</tr>`;
+
+    const section = (title, tier) => {
+      const list = recs.filter((r) => r.tier === tier);
+      if (!list.length) return '';
+      return (
+        `<tr><td colspan="4" class="eyebrow" style="padding:14px 0 2px">${title}</td></tr>` +
+        list.map(row).join('')
+      );
+    };
+
+    box.innerHTML = `
+      <div class="panel">
+        <div class="panel-body">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr class="tiny dim">
+                <th style="text-align:left;font-weight:400">모델</th>
+                <th style="text-align:right;font-weight:400">100만 토큰당 입력/출력</th>
+                <th style="text-align:right;font-weight:400">4안 1회</th>
+                <th style="text-align:right;font-weight:400">대화 1회</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${section('최고 성능', 'top')}
+              ${section('가성비', 'value')}
+            </tbody>
+          </table>
+          <p class="tiny dim" style="margin:12px 0 0">
+            오른쪽 두 칸은 이 도구에서 실제로 나가는 돈의 어림값입니다. 4안 1회는 컨셉을 만들 때
+            한 번, 대화 1회는 작업 화면에서 지시할 때마다 듭니다. 답변 길이에 따라 달라집니다.
+          </p>
+        </div>
+      </div>`;
+  }
 
   /** 키 받는 방법. 고른 제공자에 맞춰 갈아 끼운다. */
   function drawHowto(provider) {
@@ -265,14 +334,24 @@ export function mount(root, ctx) {
      */
     const lead = state.keyChecked
       ? '쓸 키는 정해졌습니다.'
-      : `이 도구에는 서버가 없습니다. 그래서 ${hi('본인의 API 키')}로 본인 계정에서 직접 모델을 부릅니다. ` +
-        `키는 이 브라우저를 벗어나 고른 제공자로만 가고, 저희는 볼 수 없습니다. ` +
-        `${hi('오른쪽에 키 받는 방법')}을 적어 뒀습니다.`;
+      /*
+       * "따로 저장되지 않습니다" 라고는 못 쓴다.
+       *
+       * 입력줄 아래에 "이 브라우저에 저장" 토글이 있고, 켜면 실제로
+       * localStorage 에 들어간다. 기본값이 off 라 대개는 맞는 말이지만,
+       * 사용자가 켜는 순간 화면의 약속과 동작이 갈린다. 키 취급에 대한
+       * 약속은 어긋난 채로 두면 안 된다. 그래서 정확히 참인 문장으로 적는다 -
+       * 어디로 가는가(고른 제공자뿐), 어디에 남는가(원하면 이 브라우저에만).
+       */
+      : `Tstory Skin Maker 는 ${hi('본인의 API 키')}를 활용하여 모델을 호출합니다. ` +
+        `키는 llm 호출에만 사용하고, 고른 제공자 외에 어디로도 전송되지 않습니다. ` +
+        `원하시면 이 브라우저에만 저장할 수 있습니다.` +
+        `<div style="margin-top:8px">아래 박스에 api 키를 작성하시고 검증 버튼을 눌러주세요. ` +
+        `첫 1회 인증 후 ${hi('좌측 상단 설정')}에서 api 키를 교체하실 수 있습니다.</div>`;
 
     parts.push(
       `<div class="msg"><div class="msg-role">안내</div><div class="msg-body">` +
-        `어떤 블로그인지 답하면 4안을 만들어 줍니다. 고른 뒤 대화로 고쳐서 내려받습니다.` +
-        `<div style="margin-top:8px">${lead}</div>` +
+        `<div>${lead}</div>` +
         (state.keyChecked
           ? ''
           : `<div class="tiny dim" style="margin-top:8px">어디 키를 쓰시겠어요?</div>`) +
@@ -315,7 +394,7 @@ export function mount(root, ctx) {
     return (
       `<div class="row" style="margin-top:10px">` +
       `<input type="password" class="mono" id="key" style="flex:1 1 150px;min-width:0" autocomplete="off" spellcheck="false" placeholder="${esc(provider.keyPlaceholder)}">` +
-      `<button class="sm" id="check"${checking ? ' disabled' : ''}>확인</button>` +
+      `<button class="sm" id="check"${checking ? ' disabled' : ''}>검증</button>` +
       (checking ? `<span class="busy">확인 중</span>` : '') +
       `</div>` +
       `<div class="field-note">` +
@@ -356,7 +435,8 @@ export function mount(root, ctx) {
   function okHtml(state, provider) {
     return (
       `<div class="msg"><div class="msg-role">안내</div><div class="msg-body">` +
-      `<span class="badge ok">확인됨</span> 키를 확인했습니다. 쓸 모델을 고르세요.` +
+      // 확인 상태는 대화 머리의 배지가 상시로 들고 있다. 여기서 또 말하지 않는다
+      `키를 확인했습니다. 쓸 모델을 고르세요.` +
       `<div class="tiny dim" style="margin-top:6px" id="lock-note"></div>` +
       `<div style="margin-top:10px" id="rec"></div>` +
       `<div class="row" style="margin-top:10px">` +
@@ -521,11 +601,14 @@ export function mount(root, ctx) {
     root.querySelector('#pick-list').classList.toggle('on', !custom);
     root.querySelector('#pick-custom').classList.toggle('on', custom);
 
-    const signature = state.models.map((m) => m.id).join(',');
+    // 음성·이미지·임베딩 모델을 빼고 채운다. 안 거르면 제공자에 따라 100개가 넘어
+    // 쓸 수 있는 모델을 찾지 못한다
+    const usable = chatModels(state.models);
+    const signature = usable.map((m) => m.id).join(',');
     if (sel.dataset.signature !== signature) {
       sel.dataset.signature = signature;
       sel.textContent = '';
-      for (const m of state.models) {
+      for (const m of usable) {
         const o = document.createElement('option');
         o.value = m.id;
         o.textContent = m.label === m.id ? m.id : `${m.label} (${m.id})`;
@@ -626,6 +709,7 @@ export function mount(root, ctx) {
     const provider = PROVIDERS[state.provider];
 
     drawHowto(provider);
+    drawPrices(provider);
     drawChat();
 
     // 입력줄은 키가 확인된 뒤에만 열린다. 그 전에는 답을 받아 봐야 쓸 데가 없다
@@ -682,7 +766,9 @@ function runCost(providerId, modelId) {
   return `4안 약 ${money(four)} · 대화 1회 약 ${money(turn)}`;
 }
 
+/** 단가를 모르는 모델은 값 대신 그렇게 적는다. NaN 을 화면에 내보내지 않는다. */
 function money(v) {
+  if (v == null || Number.isNaN(v)) return '모름';
   return '$' + (v < 0.01 ? v.toFixed(4) : v.toFixed(2));
 }
 

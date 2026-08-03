@@ -57,7 +57,6 @@ const ROUTES = {
   D1: () => import('../screens/d1.js'),
 };
 
-const STEP_LABEL = { E1: '키', P1: '컨셉', P2: '세부', W1: '작업', D1: '내려받기' };
 
 /** 900px 미만에서는 대화와 캔버스를 나란히 못 놓는다. design.css 의 .chatshell 브레이크포인트와 같은 값이어야 한다. */
 const NARROW = window.matchMedia('(max-width: 899px)');
@@ -116,8 +115,8 @@ function buildFrame() {
           <span class="mark">T</span>
           <span class="name">스킨 만들기</span>
           <span class="spacer"></span>
-          <span class="badge" id="step-count"></span>
-          <button class="sm ghost" id="settings" hidden>설정</button>
+          <span class="badge" id="key-state"></span>
+          <button class="sm" id="settings" hidden>설정</button>
         </div>
 
         <div class="tabs" id="tabs" hidden style="padding:0 var(--s4)">
@@ -153,7 +152,7 @@ function buildFrame() {
   panes = {
     shell: root.querySelector('.chatshell'),
     chatpane: root.querySelector('.chatpane'),
-    stepCount: $('step-count'),
+    keyState: $('key-state'),
     settings: $('settings'),
     drawer: $('drawer'),
     drawerBody: $('drawer-body'),
@@ -256,21 +255,30 @@ function closeSettings() {
 }
 
 /**
- * 지금 몇 번째 단계인지.
+ * 대화 머리에서 화면마다 달라지는 것.
  *
- * 예전에는 대화 머리 아래에 다섯 단계를 모두 늘어놓는 줄(.steprail)이 있었다.
- * 뺀 이유는 두 가지다. 대화가 시작되기도 전에 위쪽 두 줄을 안내가 차지했고,
- * 되돌아가는 길은 각 화면이 이미 자기 말로 제공하고 있었다(P1 "조건 바꾸기",
- * P2 "컨셉 다시 고르기", D1 "작업으로 돌아가기"). 남긴 것은 숫자 하나뿐이다.
+ * 단계 표시는 두 번에 걸쳐 걷어냈다. 처음엔 다섯 단계를 늘어놓는 줄(.steprail)이
+ * 있었고, 그다음엔 "1 / 5 키" 배지가 남아 있었다. 둘 다 뺀 이유는 같다 - 대화가
+ * 시작되기도 전에 위쪽 자리를 안내가 차지했고, 되돌아가는 길은 각 화면이 이미
+ * 자기 말로 제공하고 있다(P1 "조건 바꾸기", P2 "컨셉 다시 고르기",
+ * D1 "작업으로 돌아가기"). 지금 이 자리에 남은 것은 설정 버튼 하나뿐이다.
  */
 function drawStep(state) {
   if (!panes) return;
-  const order = actions.SCREENS;
-  const at = order.indexOf(state.screen);
-  panes.stepCount.textContent = `${at + 1} / ${order.length} ${STEP_LABEL[state.screen] || ''}`;
 
-  // E1 에서는 감춘다. 그 화면이 곧 키 설정 화면이라 설정 버튼이 자기를 가리킨다
-  panes.settings.hidden = state.screen === 'E1';
+  /*
+   * 키 상태는 셸이 상시 들고 있는다.
+   *
+   * 예전에는 E1 의 말풍선 안에 "확인됨" 배지가 있었는데, 그 말풍선은 대화가
+   * 길어지면 위로 밀려 올라가 안 보인다. 키가 살아 있는지는 어느 화면에서든
+   * 즉시 보여야 하는 값이라 항상 같은 자리에 둔다.
+   */
+  panes.keyState.textContent = state.keyChecked ? 'api-key 확인' : 'api-key 미확인';
+  panes.keyState.className = 'badge ' + (state.keyChecked ? 'ok' : 'bad');
+
+  // 키를 확인하기 전에는 설정에 담을 것이 없다. 확인하고 나면 어느 화면에서든
+  // 여기서 키와 모델을 바꿀 수 있다
+  panes.settings.hidden = !state.keyChecked;
 
   // 열어 둔 채로 상태가 바뀔 수 있다. 모델을 바꾸면 서랍 안의 값도 따라가야 한다
   if (!panes.drawer.hidden) settingsApi?.update?.(state);

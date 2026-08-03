@@ -89,27 +89,55 @@ export const PROVIDERS = {
  * 그때까지는 listModels 가 받아온 실제 목록을 sortModels 로 정렬해서 쓴다.
  */
 export const RECOMMENDED = {
-  // 모델 ID/단가 출처: claude-api 스킬 문서 (카탈로그 캐시 2026-06-04 기준)
+  // 모델 ID/단가 출처: claude-api 스킬 문서 (카탈로그 캐시 2026-06-24 기준)
   anthropic: [
-    {
-      id: 'claude-opus-4-8',
-      label: 'Claude Opus 4.8',
-      note: '가장 정확합니다',
-      price: { input: 5, output: 25 },
-    },
-    {
-      id: 'claude-sonnet-4-6',
-      label: 'Claude Sonnet 4.6',
-      note: '더 싸고 빠릅니다',
-      price: { input: 3, output: 15 },
-    },
     {
       id: 'claude-fable-5',
       label: 'Claude Fable 5',
+      tier: 'top',
       note: '최상위 성능, 가장 비쌉니다',
       price: { input: 10, output: 50 },
     },
+    {
+      id: 'claude-opus-5',
+      label: 'Claude Opus 5',
+      tier: 'top',
+      note: '결과가 가장 정확합니다',
+      price: { input: 5, output: 25 },
+    },
+    {
+      id: 'claude-opus-4-8',
+      label: 'Claude Opus 4.8',
+      tier: 'top',
+      note: '한 세대 전 오퍼스. 값은 같습니다',
+      price: { input: 5, output: 25 },
+    },
+    {
+      id: 'claude-sonnet-5',
+      label: 'Claude Sonnet 5',
+      tier: 'value',
+      note: '오퍼스에 가까운 품질을 절반 값에',
+      price: { input: 3, output: 15 },
+    },
+    {
+      id: 'claude-haiku-4-5',
+      label: 'Claude Haiku 4.5',
+      tier: 'value',
+      note: '가장 싸고 빠릅니다',
+      price: { input: 1, output: 5 },
+    },
   ],
+
+  /*
+   * OpenAI 와 Google 은 비워 둔다.
+   *
+   * 채우려면 모델 ID 와 단가를 사람이 확인해야 한다. 추측으로 박아 넣으면 없는
+   * 모델을 추천하거나 틀린 비용을 보여 주게 되는데, 둘 다 사용자 지갑에서 돈이
+   * 나가는 문제다. 위 앤트로픽 표는 공식 카탈로그를 보고 채운 것이다.
+   *
+   * 비어 있는 동안에는 listModels 가 받아온 실제 목록을 쓰고 "단가 모름"으로
+   * 표시한다. 목록이 100개를 넘는 제공자가 있어 chatModels 로 걸러 낸다.
+   */
   openai: [],
   google: [],
 };
@@ -227,6 +255,24 @@ export function sortModels(models) {
     }
     return 0;
   });
+}
+
+/**
+ * 글을 주고받는 모델만 남긴다.
+ *
+ * 제공자의 모델 목록에는 이 도구가 쓸 수 없는 것이 잔뜩 섞여 있다. 음성 합성,
+ * 받아쓰기, 임베딩, 이미지, 영상, 검열 판정 같은 것들이다. OpenAI 키로 받아 보면
+ * 130개가 넘게 오는데 그중 대부분이 여기 해당한다. 그대로 고르기 칸에 부으면
+ * 사용자는 쓸 수 있는 모델을 찾지 못하고, 잘못 고르면 호출이 실패한다.
+ *
+ * 이름으로 거르는 방식이라 완벽하지 않다. 새 종류가 나오면 여기 못 걸린다.
+ * 그래서 "빼는" 목록으로 만들었다 - 모르는 이름은 남긴다. 반대로 만들면
+ * 새로 나온 대화 모델이 사라져서 쓸 수 없게 된다. 놓치는 쪽이 덜 나쁘다.
+ */
+const NOT_CHAT = /(embedding|moderation|tts|whisper|transcribe|audio|realtime|image|dall-e|sora|veo|imagen|davinci|babbage|-aqa|guard)/i;
+
+export function chatModels(models) {
+  return (models || []).filter((m) => !NOT_CHAT.test(m.id));
 }
 
 /* --------------------------------------------------------- 어댑터 */

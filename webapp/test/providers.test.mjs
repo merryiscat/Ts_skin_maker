@@ -492,22 +492,28 @@ section('모델 목록');
 section('비용 추정');
 
 {
-  // 백만 토큰당: Opus 4.8 입력 $5 / 출력 $25, Sonnet 4.6 $3 / $15, Fable 5 $10 / $50
-  const c = estimateCost('anthropic', 'claude-opus-4-8', { input: 1_000_000, output: 1_000_000 });
-  ok(c === 30, 'Opus 4.8 단가를 계산한다', String(c));
+  // 백만 토큰당: Opus 5 입력 $5 / 출력 $25, Sonnet 5 $3 / $15,
+  // Fable 5 $10 / $50, Haiku 4.5 $1 / $5
+  const c = estimateCost('anthropic', 'claude-opus-5', { input: 1_000_000, output: 1_000_000 });
+  ok(c === 30, 'Opus 5 단가를 계산한다', String(c));
 
-  const s = estimateCost('anthropic', 'claude-sonnet-4-6', { input: 1_000_000, output: 1_000_000 });
-  ok(s === 18, 'Sonnet 4.6 단가를 계산한다', String(s));
+  const s = estimateCost('anthropic', 'claude-sonnet-5', { input: 1_000_000, output: 1_000_000 });
+  ok(s === 18, 'Sonnet 5 단가를 계산한다', String(s));
 
   const f = estimateCost('anthropic', 'claude-fable-5', { input: 1_000_000, output: 1_000_000 });
   ok(f === 60, 'Fable 5 단가를 계산한다', String(f));
 
-  ok(estimateCost('anthropic', 'claude-opus-4-8', { input: 0, output: 0 }) === 0, '0 토큰은 0');
-  ok(estimateCost('anthropic', 'claude-opus-4-8', undefined) === 0, 'usage 가 없으면 0');
+  const h = estimateCost('anthropic', 'claude-haiku-4-5', { input: 1_000_000, output: 1_000_000 });
+  ok(h === 6, 'Haiku 4.5 단가를 계산한다', String(h));
+
+  ok(estimateCost('anthropic', 'claude-opus-5', { input: 0, output: 0 }) === 0, '0 토큰은 0');
+  ok(estimateCost('anthropic', 'claude-opus-5', undefined) === 0, 'usage 가 없으면 0');
 }
 
-ok(estimateCost('anthropic', 'claude-haiku-4-5', { input: 1000, output: 1000 }) === null,
-  '모르는 Anthropic 모델은 null');
+// 추천 표에서 빠진 모델. 표를 고칠 때 이 값도 같이 봐야 한다 -
+// 추천에 넣는 순간 이 검사가 깨지면서 알려 준다
+ok(estimateCost('anthropic', 'claude-sonnet-4-6', { input: 1000, output: 1000 }) === null,
+  '추천 밖 Anthropic 모델은 null');
 ok(estimateCost('openai', 'gpt-5.2', { input: 1000, output: 1000 }) === null,
   'OpenAI 는 단가를 몰라 null');
 ok(estimateCost('google', 'gemini-3-pro', { input: 1000, output: 1000 }) === null,
