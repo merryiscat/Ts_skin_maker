@@ -56,6 +56,12 @@ W1 에서 S1(설정 패널)을 열고 닫는다.
   - E1.html, P1.html, P2.html, W1.html, D1.html, S1.html
   - wireframe.css, index.html(전체 목록)
   - README.md : 도메인 규칙, 용어 표, 노출 금지 항목
+
+  > **의뢰가 끝난 뒤 이 폴더는 지웠다.** `docs/screens/` 의 사본이었고(해시까지 동일),
+  > 같은 것이 두 벌 있으면 다음에 기획을 고칠 때 어느 쪽이 정답인지 알 수 없게 된다.
+  > 원본은 `docs/screens/` 에 있고 그것이 정답이다. 위 목록은 의뢰 당시 무엇을 보냈는지의
+  > 기록으로 남겨 둔다.
+
 - current/ : 현행 구현 (개선 대상)
   - screenshot-e1.png : 현행 E1 화면 모습
   - e1-dom-snapshot.html : 실제 렌더된 E1 의 DOM (클래스명 참고용, 이 구조를 유지할수록 포팅이 쉽다)
