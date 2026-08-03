@@ -1,8 +1,27 @@
 /**
  * 앱 껍데기
  *
- * 화면을 갈아 끼우고 공통 자산을 한 번만 받아 둔다. 화면 사이의 실제 이동 규칙은
- * state.js 가 들고 있고, 여기서는 어느 화면 모듈을 붙일지만 정한다.
+ * 골격(대화 셸)을 한 번 세워 두고, 그 안의 내용만 단계마다 갈아 끼운다.
+ * 화면 사이의 이동 규칙은 state.js 가 들고 있고, 여기서는 어느 화면 모듈을
+ * 붙일지와 공통 자리(단계 표시, 캔버스 머리 등)를 그리는 일만 한다.
+ *
+ *
+ * 골격이 이렇게 생긴 이유
+ *
+ *   +----------------------+------------------------------+
+ *   | chat-head            | canvas-head                  |
+ *   +----------------------+------------------------------+
+ *   |                      |                              |
+ *   | chat-body            | canvas-body                  |
+ *   |  (화면의 주 출력)     |  (지금 무엇이 만들어지는가)     |
+ *   +----------------------+                              |
+ *   | chat-foot            |                              |
+ *   +----------------------+------------------------------+
+ *
+ * 예전에는 단계마다 화면 전체가 통째로 갈렸다. 그러면 사용자는 마지막
+ * 단계(W1)에 가서야 이 도구가 대화형이라는 것을 알게 된다. 지금은 E1 부터
+ * 같은 자리에 대화가 있고, 각 단계의 입력 폼이 응답 말풍선 안으로 들어간다.
+ *
  *
  * 화면 모듈 규약
  *
@@ -12,11 +31,20 @@
  * update 를 부른다. 매번 통째로 다시 그리면 입력칸에서 포커스와 커서 위치가
  * 날아가서 글자를 칠 수 없다.
  *
- * ctx 에는 다음이 들어 있다.
- *   state    현재 상태 (읽기 전용으로 다룰 것)
- *   actions  state.js 가 내보내는 함수 전부
- *   shared   { css, js } 미리보기에 인라인으로 넣을 공유 자산
- *   toast    짧은 알림을 띄우는 함수
+ *   root         .chat-body - 화면의 주 출력이 들어가는 자리
+ *   ctx.panes    나머지 자리들. 아래 표 참고
+ *   ctx.state    현재 상태 (읽기 전용으로 다룰 것)
+ *   ctx.actions  state.js 가 내보내는 함수 전부
+ *   ctx.shared   { css, js } 미리보기에 인라인으로 넣을 공유 자산
+ *   ctx.toast    짧은 알림을 띄우는 함수
+ *
+ * ctx.panes 에 들어 있는 자리
+ *   foot         .chat-foot   - 입력줄과 다음 단계로 넘어가는 버튼
+ *   canvasHead   .canvas-head - 오른쪽 머리의 오른쪽 끝. 상태 한 줄
+ *   canvasBody   .canvas-body - 오른쪽 본문. 도식/미리보기/설치 안내
+ *
+ * 이 자리들은 화면이 바뀔 때 app.js 가 먼저 비운다. 화면 모듈은 자기가 쓸
+ * 자리만 채우면 되고, 안 쓴 자리는 저절로 빈 채로 남는다.
  */
 
 import * as actions from './state.js';
@@ -31,10 +59,15 @@ const ROUTES = {
 
 const STEP_LABEL = { E1: '키', P1: '컨셉', P2: '세부', W1: '작업', D1: '내려받기' };
 
+/** 900px 미만에서는 대화와 캔버스를 나란히 못 놓는다. design.css 의 .chatshell 브레이크포인트와 같은 값이어야 한다. */
+const NARROW = window.matchMedia('(max-width: 899px)');
+
 let shared = null;
 let current = null; // { id, api }
-let root = null;
-let barEl = null;
+let root = null; // 앱이 들어가는 바깥 요소 (index.html 의 #root)
+let panes = null; // 골격을 세우며 잡아 둔 자리들
+let showingCanvas = false; // 좁은 화면에서 캔버스 탭을 보고 있는지
+let wide = false; // 대화를 접고 캔버스가 전폭을 쓰는 중인지 (W1 의 확대)
 
 /** 공유 자산은 미리보기에 인라인으로 들어가므로 한 번만 받아 둔다. */
 async function loadShared() {
@@ -53,26 +86,194 @@ function toast(message, kind = 'info') {
   setTimeout(() => el.remove(), 2600);
 }
 
-/** 상단 진행 표시. 아직 갈 수 없는 화면은 눌러도 안 넘어간다. */
-function drawBar(state) {
-  if (!barEl) return;
-  barEl.textContent = '';
+/**
+ * 테마 전환 버튼을 붙인다.
+ *
+ * ui/theme.js 는 디자인에서 그대로 가져온 파일이라 손대지 않았다. 그 파일은
+ * 실행되는 순간 문서에 있는 .themebar 만 채우는데, 그 자리는 이 함수가 골격을
+ * 세운 뒤에야 생긴다. 그래서 index.html 에서 미리 부르지 않고 여기서 부른다.
+ * (테마 값 자체는 번쩍임을 막으려고 index.html 의 인라인 스크립트가 먼저 건다)
+ */
+function loadThemeSwitch() {
+  const s = document.createElement('script');
+  s.src = new URL('../ui/theme.js', import.meta.url).href;
+  document.body.append(s);
+}
+
+/**
+ * 골격을 한 번 세운다.
+ *
+ * 여기서 만든 요소는 앱이 끝날 때까지 같은 자리에 남는다. 화면이 바뀌어도
+ * 대화 머리와 단계 표시가 그대로 있어야 "같은 대화를 계속하는 중"으로 읽힌다.
+ */
+function buildFrame() {
+  root.textContent = '';
+  root.innerHTML = `
+    <div class="chatshell">
+
+      <div class="chatpane">
+        <div class="chat-head">
+          <span class="mark">T</span>
+          <span class="name">스킨 만들기</span>
+          <span class="spacer"></span>
+          <span class="badge" id="step-count"></span>
+          <button class="sm ghost" id="settings" hidden>설정</button>
+        </div>
+
+        <div class="tabs" id="tabs" hidden style="padding:0 var(--s4)">
+          <button type="button" class="tab on" id="tab-chat">대화</button>
+          <button type="button" class="tab" id="tab-canvas">나오는 것</button>
+        </div>
+
+        <div class="chat-body" id="chat-body"></div>
+        <div class="chat-foot" id="chat-foot"></div>
+      </div>
+
+      <!-- 감추는 것은 hidden 속성이 한다. design.css 의 [hidden] 이 !important 라
+           아래 인라인 display:flex 를 이긴다 -->
+      <div class="drawer" id="drawer" hidden style="display:flex;flex-direction:column;min-height:0">
+        <div class="panel-head">설정 <span class="spacer"></span><button class="sm ghost" id="settings-close">닫기</button></div>
+        <div class="chat-body" id="drawer-body"></div>
+      </div>
+
+      <div class="canvas" id="canvas">
+        <div class="canvas-head">
+          <span id="canvas-head-note"></span>
+        </div>
+        <div class="canvas-body" id="canvas-body"></div>
+        <!-- 테마 전환은 만들고 있는 스킨과 상관없는 도구 설정이라, 결과를 보는
+             자리에서 가장 먼 구석(오른쪽 아래)에 둔다 -->
+        <div class="canvas-foot"><div class="themebar"></div></div>
+      </div>
+
+    </div>`;
+
+  const $ = (id) => root.querySelector('#' + id);
+
+  panes = {
+    shell: root.querySelector('.chatshell'),
+    chatpane: root.querySelector('.chatpane'),
+    stepCount: $('step-count'),
+    settings: $('settings'),
+    drawer: $('drawer'),
+    drawerBody: $('drawer-body'),
+    tabs: $('tabs'),
+    body: $('chat-body'),
+    foot: $('chat-foot'),
+    canvas: $('canvas'),
+    canvasHead: $('canvas-head-note'),
+    canvasBody: $('canvas-body'),
+  };
+
+  $('tab-chat').addEventListener('click', () => setTab(false));
+  $('tab-canvas').addEventListener('click', () => setTab(true));
+  $('settings').addEventListener('click', () => openSettings());
+  $('settings-close').addEventListener('click', () => closeSettings());
+
+  NARROW.addEventListener('change', applyWidth);
+  applyWidth();
+}
+
+/**
+ * 좁은 화면에서 대화와 캔버스 중 하나만 보여준다.
+ *
+ * 넓은 화면에서는 둘 다 보이므로 탭 자체를 감춘다. 감추기만 하고 상태를
+ * 되돌리지는 않는다 - 창을 다시 좁혔을 때 보던 쪽으로 돌아가는 편이 덜 놀랍다.
+ */
+function applyWidth() {
+  if (!panes) return;
+  const narrow = NARROW.matches;
+  panes.tabs.hidden = !narrow;
+
+  // 설정 서랍이 대화 자리를 쓰고 있으면 폭 계산이 대화를 되살리면 안 된다
+  if (!panes.drawer.hidden) {
+    panes.chatpane.hidden = true;
+    panes.canvas.hidden = narrow;
+    return;
+  }
+
+  // 확대 중이면 넓든 좁든 캔버스만 보인다. 이 검사를 빼먹으면 창 크기를 바꾸는
+  // 순간 applyWidth 가 확대를 풀어 버린다
+  if (wide) {
+    panes.canvas.hidden = false;
+    panes.chatpane.hidden = true;
+    return;
+  }
+
+  panes.shell.style.gridTemplateColumns = '';
+  panes.canvas.hidden = narrow && !showingCanvas;
+  panes.chatpane.hidden = narrow && showingCanvas;
+}
+
+function setTab(canvas) {
+  showingCanvas = canvas;
+  root.querySelector('#tab-chat').classList.toggle('on', !canvas);
+  root.querySelector('#tab-canvas').classList.toggle('on', canvas);
+  applyWidth();
+}
+
+/* ------------------------------------------------------------ 설정 서랍 */
+
+/*
+ * 설정은 화면(라우트)이 아니라 서랍이다.
+ *
+ * 단계 흐름(E1-P1-P2-W1-D1)에 끼워 넣으면 "몇 번째 단계"의 셈이 틀어지고,
+ * 작업 중에 설정 하나 바꾸려고 흐름 밖으로 튕겨 나갔다 돌아와야 한다.
+ * 그래서 지금 화면을 그대로 둔 채 대화 자리만 덮는다.
+ *
+ * 오른쪽(캔버스)을 덮지 않는 이유는 그쪽이 결과를 보는 자리이기 때문이다.
+ * 무엇을 만들던 중이었는지 보이는 채로 설정을 만져야 한다.
+ */
+
+let settingsApi = null; // 서랍에 붙은 s1 모듈
+
+async function openSettings() {
+  if (!panes || !panes.drawer.hidden) return;
+
+  panes.drawer.hidden = false;
+  panes.chatpane.hidden = true;
+  panes.shell.classList.add('overlay');
+  panes.canvas.classList.add('behind');
+
+  if (!settingsApi) {
+    const mod = await import('../screens/s1.js');
+    settingsApi = mod.mount(panes.drawerBody, {
+      state: actions.getState(),
+      actions,
+      toast,
+      close: closeSettings,
+    });
+  }
+  settingsApi.update?.(actions.getState());
+}
+
+function closeSettings() {
+  if (!panes || panes.drawer.hidden) return;
+  panes.drawer.hidden = true;
+  panes.shell.classList.remove('overlay');
+  panes.canvas.classList.remove('behind');
+  applyWidth();
+}
+
+/**
+ * 지금 몇 번째 단계인지.
+ *
+ * 예전에는 대화 머리 아래에 다섯 단계를 모두 늘어놓는 줄(.steprail)이 있었다.
+ * 뺀 이유는 두 가지다. 대화가 시작되기도 전에 위쪽 두 줄을 안내가 차지했고,
+ * 되돌아가는 길은 각 화면이 이미 자기 말로 제공하고 있었다(P1 "조건 바꾸기",
+ * P2 "컨셉 다시 고르기", D1 "작업으로 돌아가기"). 남긴 것은 숫자 하나뿐이다.
+ */
+function drawStep(state) {
+  if (!panes) return;
   const order = actions.SCREENS;
   const at = order.indexOf(state.screen);
+  panes.stepCount.textContent = `${at + 1} / ${order.length} ${STEP_LABEL[state.screen] || ''}`;
 
-  for (let i = 0; i < order.length; i++) {
-    const id = order[i];
-    const s = document.createElement('span');
-    s.textContent = STEP_LABEL[id];
-    if (i === at) s.className = 'on';
-    else if (i < at) s.className = 'done';
-    if (i < at) {
-      s.style.cursor = 'pointer';
-      s.title = '이 단계로 돌아가기';
-      s.addEventListener('click', () => actions.go(id));
-    }
-    barEl.append(s);
-  }
+  // E1 에서는 감춘다. 그 화면이 곧 키 설정 화면이라 설정 버튼이 자기를 가리킨다
+  panes.settings.hidden = state.screen === 'E1';
+
+  // 열어 둔 채로 상태가 바뀔 수 있다. 모델을 바꾸면 서랍 안의 값도 따라가야 한다
+  if (!panes.drawer.hidden) settingsApi?.update?.(state);
 }
 
 // 화면 전환 순번. 동적 import 를 기다리는 동안 다른 전환이 겹치면
@@ -88,13 +289,32 @@ async function show(state) {
 
   const my = ++showSeq;
 
+  // 설정에서 "키 관리"를 누르면 E1 으로 간다. 서랍이 열린 채로 넘어가면
+  // 도착한 화면의 대화가 서랍에 가려 안 보인다
+  closeSettings();
+
   current?.api.unmount?.();
-  root.textContent = '';
   current = null;
+
+  // 화면이 자기가 안 쓰는 자리를 치우는 것까지 기억하게 하면 언젠가 빠뜨린다.
+  // 자리를 내주는 쪽이 비우는 것이 규칙이다
+  for (const el of [panes.body, panes.foot, panes.canvasBody]) el.textContent = '';
+  panes.canvasHead.textContent = '';
+
+  // 내용만 비우고 클래스를 그대로 두면 앞 화면이 붙인 것이 남는다. P1 이 붙이는
+  // .center(가운데 정렬)가 대표적인데, 그 상태로 E1 로 돌아가면 도식이 가운데
+  // 뭉쳐서 뜬다
+  panes.canvasBody.className = 'canvas-body';
+
+  // 확대는 그 화면에서만 유효한 상태다. 켠 채로 넘어가면 다음 화면은 대화가
+  // 사라진 채로 뜬다
+  wide = false;
+  panes.shell.style.gridTemplateColumns = '';
+  applyWidth();
 
   const loader = ROUTES[state.screen];
   if (!loader) {
-    root.innerHTML = '<div class="page"><div class="note bad">없는 화면입니다.</div></div>';
+    panes.body.innerHTML = '<div class="note bad">없는 화면입니다.</div>';
     return;
   }
 
@@ -102,14 +322,41 @@ async function show(state) {
   // 기다리는 사이 더 새 전환이 시작됐으면 mount 하지 않는다. 그쪽이 화면을 책임진다
   if (my !== showSeq) return;
 
-  const api = mod.mount(root, { state: actions.getState(), actions, shared, toast, go: actions.go });
+  const api = mod.mount(panes.body, {
+    state: actions.getState(),
+    actions,
+    shared,
+    toast,
+    go: actions.go,
+    panes: {
+      foot: panes.foot,
+      canvasHead: panes.canvasHead,
+      canvasBody: panes.canvasBody,
+    },
+    /** 좁은 화면에서 캔버스로 눈을 옮겨야 할 때. 4안이 나온 순간 같은 경우다 */
+    showCanvas: () => {
+      if (NARROW.matches) setTab(true);
+    },
+
+    /**
+     * 대화를 접고 캔버스가 전폭을 쓰게 한다. W1 의 "확대" 가 쓴다.
+     *
+     * 대화를 감추기만 하면 격자의 첫 칸(400px)이 빈 채로 남는다. 칸 자체를
+     * 없애야 미리보기가 그 자리까지 쓴다. 그래서 두 가지를 같이 만진다.
+     */
+    setWide: (on) => {
+      wide = !!on;
+      panes.shell.style.gridTemplateColumns = wide ? '1fr' : '';
+      applyWidth();
+    },
+  });
+
   current = { id: state.screen, api };
   api.update?.(actions.getState());
 }
 
-export async function start(mountPoint, stepBar) {
+export async function start(mountPoint) {
   root = mountPoint;
-  barEl = stepBar;
 
   try {
     shared = await loadShared();
@@ -125,13 +372,16 @@ export async function start(mountPoint, stepBar) {
     return;
   }
 
+  buildFrame();
+  loadThemeSwitch();
+
   actions.restore();
   actions.subscribe((s) => {
-    drawBar(s);
+    drawStep(s);
     show(s);
   });
 
   const s = actions.getState();
-  drawBar(s);
+  drawStep(s);
   await show(s);
 }

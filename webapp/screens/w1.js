@@ -10,6 +10,13 @@
  *
  * 세부 값을 고치는 경로는 여기서 대화 하나뿐이다. P2 처럼 항목 패널을 같이 두면
  * 경로가 둘이 되어 어느 쪽이 최신인지 알 수 없게 된다.
+ *
+ * 자리 배치
+ *   왼쪽 대화   지시와 응답. 앞 단계와 같은 자리다
+ *   캔버스      미리보기 또는 코드
+ *
+ * 좁은 폭에서 둘 중 하나만 보여주는 일은 셸(app.js)이 한다. 이 화면은 그 사정을
+ * 몰라도 되고, 대화를 접고 미리보기를 넓게 볼 때만 ctx.setWide 를 부른다.
  */
 
 import { detailsToPreset, validateDetails } from '../harness/spec.js';
@@ -19,7 +26,7 @@ import { checkPitfalls } from '../harness/pitfalls.js';
 import { buildSkinHtml, buildIndexXml } from '../presets/base/skeleton.js';
 import { renderPreview, PREVIEW_PAGES } from '../loop/render.js';
 import { PREVIEW_EXTRA_CSS } from '../loop/mock-data.js';
-import { createStructured, estimateCost } from '../providers.js';
+import { createStructured, estimateCost, PROVIDERS } from '../providers.js';
 
 /** 코드 열람 탭. 키는 파일 묶음의 이름이고 라벨만 짧게 줄인다. */
 const CODE_TABS = [
@@ -29,11 +36,8 @@ const CODE_TABS = [
   { key: 'index.xml', label: 'index.xml' },
 ];
 
-/** 대화와 미리보기를 한 줄에 못 놓는 폭. shell.css 의 .split 브레이크포인트와 같아야 한다. */
-const NARROW = '(max-width: 899px)';
-
 export function mount(root, ctx) {
-  const { actions, shared, toast } = ctx;
+  const { actions, shared, toast, panes, setWide } = ctx;
 
   // 화면 안에서만 쓰는 표시 상태. 상태 저장소에 넣지 않는다. 새로고침하면 사라져도 되는 것들이다
   let pageType = 'tt-body-index';
@@ -41,7 +45,6 @@ export function mount(root, ctx) {
   let zoomed = false;
   let codeOpen = false;
   let codeTab = 'skin.html';
-  let narrowTab = 'chat';
 
   // 검증에 걸린 뒤 "그냥 두기" 를 고른 것. 기록은 남기되 버튼만 접는다.
   // 순번이 아니라 항목 자체를 기억한다. 되돌리기가 대화를 자르면 순번은 다른 것을 가리킨다
@@ -53,62 +56,47 @@ export function mount(root, ctx) {
   let files = null;
   let audit = { ok: true, problems: [] };
 
-  root.innerHTML = `
-    <div class="page wide">
-      <div class="row" style="margin-bottom:12px">
-        <h2 style="font-size:16px">작업</h2>
-        <span class="badge" id="concept-name"></span>
-        <span class="badge" id="verdict"></span>
+  /* ------------------------------------------------------- 대화 아래 발판 */
+
+  panes.foot.innerHTML = `
+    <div class="composer">
+      <textarea id="input" rows="2" placeholder="바꿀 내용을 적으세요. 엔터로 보냅니다"></textarea>
+      <div class="row">
+        <button class="primary sm" id="send">보내기</button>
+        <span class="busy" id="busy" hidden>고치는 중</span>
+        <button class="sm" id="stop" hidden>중단</button>
+        <button class="sm ghost" id="reset">처음으로</button>
         <span class="spacer"></span>
-        <span class="tiny dim mono" id="model-name"></span>
-        <button class="sm" id="settings">설정</button>
-        <button class="primary sm" id="download">내려받기</button>
-      </div>
-
-      <div class="row" id="narrow-tabs" hidden style="margin-bottom:8px">
-        <button class="sm on" id="tab-chat">대화</button>
-        <button class="sm" id="tab-view">미리보기</button>
-      </div>
-
-      <div class="split chat" id="split">
-        <div class="panel" id="chat-pane">
-          <div class="panel-head">대화</div>
-          <div class="panel-body scroll" id="chat"></div>
-          <div class="panel-foot">
-            <textarea id="input" rows="2" placeholder="바꿀 내용을 적으세요. 엔터로 보냅니다"></textarea>
-            <div class="row" style="margin-top:8px">
-              <button class="primary sm" id="send">보내기</button>
-              <span class="busy" id="busy" hidden>고치는 중</span>
-              <button class="sm" id="stop" hidden>중단</button>
-              <button class="sm ghost" id="reset">처음으로</button>
-              <span class="spacer"></span>
-              <span class="tiny dim" id="usage"></span>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel" id="view-pane">
-          <div class="panel-head">
-            <span id="view-title">미리보기</span>
-            <select id="page"></select>
-            <span class="spacer"></span>
-            <button class="sm" id="mobile">모바일</button>
-            <button class="sm" id="zoom">확대</button>
-            <button class="sm" id="code">코드</button>
-          </div>
-          <div class="panel-body">
-            <iframe class="preview" id="preview" title="미리보기"></iframe>
-            <div id="code-box" hidden>
-              <div class="row" id="code-tabs"></div>
-              <pre class="mono tiny" id="code-text" style="margin:8px 0 0;padding:10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);overflow:auto;white-space:pre;max-height:calc(100vh - 340px)"></pre>
-              <p class="tiny dim" style="margin:8px 0 0">읽기 전용입니다. 고칠 내용은 왼쪽 대화로 지시하세요.</p>
-            </div>
-          </div>
-        </div>
+        <span class="tiny dim" id="usage"></span>
       </div>
     </div>`;
 
-  const $ = (id) => root.querySelector('#' + id);
+  /* ------------------------------------------------------------ 오른쪽 */
+
+  panes.canvasHead.innerHTML = `
+    <span class="badge" id="verdict"></span>
+    <select id="page"></select>
+    <button class="sm" id="mobile">모바일</button>
+    <button class="sm" id="zoom">확대</button>
+    <button class="sm" id="code">코드</button>
+    <span class="spacer"></span>
+    <span class="mono tiny" id="model-name"></span>
+    <button class="primary sm" id="download">내려받기</button>`;
+
+  panes.canvasBody.className = 'canvas-body';
+  panes.canvasBody.innerHTML = `
+    <iframe class="preview" id="preview" title="미리보기"></iframe>
+    <div id="code-box" hidden>
+      <div class="tabs" id="code-tabs"></div>
+      <pre class="code" id="code-text" style="margin:10px 0 0;max-height:calc(100vh - 220px)"></pre>
+      <p class="tiny dim" style="margin:8px 0 0">읽기 전용입니다. 고칠 내용은 왼쪽 대화로 지시하세요.</p>
+    </div>`;
+
+  const $ = (id) =>
+    root.querySelector('#' + id) ||
+    panes.foot.querySelector('#' + id) ||
+    panes.canvasHead.querySelector('#' + id) ||
+    panes.canvasBody.querySelector('#' + id);
 
   /* ---------------------------------------------------------- 미리보기 */
 
@@ -135,7 +123,9 @@ export function mount(root, ctx) {
   // 순간에만 대화를 접고 전폭으로 본다
   $('zoom').addEventListener('click', () => {
     zoomed = !zoomed;
-    applyLayout();
+    setWide?.(zoomed);
+    $('zoom').textContent = zoomed ? '대화 열기' : '확대';
+    $('zoom').classList.toggle('on', zoomed);
     drawView(actions.getState());
   });
 
@@ -150,47 +140,6 @@ export function mount(root, ctx) {
     codeTab = key;
     drawView(actions.getState());
   });
-
-  /* ---------------------------------------------------------- 좁은 폭 */
-
-  const narrow = window.matchMedia(NARROW);
-  const onNarrow = () => {
-    applyLayout();
-    drawView(actions.getState());
-  };
-  narrow.addEventListener('change', onNarrow);
-
-  $('tab-chat').addEventListener('click', () => {
-    narrowTab = 'chat';
-    applyLayout();
-  });
-  $('tab-view').addEventListener('click', () => {
-    narrowTab = 'view';
-    applyLayout();
-    drawView(actions.getState());
-  });
-
-  /**
-   * 어느 판을 보여줄지 정한다.
-   * 좁은 폭에서는 둘을 나란히 놓을 자리가 없어 탭으로 갈라 놓는다.
-   */
-  function applyLayout() {
-    const isNarrow = narrow.matches;
-    $('narrow-tabs').hidden = isNarrow ? false : true;
-    $('tab-chat').classList.toggle('on', narrowTab === 'chat');
-    $('tab-view').classList.toggle('on', narrowTab === 'view');
-
-    const showChat = zoomed ? false : isNarrow ? narrowTab === 'chat' : true;
-    const showView = zoomed ? true : isNarrow ? narrowTab === 'view' : true;
-
-    $('chat-pane').hidden = !showChat;
-    $('view-pane').hidden = !showView;
-
-    // 확대일 때 두 단 격자를 그대로 두면 미리보기가 좁은 첫 칸에 들어간다
-    $('split').className = zoomed || isNarrow ? '' : 'split chat';
-    $('zoom').textContent = zoomed ? '대화 열기' : '확대';
-    $('zoom').classList.toggle('on', zoomed);
-  }
 
   /* ---------------------------------------------------------- 보내기 */
 
@@ -231,8 +180,6 @@ export function mount(root, ctx) {
     actions.clearChat();
   });
 
-  $('settings').addEventListener('click', () => actions.go('E1'));
-
   $('download').addEventListener('click', () => {
     const state = actions.getState();
     if (!audit.ok) toast?.('검증에 걸린 채로 넘어갑니다. 그대로 올리면 깨질 수 있습니다.', 'bad');
@@ -260,6 +207,29 @@ export function mount(root, ctx) {
     const message = String(raw || '').trim();
     const state = actions.getState();
     if (!message || state.busy) return;
+
+    /*
+     * 비밀값을 지시로 보내는 것을 막는다.
+     *
+     * E1 에서 키를 아래 입력줄에 붙여넣어 등록하기 때문에, 여기서도 같은 자리에
+     * 키를 붙여넣는 손버릇이 생길 수 있다. 그런데 이 입력줄의 내용은 **모델에게
+     * 그대로 전송된다.** 서버가 없어서 안전하다고 말해 온 도구가 사용자 손으로
+     * 키를 밖에 내보내게 만드는 셈이라, 보내기 전에 막는다.
+     *
+     * 접두사만 보고 판단한다. 지시문에 우연히 sk-ant- 로 시작하는 낱말이 들어갈
+     * 일은 없고, 놓치는 것보다 한 번 더 묻는 쪽이 낫다.
+     */
+    if (looksLikeKey(message)) {
+      actions.pushChat({
+        role: 'note',
+        kind: 'stopped',
+        text:
+          'API 키로 보이는 값이라 보내지 않았습니다. 이 입력줄의 내용은 모델에게 그대로 전송됩니다. ' +
+          '키를 바꾸려면 위 설정에서 키 관리로 가세요.',
+      });
+      $('input').value = '';
+      return;
+    }
 
     $('input').value = '';
     // 최근 대화는 이번 지시를 넣기 전에 뽑는다. 넣고 뽑으면 방금 것이 두 번 들어간다
@@ -409,9 +379,8 @@ export function mount(root, ctx) {
 
     const v = $('verdict');
     v.textContent = audit.ok ? '검증 통과' : '검증 실패';
-    v.classList.toggle('on', audit.ok);
+    v.className = 'badge ' + (audit.ok ? 'ok' : 'bad');
 
-    $('view-title').textContent = codeOpen ? '코드' : '미리보기';
     $('page').hidden = codeOpen;
     $('mobile').hidden = codeOpen;
     $('code').textContent = codeOpen ? '미리보기' : '코드';
@@ -423,7 +392,7 @@ export function mount(root, ctx) {
 
     if (codeOpen) {
       $('code-tabs').innerHTML = CODE_TABS.map(
-        (t) => `<button class="sm${t.key === codeTab ? ' on' : ''}" data-tab="${t.key}">${t.label}</button>`,
+        (t) => `<button class="tab mono${t.key === codeTab ? ' on' : ''}" data-tab="${t.key}">${t.label}</button>`,
       ).join('');
       $('code-text').textContent = files[codeTab] || '';
       return;
@@ -436,19 +405,19 @@ export function mount(root, ctx) {
       extraCss: PREVIEW_EXTRA_CSS,
     });
     frame.classList.toggle('mobile', mobileFrame);
-    frame.style.height = zoomed ? 'calc(100vh - 190px)' : 'calc(100vh - 280px)';
+    frame.style.height = 'calc(100vh - 150px)';
   }
 
-  /** 대화를 통째로 다시 그린다. 입력칸은 이 안에 없어서 포커스가 날아가지 않는다. */
+  /** 대화를 통째로 다시 그린다. 입력칸은 발판에 있어서 포커스가 날아가지 않는다. */
   function drawChat(state) {
     const name = state.concepts[state.conceptIndex]?.name || '지금 값';
     const intro =
       `<div class="msg sys"><div class="msg-body">${esc(name)} 으로 시작합니다. ` +
       `바꾸고 싶은 것을 말해 주세요.</div></div>`;
 
-    $('chat').innerHTML = intro + state.chat.map(entryHtml).join('');
+    root.innerHTML = intro + state.chat.map(entryHtml).join('');
     // 새 응답은 아래에 쌓인다. 사용자가 매번 굴려 내리게 두지 않는다
-    $('chat').scrollTop = $('chat').scrollHeight;
+    root.scrollTop = root.scrollHeight;
   }
 
   function entryHtml(e, i) {
@@ -469,8 +438,8 @@ export function mount(root, ctx) {
       return (
         `<div class="msg"><div class="msg-role">응답</div><div class="msg-body">` +
         `${esc(e.text)}` +
-        (list ? `<ul class="list">${list}</ul>` : '') +
-        `<div style="margin-top:8px"><button class="sm" data-rewind="${i}">이 지점으로 되돌리기</button></div>` +
+        (list ? `<ul class="list marked">${list}</ul>` : '') +
+        `<div class="msg-actions"><button class="sm" data-rewind="${i}">이 지점으로 되돌리기</button></div>` +
         `</div></div>`
       );
     }
@@ -479,14 +448,14 @@ export function mount(root, ctx) {
       const done = dismissed.has(e);
       const list = (e.problems || []).map((p) => `<li>${esc(p)}</li>`).join('');
       return (
-        `<div class="msg sys"><div class="msg-body">` +
-        `<div style="color:var(--danger);font-weight:600">${esc(e.title || '적용하지 않았습니다')}</div>` +
-        (e.text ? `<p>${esc(e.text)}</p>` : '') +
-        (list ? `<ul class="list">${list}</ul>` : '') +
-        `<p class="tiny">직전 결과가 그대로 유지됩니다.</p>` +
+        `<div class="msg sys"><div class="msg-body" style="border-style:solid;border-color:var(--danger);background:var(--danger-bg)">` +
+        `<h3 style="font-size:var(--t-body);color:var(--danger);margin-bottom:4px">${esc(e.title || '적용하지 않았습니다')}</h3>` +
+        (e.text ? `<p style="margin:0 0 4px">${esc(e.text)}</p>` : '') +
+        (list ? `<ul class="list marked small">${list}</ul>` : '') +
+        `<p class="tiny dim" style="margin:6px 0 0">직전 결과가 그대로 유지됩니다.</p>` +
         (done
-          ? `<p class="tiny">그냥 두기를 골랐습니다.</p>`
-          : `<div class="row" style="margin-top:8px">` +
+          ? `<p class="tiny dim" style="margin:2px 0 0">그냥 두기를 골랐습니다.</p>`
+          : `<div class="msg-actions">` +
             `<button class="sm" data-retry="${i}">다시 시키기</button>` +
             `<button class="sm ghost" data-keep="${i}">그냥 두기</button>` +
             `</div>`) +
@@ -497,8 +466,15 @@ export function mount(root, ctx) {
     return `<div class="msg sys"><div class="msg-body">${esc(e.text)}</div></div>`;
   }
 
-  // 대화는 통째로 다시 그려지므로 버튼마다 리스너를 달면 매번 새로 달아야 한다
-  $('chat').addEventListener('click', (e) => {
+  /*
+   * 대화는 통째로 다시 그려지므로 버튼마다 리스너를 달면 매번 새로 달아야 한다.
+   * 그래서 대화 자리(root) 하나에만 달고 눌린 것을 dataset 으로 가려낸다.
+   *
+   * 다만 root 는 셸이 들고 있는 요소라 화면을 나갔다 들어와도 같은 객체다.
+   * 함수를 변수에 담아 두고 unmount 에서 떼지 않으면, W1 - D1 - W1 로 오간
+   * 뒤에는 리스너가 둘이 되어 되돌리기가 두 번 실행된다.
+   */
+  const onChatClick = (e) => {
     const t = e.target;
     if (t.dataset?.rewind !== undefined) {
       actions.rewindTo(Number(t.dataset.rewind));
@@ -515,7 +491,8 @@ export function mount(root, ctx) {
       const entry = actions.getState().chat[Number(t.dataset.retry)];
       if (entry?.ask) retry(entry.ask);
     }
-  });
+  };
+  root.addEventListener('click', onChatClick);
 
   function drawUsage(state) {
     const u = state.usage;
@@ -533,11 +510,12 @@ export function mount(root, ctx) {
   let lastChat = null;
   let lastError = null;
 
-  applyLayout();
-
   return {
     unmount() {
-      narrow.removeEventListener('change', onNarrow);
+      // 확대한 채로 나가면 다음 화면에 대화가 없다. 셸을 원래대로 돌려놓는다
+      setWide?.(false);
+      // root 는 셸의 것이라 화면이 바뀌어도 살아 있다. 뗀 만큼만 사라진다
+      root.removeEventListener('click', onChatClick);
     },
 
     update(state) {
@@ -551,7 +529,6 @@ export function mount(root, ctx) {
         return;
       }
 
-      $('concept-name').textContent = state.concepts[state.conceptIndex]?.name || '';
       $('model-name').textContent = state.model || '';
 
       $('busy').hidden = !state.busy;
@@ -599,6 +576,17 @@ function conversationTurns(chat) {
   }
   if (out[out.length - 1]?.role === 'user') out.pop();
   return out;
+}
+
+/**
+ * 이 글이 API 키로 보이는가.
+ *
+ * 제공자 정의의 접두사를 그대로 쓴다. 여기에 문자열을 따로 적어 두면 제공자가
+ * 늘어날 때 한쪽만 고쳐져서, 새 제공자의 키는 그대로 통과한다.
+ */
+function looksLikeKey(text) {
+  const t = text.trim();
+  return Object.values(PROVIDERS).some((p) => t.startsWith(p.keyPrefix));
 }
 
 function esc(s) {

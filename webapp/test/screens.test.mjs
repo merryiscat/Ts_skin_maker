@@ -18,7 +18,8 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const screensDir = path.resolve(here, '../screens');
-const EXPECTED = ['e1', 'p1', 'p2', 'w1', 'd1'];
+// s1 은 단계 흐름에 없는 설정 서랍이지만, 화면 모듈 규약은 똑같이 지켜야 한다
+const EXPECTED = ['e1', 'p1', 'p2', 'w1', 'd1', 's1'];
 
 let failures = 0;
 function ok(cond, label, extra = '') {

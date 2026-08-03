@@ -1,10 +1,17 @@
 /**
  * P2 세부 정하기
  *
- * 목록으로 훑고 미리보기로 다듬는다. 여기서는 API 를 쓰지 않는다.
+ * 항목을 만지면 오른쪽 미리보기가 곧바로 따라온다. 여기서는 API 를 쓰지 않는다.
  * 전부 플래그 조작이라 마음껏 눌러 볼 수 있고, 그 점이 W1 과 갈리는 지점이다.
  *
- * 이 파일이 화면 모듈의 본보기다. 규약은 app/app.js 위쪽 주석에 있다.
+ * 자리 배치
+ *   왼쪽 대화   항목 폼(.msg-form). 컨셉과 달라진 것도 여기서 알린다
+ *   캔버스      진짜 렌더 미리보기. 도식으로 바꿔 볼 수도 있다
+ *
+ * 와이어에는 "목록 보기 / 도식 보기" 전환이 있었지만 디자인에서 합쳤다.
+ * 폭이 모자라 나눴던 것이고, 대화와 캔버스로 갈라 놓으면 둘을 동시에 볼 수 있다.
+ *
+ * 화면 모듈 규약은 app/app.js 위쪽 주석에 있다.
  */
 
 import { detailsToPreset } from '../harness/spec.js';
@@ -15,48 +22,66 @@ import { renderDetailForm, changedFromConcept } from '../ui/detail-form.js';
 import { schematic } from '../ui/schematic.js';
 
 export function mount(root, ctx) {
-  const { actions, shared } = ctx;
+  const { actions, shared, panes } = ctx;
 
   let pageType = 'tt-body-index';
   let mobile = false;
   let showSchematic = false;
 
+  /* ------------------------------------------------------------ 왼쪽 대화 */
+
   root.innerHTML = `
-    <div class="page wide">
-      <div class="row" style="margin-bottom:12px">
-        <h2 style="font-size:16px">세부 정하기</h2>
-        <span class="badge" id="concept-name"></span>
-        <span class="spacer"></span>
-        <button id="back">컨셉 다시 고르기</button>
-        <button id="reset">컨셉 값으로 되돌리기</button>
-        <button class="primary" id="next">시작하기</button>
+    <div class="msg">
+      <div class="msg-role">안내</div>
+      <div class="msg-body">
+        고른 컨셉의 값을 채워 뒀습니다. 바꾸고 싶은 것만 만지세요.
+        <div class="tiny dim" style="margin-top:6px" id="concept-name"></div>
+        <div class="msg-form" id="form"></div>
       </div>
+    </div>
 
-      <div class="split">
-        <div class="panel">
-          <div class="panel-head">항목 <span class="spacer"></span><span class="plain">컨셉 표시가 붙은 것부터 보세요</span></div>
-          <div class="panel-body scroll" id="form"></div>
-        </div>
+    <div class="msg sys" id="changed" hidden>
+      <div class="msg-body" id="changed-body"></div>
+    </div>
 
-        <div class="panel">
-          <div class="panel-head">
-            <select id="page"></select>
-            <button id="desktop" class="on sm">데스크탑</button>
-            <button id="mobile" class="sm">모바일</button>
-            <span class="spacer"></span>
-            <button id="schematic" class="sm">도식</button>
-            <span class="plain tiny dim">API 를 쓰지 않습니다</span>
-          </div>
-          <div class="panel-body">
-            <iframe class="preview" id="preview" title="미리보기"></iframe>
-            <div id="schematic-box" hidden style="display:flex;justify-content:center;padding:20px 0"></div>
-            <div id="changed" hidden style="margin-top:12px"></div>
-          </div>
+    <div class="msg sys">
+      <div class="msg-body">
+        여기서는 호출하지 않습니다. 마음껏 눌러 보세요.
+        <div class="msg-actions">
+          <button class="sm" id="back">컨셉 다시 고르기</button>
+          <button class="sm" id="reset">컨셉 값으로 되돌리기</button>
         </div>
       </div>
     </div>`;
 
-  const $ = (id) => root.querySelector('#' + id);
+  panes.foot.innerHTML = `
+    <div class="composer">
+      <input type="text" placeholder="다음 화면부터 말로 고칩니다" disabled>
+      <div class="row">
+        <span class="tiny dim">정한 값으로 스킨을 한 벌 만들어 둡니다</span>
+        <span class="spacer"></span>
+        <button class="primary" id="next">시작하기</button>
+      </div>
+    </div>`;
+
+  /* ------------------------------------------------------------ 오른쪽 */
+
+  panes.canvasHead.innerHTML = `
+    <select id="page"></select>
+    <button id="desktop" class="sm on">데스크탑</button>
+    <button id="mobile" class="sm">모바일</button>
+    <button id="schematic" class="sm">도식</button>`;
+
+  panes.canvasBody.className = 'canvas-body';
+  panes.canvasBody.innerHTML = `
+    <iframe class="preview" id="preview" title="미리보기"></iframe>
+    <div id="schematic-box" hidden style="max-width:520px;margin:0 auto"></div>`;
+
+  const $ = (id) =>
+    root.querySelector('#' + id) ||
+    panes.foot.querySelector('#' + id) ||
+    panes.canvasHead.querySelector('#' + id) ||
+    panes.canvasBody.querySelector('#' + id);
 
   const sel = $('page');
   for (const p of PREVIEW_PAGES) {
@@ -116,28 +141,39 @@ export function mount(root, ctx) {
         extraCss: PREVIEW_EXTRA_CSS,
       });
       frame.classList.toggle('mobile', mobile);
-      frame.style.height = 'calc(100vh - 230px)';
+      // 캔버스 머리와 바깥 여백을 뺀 나머지. 미리보기가 잘리면 세부를 볼 수 없다
+      frame.style.height = 'calc(100vh - 150px)';
     }
 
     const box = $('schematic-box');
     box.hidden = !showSchematic;
-    if (showSchematic) box.innerHTML = schematic(preset, { width: 320 });
+    if (showSchematic) box.innerHTML = schematic(preset, { lg: true });
 
+    drawChanged(state);
+  }
+
+  /**
+   * 컨셉과 달라진 것.
+   *
+   * 세부를 많이 바꾸는 것 자체는 문제가 아니지만, 네 개 넘게 바꿨다면 애초에
+   * 고른 컨셉이 안 맞는 것일 수 있다. 그 사실을 알려 P1 으로 돌아갈 기회를 준다.
+   */
+  function drawChanged(state) {
     const changed = changedFromConcept(state.details, state.conceptDetails);
-    const c = $('changed');
-    c.hidden = changed.length === 0;
-    if (changed.length) {
-      c.innerHTML =
-        '<div class="note"><h3>컨셉과 달라진 것</h3><ul class="list">' +
-        changed
-          .map((x) => `<li>${esc(x.label)} <span class="dim">${esc(x.from)} - ${esc(x.to)}</span></li>`)
-          .join('') +
-        '</ul>' +
-        (changed.length >= 4
-          ? '<p class="tiny dim" style="margin-top:6px">많이 바꿨다면 컨셉이 맞지 않는 것일 수 있습니다.</p>'
-          : '') +
-        '</div>';
-    }
+    const box = $('changed');
+    box.hidden = changed.length === 0;
+    if (!changed.length) return;
+
+    $('changed-body').innerHTML =
+      '<span class="strong">컨셉과 달라진 것</span>' +
+      '<ul class="list marked small">' +
+      changed
+        .map((x) => `<li>${esc(x.label)} <span class="dim">${esc(x.from)} - ${esc(x.to)}</span></li>`)
+        .join('') +
+      '</ul>' +
+      (changed.length >= 4
+        ? '<p class="tiny dim" style="margin:6px 0 0">많이 바꿨다면 컨셉이 맞지 않는 것일 수 있습니다.</p>'
+        : '');
   }
 
   let lastDetails = null;
@@ -150,7 +186,8 @@ export function mount(root, ctx) {
         return;
       }
 
-      $('concept-name').textContent = state.concepts[state.conceptIndex]?.name || '';
+      const name = state.concepts[state.conceptIndex]?.name || '';
+      $('concept-name').textContent = name ? `컨셉 ${name}` : '';
 
       if (state.details !== lastDetails) {
         lastDetails = state.details;

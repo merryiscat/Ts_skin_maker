@@ -17,6 +17,13 @@
  * keyPrefix       - 형식 검사용 접두사
  * keyRejectPrefix - 이 접두사면 다른 제공자의 키다. 붙여넣기 실수를 잡는다
  * consoleUrl      - 키 발급처
+ * keySteps        - 키를 받는 절차. E1 오른쪽에 처음부터 띄워 둔다
+ * keyNote         - 절차 밖의 주의. 대개 결제 이야기라 따로 뽑았다
+ *
+ * keySteps 를 적어 두는 이유는, 키가 없는 사람이 이 도구에서 막히는 지점이
+ * "키를 어떻게 받는지 모른다" 하나이기 때문이다. 다만 남의 화면이라 언제든
+ * 바뀐다. 그래서 절차는 짧게만 적고 consoleUrl 을 항상 크게 함께 보여준다 -
+ * 글이 틀려도 링크는 맞다. D1 의 관리자 도식에서 쓰는 것과 같은 방식이다.
  */
 export const PROVIDERS = {
   anthropic: {
@@ -26,6 +33,14 @@ export const PROVIDERS = {
     keyPlaceholder: 'sk-ant-api03-...',
     consoleUrl: 'https://console.anthropic.com/settings/keys',
     consoleLabel: 'Anthropic Console',
+    keySteps: [
+      'Anthropic Console 에 가입하고 로그인합니다',
+      'Settings - API keys 로 들어갑니다',
+      'Create Key 를 누르고 이름을 짓습니다',
+      '만들어진 키를 복사합니다',
+    ],
+    keyNote:
+      '키는 만든 직후 한 번만 보입니다. 창을 닫으면 다시 볼 수 없고 새로 만들어야 합니다. 그리고 Billing 에 결제 수단을 등록하고 크레딧을 충전해야 호출이 됩니다.',
   },
   openai: {
     id: 'openai',
@@ -36,6 +51,14 @@ export const PROVIDERS = {
     keyPlaceholder: 'sk-proj-...',
     consoleUrl: 'https://platform.openai.com/api-keys',
     consoleLabel: 'OpenAI Platform',
+    keySteps: [
+      'OpenAI Platform 에 가입하고 로그인합니다',
+      'API keys 로 들어갑니다',
+      'Create new secret key 를 누릅니다',
+      '만들어진 키를 복사합니다',
+    ],
+    keyNote:
+      '키는 만든 직후 한 번만 보입니다. 결제 수단을 등록하지 않으면 키는 살아 있어도 호출에서 할당량 오류가 납니다.',
   },
   google: {
     id: 'google',
@@ -44,6 +67,14 @@ export const PROVIDERS = {
     keyPlaceholder: 'AIza...',
     consoleUrl: 'https://aistudio.google.com/apikey',
     consoleLabel: 'Google AI Studio',
+    keySteps: [
+      'Google AI Studio 에 구글 계정으로 로그인합니다',
+      'API 키 만들기를 누릅니다',
+      '쓸 구글 클라우드 프로젝트를 고릅니다',
+      '만들어진 키를 복사합니다',
+    ],
+    keyNote:
+      '셋 중 유일하게 무료 등급이 있습니다. 다만 무료 등급은 분당 호출 수가 낮아 작업 중에 막힐 수 있습니다.',
   },
 };
 

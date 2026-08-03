@@ -5,8 +5,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>티스토리 스킨 만들기</title>
 <meta name="description" content="어떤 블로그인지 답하면 컨셉 4안을 만들어 줍니다. 고른 뒤 대화로 고쳐서 내려받습니다.">
-<link rel="stylesheet" href="./ui/shell.css">
+<link rel="stylesheet" href="./ui/design.css">
 <style>
+  /* -----------------------------------------------------------------------
+     앱에서만 필요한 것.
+
+     design.css 는 화면 명세용 문서(가운데 정렬된 .spec 안에 골격을 얹은 형태)
+     기준이라 .chatshell 에 min-height 만 걸려 있다. 실제 앱은 브라우저 창을
+     꽉 채워야 하므로 높이만 여기서 덮는다. 색·간격·글자는 절대 여기서 정하지
+     않는다 - design.css 가 단일 출처이고, 여기에 색을 적으면 테마를 갈아탈 때
+     이 줄만 안 따라와서 어긋난다.
+     ----------------------------------------------------------------------- */
+  /* 높이는 사슬로 이어져야 한다. 중간에 하나라도 auto 가 끼면 .chatshell 의
+     height:100% 는 "부모 높이의 100%"를 계산하지 못하고 내용 높이로 주저앉는다.
+     그래서 html - body - #root 를 모두 100% 로 묶는다 */
+  html, body { height: 100%; }
+  body { overflow: hidden; }
+  #root { height: 100%; }
+  .chatshell { height: 100%; min-height: 0; }
+
+  /* 넘치는 내용은 각자 자기 안에서 굴러야 한다.
+
+     이걸 안 걸면 오른쪽 캔버스의 내용이 길어질 때 격자 칸이 통째로 늘어나고,
+     그만큼 왼쪽 대화판도 같이 늘어나 입력줄(.chat-foot)이 화면 밖으로 밀려난다.
+     body 가 overflow:hidden 이라 굴려서 찾아갈 수도 없다.
+
+     min-height:0 이 같이 필요한 이유: flex 아이템의 기본 최소 높이는 auto 라
+     "내용보다 작아지지 않는다". 그 상태로는 overflow:auto 를 걸어도 줄어들지
+     않아서 스크롤바가 생기지 않는다. 0 으로 낮춰야 비로소 줄어들며 굴러간다. */
+  .chatpane, .canvas, .drawer { min-height: 0; }
+  .chat-body, .canvas-body { min-height: 0; overflow-y: auto; }
+
+  /* 캔버스 바닥. 테마 전환처럼 화면 내용이 아닌 것이 앉는 자리다 */
+  .canvas-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--s2);
+    padding: var(--s2) var(--s4);
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .canvas-foot .themebar { margin: 0; }
+
+  /* 짧은 알림. 화면 위에 잠깐 떴다 사라지므로 어느 판에도 속하지 않는다 */
   .toast {
     position: fixed;
     left: 50%;
@@ -16,27 +58,41 @@
     background: var(--text);
     color: var(--bg);
     border-radius: var(--radius);
-    font-size: 13px;
+    font-size: var(--t-small);
     z-index: 100;
   }
-  .toast.bad { background: var(--danger); }
-  .boot { padding: 48px 16px; text-align: center; color: var(--dim); font-size: 13px; }
+  .toast.bad { background: var(--danger); color: #fff; }
+
+  .boot { display: grid; place-items: center; height: 100%; color: var(--dim); font-size: var(--t-small); }
 </style>
+<script>
+  /* 테마를 그리기 전에 먼저 건다.
+
+     실제 전환 버튼은 ui/theme.js 가 만드는데, 그 파일은 실행되는 순간 문서에
+     있는 .themebar 만 채운다. 그 자리는 app.js 가 골격을 세운 뒤에야 생기므로
+     theme.js 는 app.js 가 나중에 불러온다(app.js 의 loadThemeSwitch 참고).
+
+     그런데 그때까지 기다리면 저장해 둔 테마가 늦게 걸려 기본색이 한 번
+     번쩍인다(FOUC, flash of unstyled content). 그래서 값을 거는 일만 여기서
+     먼저 한다. 키 이름은 theme.js 와 같아야 한다 - 다르면 버튼이 만든 선택을
+     다음 방문에 못 읽는다. */
+  try {
+    document.documentElement.setAttribute(
+      'data-theme',
+      localStorage.getItem('skinmaker-theme') || 'solar',
+    );
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'solar');
+  }
+</script>
 </head>
 <body>
-
-<div class="appbar">
-  <h1>티스토리 스킨 만들기</h1>
-  <div class="steps" id="steps"></div>
-  <span class="spacer"></span>
-  <span class="tiny dim">서버 없음 · 키는 이 브라우저를 벗어나지 않습니다</span>
-</div>
 
 <div id="root"><div class="boot">불러오는 중</div></div>
 
 <script type="module">
 import { start } from './app/app.js';
-start(document.getElementById('root'), document.getElementById('steps'));
+start(document.getElementById('root'));
 </script>
 </body>
 </html>
