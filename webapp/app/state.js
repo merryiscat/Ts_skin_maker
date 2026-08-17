@@ -150,9 +150,15 @@ export function setApiKey(key) {
   localStorage.removeItem(KEY_STORAGE);
 }
 
-/** 키 확인이 끝났을 때. 모델 목록이 같이 들어온다. */
+/**
+ * 키 확인이 끝났을 때. 모델 목록이 같이 들어온다.
+ *
+ * model 이 비어 있어도 목록 첫 번째로 채워 주지 않는다. 모델은 사용자가
+ * 직접 고르는 값이고, 고른 순간이 있어야 E1 이 다음 질문으로 넘어갈 수
+ * 있다 (2026-08-17 디자인 피드백). 빈 채로 두면 화면이 고르라고 요구한다.
+ */
 export function setKeyChecked(models, model) {
-  set({ keyChecked: true, models, model: model || models[0]?.id || '', error: null });
+  set({ keyChecked: true, models, model: model || '', error: null });
   persistKey();
   persistPref();
 }

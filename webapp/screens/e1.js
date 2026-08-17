@@ -2,7 +2,7 @@
  * E1 진입 / 키 등록
  *
  * 키 확인은 모델 목록 조회로 한다. 토큰이 들지 않으므로 키가 살아 있는지와
- * 쓸 수 있는 모델을 한 번에 얻는다. 확인 전에는 모델도 시작 버튼도 잠근다 -
+ * 쓸 수 있는 모델을 한 번에 얻는다. 확인 전에는 모델 선택도 입력줄도 잠근다 -
  * 잘못된 키로 P1 까지 갔다가 되돌아오는 낭비를 없애는 것이 이 화면의 목적이다.
  *
  *
@@ -25,64 +25,17 @@
  *
  *
  * 자리 배치
- *   왼쪽 대화   안내 - 제공자 고르기 - (키 붙여넣기) - 확인 결과와 모델 고르기
- *   chat-foot   키를 붙여넣는 입력줄, 저장 토글, 시작 버튼
- *   캔버스      키 받는 방법 - 흐름과 비용 - 나오는 것
+ *   왼쪽 대화   안내 - 제공자 고르기 - 키 칸과 검증 - 확인 결과와 모델 고르기
+ *   chat-foot   대화 입력줄과 전송 버튼. 키가 확인되기 전까지 잠근다
+ *   캔버스      키 받는 방법 - 모델과 비용
+ *
+ * 흐름 안내와 결과물 도식은 첫 화면에서 뺐다 (2026-08-15 디자인 피드백).
+ * 키를 넣는 사람에게 필요한 것만 남긴다.
  *
  * 화면 모듈 규약은 app/app.js 위쪽 주석에 있다.
  */
 
-import { PROVIDERS, RECOMMENDED, chatModels, validateKeyFormat, listModels, estimateCost } from '../providers.js';
-import { detailsToPreset } from '../harness/spec.js';
-import { schematic } from '../ui/schematic.js';
-
-/**
- * 캔버스 아래쪽에 거는 결과물 도식 네 개.
- *
- * "답에 맞춰 매번 다른 4안이 나옵니다" 를 말이 아니라 그림으로 보여주는 자리다.
- * 넷이 눈에 띄게 달라야 뜻이 전달되므로 사이드바 위치, 목록 모양, 배경을 전부 다르게 잡았다.
- */
-const SHOWCASE = [
-  {
-    caption: '표준',
-    note: '사이드바와 목록',
-    details: { sidebar: 'left', listStyle: 'standard', listItems: ['thumbnail', 'summary'], background: 'light', accent: '#2f6f4f' },
-  },
-  {
-    caption: '읽기 중심',
-    note: '사이드바 없음',
-    details: { sidebar: 'none', listStyle: 'plain', listItems: ['summary'], background: 'light', accent: '#a3352a', features: ['toc'] },
-  },
-  {
-    caption: '그리드',
-    note: '이미지 앞세움',
-    details: { sidebar: 'none', listStyle: 'grid', listItems: ['thumbnail'], background: 'light', accent: '#2f4f8f' },
-  },
-  {
-    caption: '작업 로그',
-    note: '날짜와 제목만',
-    details: { sidebar: 'right', listStyle: 'dense', listItems: [], background: 'dark', accent: '#c08a2e' },
-  },
-];
-
-/** 다섯 단계가 각각 얼마를 쓰는지. 키를 넣기 전에 전체 비용 구조를 먼저 보여준다. */
-const FLOW = [
-  { what: '키 등록', cost: '무료' },
-  { what: '컨셉 4안', cost: '호출 1회' },
-  { what: '세부 정하기', cost: '무료' },
-  { what: '대화로 작업', cost: '지시마다' },
-  { what: 'ZIP 내려받기', cost: '무료' },
-];
-
-/**
- * 비용 예상에 쓰는 대략의 토큰 수.
- *
- * 정확한 값이 아니라 자릿수를 보여주기 위한 것이다. 실제 사용량은 답변 길이에 따라 달라진다.
- */
-const EST = {
-  concepts: { input: 4000, output: 3500 },
-  turn: { input: 6000, output: 1500 },
-};
+import { PROVIDERS, RECOMMENDED, chatModels, validateKeyFormat, listModels } from '../providers.js';
 
 /**
  * 오류 문구.
@@ -116,7 +69,7 @@ export function mount(root, ctx) {
 
   let checking = false;
   let failure = null; // { kind, message }
-  let custom = false; // 모델을 직접 입력하는 중
+  let showAll = false; // 전체 모델 목록을 펼쳐 둔 상태
   let attempt = 0; // 확인 중에 제공자를 바꾸면 늦게 온 응답을 버린다
 
   // 저장해 둔 키로 들어왔는지. 그러면 입력칸 대신 "확인할까요" 를 낸다.
@@ -138,13 +91,9 @@ export function mount(root, ctx) {
    */
   panes.foot.innerHTML = `
     <div class="composer">
-      <input type="text" id="composer" placeholder="어떤 용도의 블로그를 만들려고 하시나요?" disabled>
-      <div class="row">
-        <button class="sm switch" id="remember">off</button>
-        <span class="tiny dim">이 브라우저에 저장</span>
-        <span class="spacer"></span>
-        <span class="tiny dim" id="foot-note"></span>
-        <button class="primary" id="start" disabled>시작</button>
+      <div class="row" style="flex-wrap:nowrap">
+        <input type="text" id="composer" placeholder="어떤 용도의 블로그를 만들려고 하시나요?" disabled style="flex:1 1 auto;min-width:0">
+        <button class="primary" id="send" disabled>전송</button>
       </div>
     </div>`;
 
@@ -155,10 +104,6 @@ export function mount(root, ctx) {
       e.preventDefault();
       submitPurpose();
     }
-  });
-
-  foot('remember').addEventListener('click', () => {
-    actions.setRememberKey(!actions.getState().rememberKey);
   });
 
   /*
@@ -172,7 +117,7 @@ export function mount(root, ctx) {
     return actions.getState().conceptDetails ? 'W1' : 'P1';
   }
 
-  foot('start').addEventListener('click', () => actions.go(exitTo()));
+  foot('send').addEventListener('click', () => submitPurpose());
 
   /* ------------------------------------------------------------ 오른쪽 */
 
@@ -180,37 +125,14 @@ export function mount(root, ctx) {
     <div id="howto"></div>
 
     <div class="eyebrow" style="margin:32px 0 12px">모델과 비용</div>
-    <div id="price"></div>
-
-    <div class="eyebrow" style="margin:32px 0 12px">흐름과 비용</div>
-    <div class="flow">
-      ${FLOW.map(
-        (f, i) =>
-          `<div${i === 0 ? ' class="now"' : ''}>` +
-          `<div class="num">${i + 1}</div>` +
-          `<div class="what">${f.what}</div>` +
-          `<div class="cost">${f.cost}</div>` +
-          '</div>',
-      ).join('')}
-    </div>
-
-    <div class="eyebrow" style="margin:32px 0 12px">나오는 것</div>
-    <div class="grid-4">
-      ${SHOWCASE.map(
-        (c) =>
-          '<div>' +
-          schematic(detailsToPreset(c.details)) +
-          `<div class="shot-caption"><b>${c.caption}</b> ${c.note}</div>` +
-          '</div>',
-      ).join('')}
-    </div>
-    <p class="tiny dim" style="margin-top:12px">답에 맞춰 매번 다른 4안이 나옵니다</p>`;
+    <div id="price"></div>`;
 
   /**
    * 모델 비용 표.
    *
-   * 4안 한 번과 대화 한 번이 각각 얼마인지를 고르기 전에 보여 준다. 단가만 적으면
-   * "100만 토큰당 $5" 가 이 도구에서 얼마인지 알 수 없다.
+   * 지금은 공식 단가(100만 토큰당)만 보여 준다. "4안 1회 얼마" 같은 호출당
+   * 어림값은 실제 호출의 평균 토큰 수를 재고 나서 되살리기로 했다
+   * (docs/TODO.md) — 재기 전의 어림값은 지어낸 숫자와 다를 게 없다.
    *
    * 단가를 모르는 제공자는 표 대신 그 사실을 적는다. 지어낸 값을 넣으면 사용자가
    * 그 숫자를 보고 결제 규모를 판단하게 되는데, 틀리면 실제 청구서로 돌아온다.
@@ -234,18 +156,11 @@ export function mount(root, ctx) {
       `<td style="padding:6px 0"><span class="strong">${esc(r.label)}</span>` +
       `<div class="tiny dim">${esc(r.note || '')}</div></td>` +
       `<td class="mono tiny" style="text-align:right;white-space:nowrap">$${r.price.input} / $${r.price.output}</td>` +
-      `<td class="mono tiny" style="text-align:right;white-space:nowrap">${money(estimateCost(provider.id, r.id, EST.concepts))}</td>` +
-      `<td class="mono tiny" style="text-align:right;white-space:nowrap">${money(estimateCost(provider.id, r.id, EST.turn))}</td>` +
       `</tr>`;
 
-    const section = (title, tier) => {
-      const list = recs.filter((r) => r.tier === tier);
-      if (!list.length) return '';
-      return (
-        `<tr><td colspan="4" class="eyebrow" style="padding:14px 0 2px">${title}</td></tr>` +
-        list.map(row).join('')
-      );
-    };
+    // "최고 성능"/"가성비" 구분 제목은 2026-08-16 피드백으로 뺐다.
+    // 다만 줄 순서는 그 구분을 따른다 - 비싼 것부터 싼 것 순으로 읽히게
+    const ordered = ['top', 'value'].flatMap((t) => recs.filter((r) => r.tier === t));
 
     box.innerHTML = `
       <div class="panel">
@@ -255,41 +170,41 @@ export function mount(root, ctx) {
               <tr class="tiny dim">
                 <th style="text-align:left;font-weight:400">모델</th>
                 <th style="text-align:right;font-weight:400">100만 토큰당 입력/출력</th>
-                <th style="text-align:right;font-weight:400">4안 1회</th>
-                <th style="text-align:right;font-weight:400">대화 1회</th>
               </tr>
             </thead>
             <tbody>
-              ${section('최고 성능', 'top')}
-              ${section('가성비', 'value')}
+              ${ordered.map(row).join('')}
             </tbody>
           </table>
-          <p class="tiny dim" style="margin:12px 0 0">
-            오른쪽 두 칸은 이 도구에서 실제로 나가는 돈의 어림값입니다. 4안 1회는 컨셉을 만들 때
-            한 번, 대화 1회는 작업 화면에서 지시할 때마다 듭니다. 답변 길이에 따라 달라집니다.
-          </p>
         </div>
       </div>`;
   }
 
-  /** 키 받는 방법. 고른 제공자에 맞춰 갈아 끼운다. */
+  /**
+   * 키 받는 방법. 고른 제공자에 맞춰 갈아 끼운다.
+   *
+   * 발급처 링크는 별도 줄이 아니라 첫 단계의 이름에 건다. 절차를 읽다가 그
+   * 이름을 누르면 바로 그 화면이 열리는 것이 자연스럽고, 줄 하나가 준다.
+   * keySteps 의 첫 단계에는 consoleLabel 이 들어 있다는 전제다 — 제공자를
+   * 추가할 때 그 이름을 절차에 쓰면 링크는 따라온다.
+   */
   function drawHowto(provider) {
+    const linkStep = (s) => {
+      const t = esc(s);
+      const l = esc(provider.consoleLabel);
+      if (!t.includes(l)) return t;
+      return t.replace(l, `<a href="${esc(provider.consoleUrl)}" target="_blank" rel="noopener">${l}</a>`);
+    };
+
     panes.canvasBody.querySelector('#howto').innerHTML = `
       <div class="eyebrow" style="margin-bottom:12px;color:var(--accent)">${esc(provider.label)} 키 받는 방법</div>
       <div class="panel">
         <div class="panel-body">
           <ol class="list" style="padding-left:18px;list-style:decimal">
-            ${(provider.keySteps || []).map((s) => `<li>${esc(s)}</li>`).join('')}
+            ${(provider.keySteps || []).map((s) => `<li>${linkStep(s)}</li>`).join('')}
           </ol>
-          <p class="small dim" style="margin:12px 0 0">${esc(provider.keyNote || '')}</p>
         </div>
-        <div class="panel-foot row">
-          <a href="${esc(provider.consoleUrl)}" target="_blank" rel="noopener">${esc(provider.consoleLabel)} 열기</a>
-          <span class="spacer"></span>
-          <span class="tiny dim">화면이 설명과 다르면 이 링크가 맞습니다</span>
-        </div>
-      </div>
-      <p class="tiny dim" style="margin:8px 0 0">받은 키를 왼쪽 아래 입력줄에 붙여넣고 엔터를 누르세요. 확인은 모델 목록을 받아오는 것이라 토큰이 들지 않습니다.</p>`;
+      </div>`;
   }
 
   /* ------------------------------------------------------------ 대화 */
@@ -306,13 +221,20 @@ export function mount(root, ctx) {
   function drawChat() {
     const state = actions.getState();
     const provider = PROVIDERS[state.provider];
-    const parts = [];
 
-    parts.push(
-      `<div class="msg sys"><div class="msg-body">` +
-        `서버 없음 · 로그인 없음. 키는 이 브라우저를 벗어나 고른 제공자로만 갑니다.` +
-        `</div></div>`,
-    );
+    /*
+     * 키와 모델이 모두 정해지면 설정 안내는 통째로 사라진다 (2026-08-17
+     * 디자인 피드백). 그 시점에 남은 질문은 "무엇을 만들 것인가" 하나라서,
+     * 그 질문과 답의 예시만 남긴다.
+     */
+    if (state.keyChecked && state.model) {
+      root.innerHTML = purposeHtml();
+      wirePurpose();
+      root.scrollTop = root.scrollHeight;
+      return;
+    }
+
+    const parts = [];
 
     /*
      * 키를 받는 칸은 이 안내 말풍선 안에 있다.
@@ -332,29 +254,24 @@ export function mount(root, ctx) {
      * 강조한 낱말은 오른쪽 "키 받는 방법" 제목과 같은 색(--accent)을 쓴다.
      * 왼쪽에서 요구한 것의 답이 오른쪽에 있다는 것을 색으로 잇는 것이다.
      */
+    /*
+     * "이 브라우저에 저장할 수 있습니다" 는 이제 말하지 않는다.
+     *
+     * 저장 토글을 화면에서 뺐기 때문이다 (2026-08-15 디자인 피드백). 약속만
+     * 남기고 켤 방법이 없으면 화면이 거짓말을 하는 셈이라 문장도 같이 뺐다.
+     * 과거에 저장해 둔 키가 있는 사람의 동작(stored 경로)은 그대로 살아 있다.
+     */
     const lead = state.keyChecked
       ? '쓸 키는 정해졌습니다.'
-      /*
-       * "따로 저장되지 않습니다" 라고는 못 쓴다.
-       *
-       * 입력줄 아래에 "이 브라우저에 저장" 토글이 있고, 켜면 실제로
-       * localStorage 에 들어간다. 기본값이 off 라 대개는 맞는 말이지만,
-       * 사용자가 켜는 순간 화면의 약속과 동작이 갈린다. 키 취급에 대한
-       * 약속은 어긋난 채로 두면 안 된다. 그래서 정확히 참인 문장으로 적는다 -
-       * 어디로 가는가(고른 제공자뿐), 어디에 남는가(원하면 이 브라우저에만).
-       */
       : `Tstory Skin Maker 는 ${hi('본인의 API 키')}를 활용하여 모델을 호출합니다. ` +
-        `키는 llm 호출에만 사용하고, 고른 제공자 외에 어디로도 전송되지 않습니다. ` +
-        `원하시면 이 브라우저에만 저장할 수 있습니다.` +
+        `키는 llm 호출에만 사용하고, 고른 제공자 외에 어디로도 전송되지 않습니다.` +
         `<div style="margin-top:8px">아래 박스에 api 키를 작성하시고 검증 버튼을 눌러주세요. ` +
-        `첫 1회 인증 후 ${hi('좌측 상단 설정')}에서 api 키를 교체하실 수 있습니다.</div>`;
+        `첫 1회 인증 후 ${hi('좌측 상단 설정')}에서 api 키를 교체하실 수 있습니다.</div>` +
+        `<div class="tiny dim" style="margin-top:8px">처음 연결 검증에는 비용이 소요되지 않습니다.</div>`;
 
     parts.push(
       `<div class="msg"><div class="msg-role">안내</div><div class="msg-body">` +
         `<div>${lead}</div>` +
-        (state.keyChecked
-          ? ''
-          : `<div class="tiny dim" style="margin-top:8px">어디 키를 쓰시겠어요?</div>`) +
         `<div class="opts" id="providers" style="margin-top:8px"></div>` +
         (state.keyChecked ? '' : keyFieldHtml(state, provider)) +
         `</div></div>`,
@@ -391,15 +308,13 @@ export function mount(root, ctx) {
       );
     }
 
+    // 검증 버튼은 align-self:stretch 로 옆 입력칸과 키를 맞춘다. 높이를 숫자로
+    // 적으면 입력칸의 패딩을 바꿀 때 따로 놀게 된다
     return (
       `<div class="row" style="margin-top:10px">` +
       `<input type="password" class="mono" id="key" style="flex:1 1 150px;min-width:0" autocomplete="off" spellcheck="false" placeholder="${esc(provider.keyPlaceholder)}">` +
-      `<button class="sm" id="check"${checking ? ' disabled' : ''}>검증</button>` +
+      `<button class="sm" id="check" style="align-self:stretch"${checking ? ' disabled' : ''}>검증</button>` +
       (checking ? `<span class="busy">확인 중</span>` : '') +
-      `</div>` +
-      `<div class="field-note">` +
-      `<a href="${esc(provider.consoleUrl)}" target="_blank" rel="noopener">${esc(provider.consoleLabel)} 에서 발급</a>` +
-      ` · 확인은 모델 목록을 받아오는 것이라 토큰이 들지 않습니다` +
       `</div>`
     );
   }
@@ -439,20 +354,68 @@ export function mount(root, ctx) {
       `키를 확인했습니다. 쓸 모델을 고르세요.` +
       `<div class="tiny dim" style="margin-top:6px" id="lock-note"></div>` +
       `<div style="margin-top:10px" id="rec"></div>` +
-      `<div class="row" style="margin-top:10px">` +
-      `<button class="sm" id="pick-list">받아온 목록에서</button>` +
-      `<button class="sm" id="pick-custom">직접 입력</button>` +
-      `</div>` +
-      `<div class="row" style="margin-top:8px">` +
+      // 전체 목록은 평소에 접어 둔다. 추천 카드가 기본 경로이고, 그 밖의 모델은
+      // 아래 "모델 선택" 을 눌렀을 때만 목록이 열린다 (2026-08-17 피드백으로
+      // 상시 노출되던 목록/직접 입력을 걷어냄. 직접 입력은 대체 없이 뺐다 -
+      // docs/TODO.md "정해야 할 것" 참조)
+      `<div class="row" id="all-row" hidden style="margin-top:10px">` +
       `<select id="all" style="max-width:100%"></select>` +
-      `<input type="text" class="mono" id="custom" hidden style="flex:1 1 150px;min-width:0" placeholder="모델 ID">` +
       `</div>` +
       `<div class="field-note" id="model-note"></div>` +
+      `<div class="msg-actions">` +
+      `<button class="sm" id="pick-all">모델 선택</button>` +
+      `<button class="sm" id="forget">키 지우기</button>` +
+      `</div>` +
+      `</div></div>`
+    );
+  }
+
+  /**
+   * 키와 모델이 정해진 뒤의 대화.
+   *
+   * 예시를 누르면 입력줄에 채워질 뿐 바로 보내지 않는다 - 보내는 행동은
+   * 사용자의 것이어야 하고, 채워진 글을 고쳐서 자기 말로 만들 수도 있다.
+   *
+   * 키 지우기는 여기에도 남긴다. 설정의 "키 관리"가 이 화면으로 보내므로,
+   * 여기서 키를 지울 수 없으면 그 길이 막다른 골목이 된다. 모델 바꾸기는
+   * 설정 팝업이 맡는다.
+   */
+  function purposeHtml() {
+    const samples = [
+      '개발 공부한 내용을 정리하는 기술 블로그예요. 코드 예제가 많이 들어갑니다',
+      '여행 다녀온 곳을 사진 위주로 기록하려고 해요',
+      '요리 레시피와 생활 팁을 모아 두는 블로그입니다',
+    ];
+    return (
+      `<div class="msg"><div class="msg-role">안내</div><div class="msg-body">` +
+      `어떤 용도의 블로그를 만들려고 하시나요?` +
+      `<div class="tiny dim" style="margin-top:6px">아래 입력줄에 적어 보내면 그 답에 맞춰 컨셉을 만듭니다. 예시를 누르면 입력줄에 채워집니다.</div>` +
+      `<div class="col" id="samples" style="margin-top:10px">` +
+      samples
+        .map((s) => `<button type="button" class="opt sm" style="text-align:left">${esc(s)}</button>`)
+        .join('') +
+      `</div>` +
       `<div class="msg-actions">` +
       `<button class="sm" id="forget">키 지우기</button>` +
       `</div>` +
       `</div></div>`
     );
+  }
+
+  function wirePurpose() {
+    for (const b of root.querySelectorAll('#samples button')) {
+      b.addEventListener('click', () => {
+        const el = foot('composer');
+        el.value = b.textContent;
+        el.focus();
+      });
+    }
+    root.querySelector('#forget').addEventListener('click', () => {
+      stored = false;
+      failure = null;
+      actions.forgetEverything();
+      toast('저장된 키를 지웠습니다');
+    });
   }
 
   /* ------------------------------------------------------------ 이어붙이기 */
@@ -471,7 +434,7 @@ export function mount(root, ctx) {
         attempt++;
         checking = false;
         failure = null;
-        custom = false;
+        showAll = false;
         stored = false;
         actions.setProvider(p.id);
       });
@@ -506,17 +469,11 @@ export function mount(root, ctx) {
 
     if (!state.keyChecked) return;
 
-    $('pick-list').addEventListener('click', () => {
-      custom = false;
+    $('pick-all').addEventListener('click', () => {
+      showAll = !showAll;
       drawModels(actions.getState());
-    });
-    $('pick-custom').addEventListener('click', () => {
-      custom = true;
-      drawModels(actions.getState());
-      $('custom').focus();
     });
     $('all').addEventListener('change', () => actions.setModel($('all').value));
-    $('custom').addEventListener('change', () => actions.setModel($('custom').value.trim()));
 
     $('lock-note').textContent = [
       state.rememberKey ? '이 브라우저에 저장됨' : '이 탭에서만 유지됨',
@@ -563,10 +520,7 @@ export function mount(root, ctx) {
     for (const r of recs) {
       const card = document.createElement('div');
       card.className = 'card tight pick' + (state.model === r.id ? ' selected' : '');
-      card.addEventListener('click', () => {
-        custom = false;
-        actions.setModel(r.id);
-      });
+      card.addEventListener('click', () => actions.setModel(r.id));
 
       const head = document.createElement('div');
       head.className = 'row';
@@ -578,7 +532,7 @@ export function mount(root, ctx) {
       gap.className = 'spacer';
       const price = document.createElement('span');
       price.className = 'tiny dim';
-      price.textContent = runCost(state.provider, r.id) || unitPrice(r);
+      price.textContent = unitPrice(r);
       head.append(name, gap, price);
 
       const note = document.createElement('div');
@@ -590,16 +544,13 @@ export function mount(root, ctx) {
     }
   }
 
-  /** 받아온 전체 목록과 직접 입력. 목록이 바뀔 때만 다시 채운다. */
+  /** 받아온 전체 목록. "모델 선택" 으로 여닫는다. 목록이 바뀔 때만 다시 채운다. */
   function drawAllModels(state) {
     const sel = root.querySelector('#all');
-    const box = root.querySelector('#custom');
-    if (!sel || !box) return;
+    if (!sel) return;
 
-    sel.hidden = custom;
-    box.hidden = !custom;
-    root.querySelector('#pick-list').classList.toggle('on', !custom);
-    root.querySelector('#pick-custom').classList.toggle('on', custom);
+    root.querySelector('#all-row').hidden = !showAll;
+    root.querySelector('#pick-all').classList.toggle('on', showAll);
 
     // 음성·이미지·임베딩 모델을 빼고 채운다. 안 거르면 제공자에 따라 100개가 넘어
     // 쓸 수 있는 모델을 찾지 못한다
@@ -615,8 +566,7 @@ export function mount(root, ctx) {
         sel.append(o);
       }
     }
-    if (!custom && sel.value !== state.model) sel.value = state.model;
-    if (custom && document.activeElement !== box && box.value !== state.model) box.value = state.model;
+    if (sel.value !== state.model) sel.value = state.model;
   }
 
   /** 받아온 목록에 실제로 있는 추천만. */
@@ -698,7 +648,7 @@ export function mount(root, ctx) {
     }
 
     failure = null;
-    actions.setKeyChecked(res.models, preferredModel(state.provider, res.models, state.model));
+    actions.setKeyChecked(res.models, preferredModel(res.models, state.model));
     draw();
   }
 
@@ -712,25 +662,21 @@ export function mount(root, ctx) {
     drawPrices(provider);
     drawChat();
 
-    // 입력줄은 키가 확인된 뒤에만 열린다. 그 전에는 답을 받아 봐야 쓸 데가 없다
+    // 입력줄은 키가 확인된 뒤에만 열린다. 그 전에는 답을 받아 봐야 쓸 데가 없다.
+    // 설정에서 키 관리로 온 사람은 전송이 "작업으로 돌아가기" 역할을 한다 —
+    // 그 사실은 자리표시 문구가 말한다
     const ready = state.keyChecked && !!state.model;
+    const back = exitTo() === 'W1';
     const composer = foot('composer');
     composer.disabled = !ready;
-    composer.placeholder = ready
-      ? '어떤 용도의 블로그를 만들려고 하시나요?'
-      : '키를 확인하면 여기서 대화를 시작합니다';
-
-    foot('remember').textContent = state.rememberKey ? 'on' : 'off';
-    foot('remember').classList.toggle('on', state.rememberKey);
-
-    const back = exitTo() === 'W1';
-    foot('start').disabled = !state.keyChecked || !state.model;
-    foot('start').textContent = back ? '작업으로 돌아가기' : '시작';
-    foot('foot-note').textContent = state.keyChecked
-      ? back
-        ? '만들던 것은 그대로 있습니다'
-        : '요금은 사용자 계정에서 결제됩니다'
-      : '키를 확인해야 시작할 수 있습니다';
+    composer.placeholder = !ready
+      ? state.keyChecked
+        ? '모델을 고르면 여기서 대화를 시작합니다'
+        : '키를 확인하면 여기서 대화를 시작합니다'
+      : back
+        ? '엔터나 전송을 누르면 만들던 작업으로 돌아갑니다'
+        : '어떤 용도의 블로그를 만들려고 하시나요?';
+    foot('send').disabled = !ready;
 
     // 확인 전에는 비워 둔다. 이 줄에 넣을 만한 "지금 상태"가 아직 없다
     panes.canvasHead.textContent = state.keyChecked
@@ -758,26 +704,16 @@ function unitPrice(rec) {
   return `100만 토큰당 입력 $${rec.price.input} · 출력 $${rec.price.output}`;
 }
 
-/** 자릿수를 보여주는 용도의 예상 비용. 실제 사용량은 답변 길이에 따라 달라진다. */
-function runCost(providerId, modelId) {
-  const four = estimateCost(providerId, modelId, EST.concepts);
-  const turn = estimateCost(providerId, modelId, EST.turn);
-  if (four == null || turn == null) return '';
-  return `4안 약 ${money(four)} · 대화 1회 약 ${money(turn)}`;
-}
-
-/** 단가를 모르는 모델은 값 대신 그렇게 적는다. NaN 을 화면에 내보내지 않는다. */
-function money(v) {
-  if (v == null || Number.isNaN(v)) return '모름';
-  return '$' + (v < 0.01 ? v.toFixed(4) : v.toFixed(2));
-}
-
-/** 이미 고른 모델이 살아 있으면 유지하고, 아니면 추천 중 첫 번째를 고른다. */
-function preferredModel(providerId, models, current) {
+/**
+ * 이미 고른 모델이 살아 있으면 유지한다. 처음이면 비워 둔다.
+ *
+ * 예전에는 추천 첫 번째를 대신 골라 줬는데, 그러면 "모델을 골랐다"는 순간이
+ * 없어서 고르는 화면을 보여줄 틈도 없다. 직접 고른 순간이 있어야 그다음
+ * (용도 질문)으로 넘어갈 수 있다 (2026-08-17 디자인 피드백).
+ */
+function preferredModel(models, current) {
   const have = new Set(models.map((m) => m.id));
-  if (current && have.has(current)) return current;
-  const rec = (RECOMMENDED[providerId] || []).find((r) => have.has(r.id));
-  return rec?.id || models[0]?.id || '';
+  return current && have.has(current) ? current : '';
 }
 
 /**
