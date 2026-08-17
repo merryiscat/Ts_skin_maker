@@ -136,13 +136,16 @@ function buildFrame() {
       </div>
 
       <div class="canvas" id="canvas">
+        <!-- 테마 전환은 만들고 있는 스킨과 상관없는 도구 설정이라 머리의
+             오른쪽 끝에 둔다. 발판은 비어 있지만 남긴다 - 셸의 발판 행을
+             왼쪽 입력줄과 나눠 쓰므로 두 판의 아래 경계선이 나란해진다 -->
         <div class="canvas-head">
           <span id="canvas-head-note"></span>
+          <span class="spacer"></span>
+          <div class="themebar"></div>
         </div>
         <div class="canvas-body" id="canvas-body"></div>
-        <!-- 테마 전환은 만들고 있는 스킨과 상관없는 도구 설정이라, 결과를 보는
-             자리에서 가장 먼 구석(오른쪽 아래)에 둔다 -->
-        <div class="canvas-foot"><div class="themebar"></div></div>
+        <div class="canvas-foot"></div>
       </div>
 
     </div>`;
@@ -184,12 +187,7 @@ function applyWidth() {
   const narrow = NARROW.matches;
   panes.tabs.hidden = !narrow;
 
-  // 설정 서랍이 대화 자리를 쓰고 있으면 폭 계산이 대화를 되살리면 안 된다
-  if (!panes.drawer.hidden) {
-    panes.chatpane.hidden = true;
-    panes.canvas.hidden = narrow;
-    return;
-  }
+  // 설정 팝업은 판 위에 떠 있을 뿐 자리를 차지하지 않으므로 폭 계산과 무관하다
 
   // 확대 중이면 넓든 좁든 캔버스만 보인다. 이 검사를 빼먹으면 창 크기를 바꾸는
   // 순간 applyWidth 가 확대를 풀어 버린다
@@ -214,14 +212,15 @@ function setTab(canvas) {
 /* ------------------------------------------------------------ 설정 서랍 */
 
 /*
- * 설정은 화면(라우트)이 아니라 서랍이다.
+ * 설정은 화면(라우트)이 아니라 가운데 팝업이다.
  *
  * 단계 흐름(E1-P1-P2-W1-D1)에 끼워 넣으면 "몇 번째 단계"의 셈이 틀어지고,
  * 작업 중에 설정 하나 바꾸려고 흐름 밖으로 튕겨 나갔다 돌아와야 한다.
- * 그래서 지금 화면을 그대로 둔 채 대화 자리만 덮는다.
+ * 그래서 지금 화면을 그대로 둔 채 그 위에 띄운다.
  *
- * 오른쪽(캔버스)을 덮지 않는 이유는 그쪽이 결과를 보는 자리이기 때문이다.
- * 무엇을 만들던 중이었는지 보이는 채로 설정을 만져야 한다.
+ * 뒤의 두 판은 흐려진 채(.behind) 남는다. 무엇을 만들던 중이었는지 보이는
+ * 채로 설정을 만져야 한다. 원래는 왼쪽 대화 자리를 덮는 서랍이었는데
+ * 2026-08-17 디자인 피드백으로 팝업이 되었다.
  */
 
 let settingsApi = null; // 서랍에 붙은 s1 모듈
@@ -230,8 +229,8 @@ async function openSettings() {
   if (!panes || !panes.drawer.hidden) return;
 
   panes.drawer.hidden = false;
-  panes.chatpane.hidden = true;
   panes.shell.classList.add('overlay');
+  panes.chatpane.classList.add('behind');
   panes.canvas.classList.add('behind');
 
   if (!settingsApi) {
@@ -250,6 +249,7 @@ function closeSettings() {
   if (!panes || panes.drawer.hidden) return;
   panes.drawer.hidden = true;
   panes.shell.classList.remove('overlay');
+  panes.chatpane.classList.remove('behind');
   panes.canvas.classList.remove('behind');
   applyWidth();
 }

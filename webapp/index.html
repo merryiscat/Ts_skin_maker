@@ -36,17 +36,15 @@
   .chatpane, .canvas, .drawer { min-height: 0; }
   .chat-body, .canvas-body { min-height: 0; overflow-y: auto; }
 
-  /* 캔버스 바닥. 테마 전환처럼 화면 내용이 아닌 것이 앉는 자리다 */
+  /* 캔버스 바닥. 내용은 없지만 왼쪽 입력줄과 같은 행을 나눠 쓰는 정렬용
+     밴드다(design.css 19절의 subgrid 참고). 테마 전환은 머리로 옮겨 갔다 */
   .canvas-foot {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--s2);
-    padding: var(--s2) var(--s4);
     border-top: 1px solid var(--border);
     background: var(--bg);
   }
-  .canvas-foot .themebar { margin: 0; }
+  /* design.css 의 .themebar 는 본문에 앉을 때의 여백(margin-top)을 갖고
+     있다. 머리 안에서는 그 여백이 줄을 어긋나게 하므로 지운다 */
+  .canvas-head .themebar { margin: 0; }
 
   /* 짧은 알림. 화면 위에 잠깐 떴다 사라지므로 어느 판에도 속하지 않는다 */
   .toast {
