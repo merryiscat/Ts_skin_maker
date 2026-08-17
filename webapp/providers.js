@@ -18,7 +18,6 @@
  * keyRejectPrefix - 이 접두사면 다른 제공자의 키다. 붙여넣기 실수를 잡는다
  * consoleUrl      - 키 발급처
  * keySteps        - 키를 받는 절차. E1 오른쪽에 처음부터 띄워 둔다
- * keyNote         - 절차 밖의 주의. 대개 결제 이야기라 따로 뽑았다
  *
  * keySteps 를 적어 두는 이유는, 키가 없는 사람이 이 도구에서 막히는 지점이
  * "키를 어떻게 받는지 모른다" 하나이기 때문이다. 다만 남의 화면이라 언제든
@@ -39,8 +38,6 @@ export const PROVIDERS = {
       'Create Key 를 누르고 이름을 짓습니다',
       '만들어진 키를 복사합니다',
     ],
-    keyNote:
-      '키는 만든 직후 한 번만 보입니다. 창을 닫으면 다시 볼 수 없고 새로 만들어야 합니다. 그리고 Billing 에 결제 수단을 등록하고 크레딧을 충전해야 호출이 됩니다.',
   },
   openai: {
     id: 'openai',
@@ -57,8 +54,6 @@ export const PROVIDERS = {
       'Create new secret key 를 누릅니다',
       '만들어진 키를 복사합니다',
     ],
-    keyNote:
-      '키는 만든 직후 한 번만 보입니다. 결제 수단을 등록하지 않으면 키는 살아 있어도 호출에서 할당량 오류가 납니다.',
   },
   google: {
     id: 'google',
@@ -73,8 +68,6 @@ export const PROVIDERS = {
       '쓸 구글 클라우드 프로젝트를 고릅니다',
       '만들어진 키를 복사합니다',
     ],
-    keyNote:
-      '셋 중 유일하게 무료 등급이 있습니다. 다만 무료 등급은 분당 호출 수가 낮아 작업 중에 막힐 수 있습니다.',
   },
 };
 
@@ -84,9 +77,10 @@ export const PROVIDERS = {
  * price 는 백만 토큰당 USD. 값을 모르면 price 를 두지 않는다 —
  * 틀린 단가를 보여 주는 것보다 "모름"이 낫다.
  *
- * 유지 항목: OpenAI 와 Google 은 사람이 확인해서 채워야 한다. 추측으로 모델 ID 와
- * 단가를 박아 넣으면 존재하지 않는 모델을 추천하거나 잘못된 비용을 보여 주게 된다.
- * 그때까지는 listModels 가 받아온 실제 목록을 sortModels 로 정렬해서 쓴다.
+ * 유지 항목: 세 표 모두 공식 요금 페이지를 사람이 조회해서 채운 것이다. 추측으로
+ * 모델 ID 와 단가를 박아 넣으면 존재하지 않는 모델을 추천하거나 잘못된 비용을
+ * 보여 주게 된다. 가격이 바뀌면 표도 낡는다 — 출처와 조회일을 각 표 위에 적어 둔다.
+ * 추천 밖 모델은 listModels 가 받아온 실제 목록을 sortModels 로 정렬해서 쓴다.
  */
 export const RECOMMENDED = {
   // 모델 ID/단가 출처: claude-api 스킬 문서 (카탈로그 캐시 2026-06-24 기준)
@@ -128,18 +122,87 @@ export const RECOMMENDED = {
     },
   ],
 
-  /*
-   * OpenAI 와 Google 은 비워 둔다.
-   *
-   * 채우려면 모델 ID 와 단가를 사람이 확인해야 한다. 추측으로 박아 넣으면 없는
-   * 모델을 추천하거나 틀린 비용을 보여 주게 되는데, 둘 다 사용자 지갑에서 돈이
-   * 나가는 문제다. 위 앤트로픽 표는 공식 카탈로그를 보고 채운 것이다.
-   *
-   * 비어 있는 동안에는 listModels 가 받아온 실제 목록을 쓰고 "단가 모름"으로
-   * 표시한다. 목록이 100개를 넘는 제공자가 있어 chatModels 로 걸러 낸다.
-   */
-  openai: [],
-  google: [],
+  // 모델 ID/단가 출처: developers.openai.com/api/docs/pricing + /models (2026-08-15 조회)
+  // gpt-5.6 세 기종(sol/terra/luna)은 모델 문서에서 현행 카탈로그로 교차 확인함.
+  openai: [
+    {
+      id: 'gpt-5.6-sol',
+      label: 'GPT-5.6 Sol',
+      tier: 'top',
+      note: '최신 플래그십. 결과가 가장 정확합니다',
+      price: { input: 5, output: 30 },
+    },
+    {
+      id: 'gpt-5.5',
+      label: 'GPT-5.5',
+      tier: 'top',
+      note: '직전 플래그십. 값은 같습니다',
+      price: { input: 5, output: 30 },
+    },
+    {
+      id: 'gpt-5.4',
+      label: 'GPT-5.4',
+      tier: 'top',
+      note: '두 세대 전 플래그십. 절반 값입니다',
+      price: { input: 2.5, output: 15 },
+    },
+    {
+      id: 'gpt-5.6-terra',
+      label: 'GPT-5.6 Terra',
+      tier: 'value',
+      note: '최신 세대의 중형. 성능과 비용의 균형',
+      price: { input: 2, output: 12 },
+    },
+    {
+      id: 'gpt-5.6-luna',
+      label: 'GPT-5.6 Luna',
+      tier: 'value',
+      note: '최신 세대의 소형. 가장 싸고 빠릅니다',
+      price: { input: 0.2, output: 1.2 },
+    },
+  ],
+
+  // 모델 ID/단가 출처: ai.google.dev/gemini-api/docs/pricing + /models (2026-08-15 조회)
+  // 3.7/3.6 Flash 단가는 2026-12-31 까지의 할인가다. 2027-01-01 부터 2배가 되므로
+  // 그때 이 표를 다시 봐야 한다. Pro 단가는 20만 토큰 이하 구간 기준 — 이 도구의
+  // 요청은 그보다 훨씬 작다.
+  google: [
+    {
+      id: 'gemini-3.1-pro-preview',
+      label: 'Gemini 3.1 Pro Preview',
+      tier: 'top',
+      note: '결과가 가장 정확합니다. preview 라 예고 없이 바뀔 수 있습니다',
+      price: { input: 2, output: 12 },
+    },
+    {
+      id: 'gemini-3.7-flash',
+      label: 'Gemini 3.7 Flash',
+      tier: 'top',
+      note: '최신 안정판. 이 값은 2026년 말까지의 할인가입니다',
+      price: { input: 0.75, output: 3.75 },
+    },
+    {
+      id: 'gemini-3.6-flash',
+      label: 'Gemini 3.6 Flash',
+      tier: 'top',
+      note: '직전 안정판. 값은 같습니다',
+      price: { input: 0.75, output: 3.75 },
+    },
+    {
+      id: 'gemini-3.5-flash-lite',
+      label: 'Gemini 3.5 Flash-Lite',
+      tier: 'value',
+      note: '가벼운 작업용. 충분히 싸고 준수합니다',
+      price: { input: 0.3, output: 2.5 },
+    },
+    {
+      id: 'gemini-2.5-flash-lite',
+      label: 'Gemini 2.5 Flash-Lite',
+      tier: 'value',
+      note: '가장 싸고 빠릅니다',
+      price: { input: 0.1, output: 0.4 },
+    },
+  ],
 };
 
 /** Anthropic 은 thinking 이 기본으로 켜져 있고 max_tokens 가 thinking + 응답을 합쳐 제한한다. */

@@ -510,14 +510,23 @@ section('비용 추정');
   ok(estimateCost('anthropic', 'claude-opus-5', undefined) === 0, 'usage 가 없으면 0');
 }
 
+{
+  // OpenAI/Google 단가 (2026-08-15 공식 요금 페이지 조회분)
+  const o = estimateCost('openai', 'gpt-5.6-sol', { input: 1_000_000, output: 1_000_000 });
+  ok(o === 35, 'GPT-5.6 Sol 단가를 계산한다', String(o));
+
+  const g = estimateCost('google', 'gemini-2.5-flash-lite', { input: 1_000_000, output: 1_000_000 });
+  ok(g === 0.5, 'Gemini 2.5 Flash-Lite 단가를 계산한다', String(g));
+}
+
 // 추천 표에서 빠진 모델. 표를 고칠 때 이 값도 같이 봐야 한다 -
 // 추천에 넣는 순간 이 검사가 깨지면서 알려 준다
 ok(estimateCost('anthropic', 'claude-sonnet-4-6', { input: 1000, output: 1000 }) === null,
   '추천 밖 Anthropic 모델은 null');
 ok(estimateCost('openai', 'gpt-5.2', { input: 1000, output: 1000 }) === null,
-  'OpenAI 는 단가를 몰라 null');
+  '추천 밖 OpenAI 모델은 null');
 ok(estimateCost('google', 'gemini-3-pro', { input: 1000, output: 1000 }) === null,
-  'Google 은 단가를 몰라 null');
+  '추천 밖 Google 모델은 null');
 ok(estimateCost('nope', 'x', { input: 1, output: 1 }) === null, '모르는 제공자는 null');
 
 /* ------------------------------------------------------------------ */
@@ -533,17 +542,20 @@ for (const id of ['anthropic', 'openai', 'google']) {
 }
 
 // 추천에 단가를 적었다면 두 값이 다 있어야 한다. 반쪽 단가는 잘못된 비용을 낳는다.
+// tier 는 E1 비용 표를 두 구역으로 가르는 값이라 top/value 외의 값이 오면 안 된다.
 for (const [id, list] of Object.entries(RECOMMENDED)) {
+  ok(list.length === 5, `${id} 추천은 5개다 (최고 성능 3 + 가성비 2)`, String(list.length));
+  ok(list.filter((m) => m.tier === 'top').length === 3, `${id} top 이 3개다`);
+  ok(list.filter((m) => m.tier === 'value').length === 2, `${id} value 가 2개다`);
   for (const m of list) {
     ok(!!m.id && !!m.label && !!m.note, `${id}/${m.id} 추천 항목이 온전하다`);
+    ok(m.tier === 'top' || m.tier === 'value', `${id}/${m.id} tier 가 top 또는 value 다`);
     ok(
       typeof m.price.input === 'number' && typeof m.price.output === 'number',
       `${id}/${m.id} 단가가 입출력 둘 다 있다`,
     );
   }
 }
-ok(RECOMMENDED.openai.length === 0 && RECOMMENDED.google.length === 0,
-  'OpenAI/Google 추천은 확인 전까지 비워 둔다');
 
 console.log(`\n${checks} 가지 확인`);
 console.log(failures === 0 ? '전체 통과' : `실패 ${failures}건`);
