@@ -35,8 +35,10 @@ function listItem(s, accent) {
     : '';
 
   if (s.listStyle === LIST_STYLES.DENSE) {
-    // 날짜 + 제목만 있는 한 줄짜리. 작업 로그처럼 보인다
-    return '<div class="rowline"><i></i><l class="t"></l></div>';
+    // 날짜 + (작은 썸네일) + 제목 한 줄. 밀집 목록도 썸네일을 켜면 작게 보여 준다 -
+    // 실제 스킨의 dense 가 "작은 썸네일 + 요약"이라 도식도 맞춰야 무엇을 만드는지 보인다
+    const thumb = s.showThumbnail ? '<u class="th"></u>' : '';
+    return `<div class="rowline"><i></i>${thumb}<l class="t"></l></div>`;
   }
 
   if (s.listStyle === LIST_STYLES.PLAIN) {

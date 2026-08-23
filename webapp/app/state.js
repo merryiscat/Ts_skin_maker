@@ -10,11 +10,15 @@
  */
 
 import { defaultDetails } from '../harness/spec.js';
+import { wireToDetails } from '../harness/concept-prompt.js';
 
 const KEY_STORAGE = 'tsm.key';
 const PREF_STORAGE = 'tsm.pref';
 
-/** 화면 목록. 순서가 곧 진행 순서다. */
+/** 화면 목록. 순서가 곧 진행 순서다.
+ *  2026-08-24 생성형으로 재피벗. E1(용도) → P1(상담+4 와이어 컨셉, 고름) →
+ *  P2(고른 안의 구조를 미리보고 손보기) → W1(대화 편집) → D1(내려받기).
+ *  P1 은 새 흐름으로 새로 짰다. 리치한 "look" 을 CSS 로 실현하는 ④단계는 뒤에 얹는다. */
 export const SCREENS = ['E1', 'P1', 'P2', 'W1', 'D1'];
 
 function emptyState() {
@@ -32,13 +36,34 @@ function emptyState() {
     // P1
     purpose: '',
     mood: '',
+    extra: '', // 용도·느낌 뒤에 자유로 덧붙이는 추가 의견. 4안 생성 프롬프트에 실린다
     concepts: [],
     conceptIndex: -1,
     mixNote: '',
 
+    // P1 (생성형 앞단, 2026-08-24). 상담 대화체 한 덩이 + 새 컨셉 4안(wire/look).
+    consultation: '',
+    genConcepts: [], // [{ kind, name, pitch, wire, look, tradeoff }]
+    genIndex: -1,
+    conceptNote: '', // 고른 안에 사용자가 덧붙인 의견. ④ CSS 실현에 실린다
+    selectedConcept: null, // 고른 안 전체(look 포함). ④단계 재료
+
+    // 마지막으로 상담/4안을 만든 용도. 이 값이 바뀌면 다시 생성한다
+    genPurpose: '',
+
+    // ④ 생성된 테마 CSS 레이어와, 그것을 어느 안으로 만들었는지 키(고른 안이 바뀌면 다시 만든다)
+    themeCss: '',
+    themeFor: '',
+
     // P2
     conceptDetails: null,
     details: defaultDetails(),
+    // 미리보기 채움용 LLM 샘플. { purpose, blogTitle, posts, ... } 또는 null.
+    // 용도별로 한 번 만들어 두고 그 용도가 바뀌면 다시 만든다.
+    sample: null,
+    // 사용자가 올린 글꼴. { name, family, css(@font-face) } 또는 null.
+    // bodyFont 를 'uploaded' 로 두면 이 글꼴을 스킨에 임베드해 쓴다.
+    uploadedFont: null,
 
     // W1
     chat: [],
@@ -48,6 +73,10 @@ function emptyState() {
     busy: false,
     error: null,
     usage: { calls: 0, input: 0, output: 0, cost: 0 },
+
+    // E1 에서 용도·느낌을 다 받고 "4안 만들기" 를 누르면 켠다. P1 이 켜진 채로
+    // 열리면 묻지 않고 곧장 4안을 생성하고, 소비하는 즉시 끈다. 저장하지 않는다
+    pendingGenerate: false,
   };
 }
 
@@ -170,15 +199,125 @@ export function setModel(model) {
 
 /* ------------------------------------------------------------ P1 */
 
-export function setQuestion({ purpose, mood }) {
+/**
+ * 스키마 선택을 시작한다. 생성 컨셉이 없으므로 기본값을 "기준선(conceptDetails)"
+ * 으로 세운다 - P2·W1·되돌리기가 이 기준선을 그대로 쓴다. 한 번만 세우고,
+ * 이미 있으면 사용자가 만진 값을 지키기 위해 건드리지 않는다.
+ */
+export function startDesign() {
+  if (!state.conceptDetails) {
+    const base = defaultDetails();
+    set({ conceptDetails: base, details: base });
+  }
+}
+
+/** 처음부터 다시 - 용도·기준선·값·대화를 비운다(키는 그대로). E1 로 돌아간다. */
+export function startOver() {
+  set({
+    purpose: '',
+    conceptDetails: null,
+    details: defaultDetails(),
+    chat: [],
+    mixNote: '',
+    sample: null,
+    uploadedFont: null,
+    consultation: '',
+    genConcepts: [],
+    genIndex: -1,
+    conceptNote: '',
+    selectedConcept: null,
+    genPurpose: '',
+    themeCss: '',
+    themeFor: '',
+  });
+}
+
+/* ------------------------------------------------------------ P1 (생성형 앞단) */
+
+/** 상담 + 4 와이어 컨셉 결과를 넣는다. 만든 용도를 함께 저장해 용도가 바뀌면 다시 만든다. */
+export function setConsult({ consultation, concepts, purpose }) {
+  set({
+    consultation: consultation || '',
+    genConcepts: Array.isArray(concepts) ? concepts : [],
+    genIndex: -1,
+    genPurpose: purpose ?? state.purpose,
+  });
+}
+
+/** 컨셉 하나를 고른다(아직 확정 전, 강조만). */
+export function chooseGenConcept(i) {
+  set({ genIndex: i });
+}
+
+/** 고른 안에 덧붙이는 의견. */
+export function setConceptNote(text) {
+  set({ conceptNote: text });
+}
+
+/**
+ * 고른 안을 확정한다. wire 를 세부 값(details)으로 옮겨 골격이 구조를 렌더하게 하고,
+ * 안 전체(look 포함)를 selectedConcept 로 남긴다 - look 을 CSS 로 실현하는 ④단계 재료다.
+ */
+export function applyGenConcept() {
+  const c = state.genConcepts[state.genIndex];
+  if (!c) return;
+  const details = wireToDetails(c.wire);
+  // 새 안을 고르면 이전 테마는 낡았다. 비워서 P2 가 이 안으로 다시 만들게 한다
+  set({ selectedConcept: c, conceptDetails: { ...details }, details: { ...details }, themeCss: '', themeFor: '' });
+}
+
+/** 고른 안을 가리키는 키. 이 값이 바뀌면 테마를 다시 만든다. */
+export function conceptKey(concept) {
+  if (!concept) return '';
+  return `${concept.kind || ''}|${concept.name || ''}`;
+}
+
+/** ④ 생성된 테마 CSS 를 넣는다. 어느 안으로 만들었는지 키도 함께 저장한다. */
+export function setTheme({ css, forKey }) {
+  set({ themeCss: css || '', themeFor: forKey || '' });
+}
+
+/** 미리보기 샘플을 저장한다. { purpose 포함 } 로 넣어 용도가 바뀌면 다시 만들게 한다. */
+export function setSample(sample) {
+  set({ sample });
+}
+
+/** 사용자가 올린 글꼴을 저장한다. */
+export function setUploadedFont(font) {
+  set({ uploadedFont: font });
+}
+
+export function setQuestion({ purpose, mood, extra }) {
   set({
     purpose: purpose ?? state.purpose,
     mood: mood ?? state.mood,
+    extra: extra ?? state.extra,
   });
 }
 
 export function setConcepts(concepts) {
   set({ concepts, conceptIndex: -1 });
+}
+
+/** E1 의 "4안 만들기" 가 켜고, P1 이 열리며 소비한 뒤 끈다. */
+export function requestGenerate(on = true) {
+  set({ pendingGenerate: on });
+}
+
+/**
+ * P1 "조건 바꾸기" — 만든 4안과 고른 것, 그동안의 작업을 버리고 앞 화면(E1)에서
+ * 용도·느낌을 다시 만지게 한다. 용도·느낌 자체는 남겨 두어 E1 이 그 값을 미리
+ * 채워 보여 준다. conceptDetails 를 비워야 E1 이 다시 P1(4안 생성)로 나간다.
+ */
+export function restartConcepts() {
+  set({
+    concepts: [],
+    conceptIndex: -1,
+    conceptDetails: null,
+    details: defaultDetails(),
+    mixNote: '',
+    chat: [],
+  });
 }
 
 /** 실패했다가 다시 만든 안 하나를 자리에 끼워 넣는다. */
@@ -220,11 +359,16 @@ export function pushChat(entry) {
   set({ chat: [...state.chat, { ...entry, at: state.chat.length }] });
 }
 
-/** 대화의 특정 지점으로 되돌린다. 그 시점의 세부 값도 같이 복원한다. */
+/** 대화의 특정 지점으로 되돌린다. 그 시점의 세부 값과 테마도 같이 복원한다. */
 export function rewindTo(index) {
   const entry = state.chat[index];
   if (!entry || !entry.details) return;
-  set({ chat: state.chat.slice(0, index + 1), details: { ...entry.details } });
+  set({
+    chat: state.chat.slice(0, index + 1),
+    details: { ...entry.details },
+    // 그 시점의 테마 스냅샷이 있으면 함께 되돌린다(없던 시절 항목이면 그대로 둔다)
+    ...(entry.themeCss !== undefined ? { themeCss: entry.themeCss } : {}),
+  });
 }
 
 /**

@@ -1,249 +1,60 @@
 /**
- * P1 컨셉 고르기
+ * P1 상담 + 방향 고르기 (생성형 앞단, 2026-08-24)
  *
- * 용도와 컨셉을 묻고, 그 답으로 만든 컨셉 4안을 제시한다.
+ * 용도·느낌을 받아 한 번의 호출로 ①상담과 ②컨셉 4안을 만든다.
  *
- * 넷을 한 호출로 같이 만든다. 따로 만들면 서로를 모르는 채 생성되어 보편 A 와 B 가,
- * 실험 A 와 B 가 겹친다. 넷이 서로 다르다는 것이 4안의 존재 이유이므로 상호 차별화는
- * 생성 시점에 보장돼야 한다.
+ *   왼쪽 대화   상담(시안 요청자에게 디자이너가 건네듯 대화체 한 덩이) + 고르기 + 의견
+ *   캔버스      4 방향을 와이어프레임으로 나란히. 눌러서 고른다
  *
- * 대신 검증에 실패한 안만 나머지 셋을 참고 자료로 줘서 그 안만 다시 만든다.
- * 하나 때문에 넷을 통째로 다시 만들면 사용자 지갑에서 나가는 돈이 네 배가 된다.
+ * 사용자에게는 A안·B안·C안·D안 으로만 보인다(내부 kind 는 품질용, 숨김).
+ * 고른 안의 구조(wire)는 세부 값으로 옮겨 다음 화면(P2)이 바로 렌더한다.
+ * 시각 성격(look)은 selectedConcept 에 남아 ④(CSS 실현)에서 입혀진다.
  *
- * 자리 배치
- *   왼쪽 대화   질문 - 진행 - 고르기. 고르는 행위만 대화에 남는다
- *   캔버스      4안 비교. 컨셉 글이 주인공이고 도식은 보조다
- *
- * 왜 비교를 캔버스로 뺐나: 네 안의 설명을 400px 대화 폭에 세로로 쌓으면 스크롤을
- * 왕복해야 비교가 된다. 비교는 넓은 자리에서 하고, 결정만 대화로 가져온다.
+ * 화면 모듈 규약은 app/app.js 위쪽 주석에 있다.
  */
 
-import { buildConceptPrompt, buildRetryConceptPrompt, conceptSchemaFor } from '../harness/system-prompt.js';
-import { validateConceptSet, validateDetails, detailsToPreset } from '../harness/spec.js';
+import { buildConsultConceptPrompt, validateConceptSet, wireToSpec, conceptLabel } from '../harness/concept-prompt.js';
 import { createStructured, estimateCost } from '../providers.js';
-import { buildSkinHtml } from '../presets/base/skeleton.js';
-import { auditPlaceholders, auditGroupTags } from '../harness/contract.js';
-import { checkPitfalls } from '../harness/pitfalls.js';
-import { schematic } from '../ui/schematic.js';
-
-const KINDS = ['보편 A', '보편 B', '실험 A', '실험 B'];
-
-const PURPOSES = ['개발', '에세이', '사진', '리뷰', '일상'];
-const MOODS = ['미니멀', '터미널 느낌', '잡지 같은', '따뜻한', '정보 밀도 높게', '여백 많이'];
+import { wireframe } from '../ui/wireframe.js';
 
 export function mount(root, ctx) {
-  const { actions, shared, toast, panes, showCanvas } = ctx;
+  const { actions, toast, panes, showCanvas } = ctx;
 
-  let phase = 'ask'; // ask | busy | show
-  let progress = [];
-  let failed = []; // 검증에 걸린 종류
-  let zoomIndex = -1;
-  let custom = false;
-
-  /* ------------------------------------------------------------ 질문 */
-
-  function drawAsk(state) {
-    root.innerHTML = `
-      <div class="msg">
-        <div class="msg-role">안내</div>
-        <div class="msg-body">
-          두 가지만 알면 됩니다. 나머지는 다음 화면에서 정합니다.
-          <div class="msg-form">
-            <div class="field">
-              <div class="field-label">어떤 글을 쓰시나요</div>
-              <div class="opts" id="purposes"></div>
-              <input type="text" id="purpose-custom" placeholder="직접 입력" hidden style="margin-top:6px">
-            </div>
-
-            <div class="field">
-              <div class="field-label">어떤 느낌이면 좋겠어요</div>
-              <input type="text" id="mood" placeholder="예: 담백하고 글에 집중되는">
-              <div class="opts" style="margin-top:6px" id="moods"></div>
-              <div class="field-note">비워 두면 용도만 보고 만듭니다</div>
-            </div>
-          </div>
-        </div>
-      </div>`;
-
-    panes.foot.innerHTML = `
-      <div class="composer">
-        <input type="text" id="composer" placeholder="덧붙일 것이 있으면 느낌 칸에 적어 주세요" disabled>
-        <div class="row">
-          <span class="tiny dim" id="cost-hint"></span>
-          <span class="spacer"></span>
-          <button class="primary" id="make">4안 만들기</button>
-        </div>
-      </div>`;
-
-    // 아직 아무것도 없는 캔버스. 흐리게 깔아 두면 무엇이 그 자리에 올지 미리 읽힌다
-    panes.canvasHead.textContent = '답을 받으면 여기에 4안이 놓입니다';
-    panes.canvasBody.className = 'canvas-body center';
-    panes.canvasBody.innerHTML = `
-      <div class="canvas-empty">
-        <div class="grid-4" style="grid-template-columns:1fr 1fr;opacity:0.4;margin-bottom:20px">
-          ${[
-            { sidebar: 'left', listStyle: 'standard', listItems: ['thumbnail', 'summary'] },
-            { sidebar: 'none', listStyle: 'plain', listItems: ['summary'] },
-            { sidebar: 'none', listStyle: 'grid', listItems: ['thumbnail'] },
-            { sidebar: 'right', listStyle: 'dense', listItems: [] },
-          ]
-            .map((d) => schematic(detailsToPreset({ ...d, background: 'light', accent: '#888888' })))
-            .join('')}
-        </div>
-        <p class="small">왼쪽 두 가지에 답하면 서로 다른 네 컨셉을 한 번에 만듭니다.</p>
-      </div>`;
-
-    const purposesEl = root.querySelector('#purposes');
-    const customEl = root.querySelector('#purpose-custom');
-    const moodEl = root.querySelector('#mood');
-
-    const paint = () => {
-      purposesEl.textContent = '';
-      for (const p of PURPOSES) {
-        const b = button(p, state.purpose === p && !custom, () => {
-          custom = false;
-          actions.setQuestion({ purpose: p });
-        });
-        purposesEl.append(b);
-      }
-      purposesEl.append(
-        button('직접 입력', custom, () => {
-          custom = true;
-          actions.setQuestion({ purpose: '' });
-        }),
-      );
-      customEl.hidden = !custom;
-    };
-    paint();
-
-    customEl.value = custom ? state.purpose : '';
-    customEl.addEventListener('input', () => actions.setQuestion({ purpose: customEl.value }));
-
-    moodEl.value = state.mood;
-    moodEl.addEventListener('input', () => actions.setQuestion({ mood: moodEl.value }));
-
-    const moodsEl = root.querySelector('#moods');
-    for (const m of MOODS) {
-      moodsEl.append(
-        button(m, false, () => {
-          // drawAsk 시점의 state 스냅샷을 읽으면 그 뒤에 직접 타이핑한 내용이 사라진다.
-          // 클릭하는 순간의 최신 값을 읽어서 이어 붙인다
-          const cur = actions.getState().mood;
-          const next = cur ? `${cur}, ${m}` : m;
-          moodEl.value = next;
-          actions.setQuestion({ mood: next });
-        }, 'ghost'),
-      );
-    }
-
-    panes.foot.querySelector('#make').addEventListener('click', () => generate());
-    updateAsk(actions.getState());
-  }
-
-  function updateAsk(state) {
-    const make = panes.foot.querySelector('#make');
-    if (make) make.disabled = !state.purpose.trim();
-    const hint = panes.foot.querySelector('#cost-hint');
-    if (hint) {
-      hint.textContent = state.keyChecked
-        ? '4안을 만드는 데 한 번 호출합니다'
-        : '키를 먼저 확인해야 합니다';
-    }
-  }
+  let phase = 'busy'; // busy | show
 
   /* ------------------------------------------------------------ 생성 */
 
   function drawBusy() {
-    const st = actions.getState();
     root.innerHTML = `
-      <div class="msg user">
-        <div class="msg-role">나</div>
-        <div class="msg-body">${esc([st.purpose, st.mood].filter(Boolean).join(' / '))}</div>
-      </div>
       <div class="msg">
-        <div class="msg-role">안내</div>
         <div class="msg-body">
-          <span class="busy">넷을 한 번에 만드는 중입니다</span>
-          <div id="prog" style="margin-top:10px"></div>
-          <div class="tiny dim" style="margin-top:10px">넷이 서로 달라야 하므로 한 번에 같이 만듭니다</div>
+          <span class="busy">상담하고 방향을 잡는 중입니다</span>
+          <div class="tiny dim" style="margin-top:10px">되는 것과 어려운 것을 살펴 네 방향으로 정리합니다</div>
         </div>
       </div>`;
 
     panes.foot.innerHTML = `
       <div class="composer">
         <input type="text" placeholder="만드는 중" disabled>
-        <div class="row"><span class="tiny dim">한 번의 호출로 넷을 받습니다</span></div>
+        <div class="row"><span class="tiny dim">한 번의 호출로 상담과 네 방향을 받습니다</span></div>
       </div>`;
 
-    panes.canvasHead.textContent = '자리를 잡는 중';
+    panes.canvasHead.textContent = '방향을 그리는 중';
     panes.canvasBody.className = 'canvas-body';
     panes.canvasBody.innerHTML = `
       <div class="split">
-        ${KINDS.map(
-          (k) =>
-            '<div class="card">' +
-            `<div class="eyebrow">${esc(k)}</div>` +
-            '<div class="skeleton" style="height:14px;width:70%;margin-top:10px"></div>' +
-            '<div class="skeleton" style="height:9px;width:100%;margin-top:8px"></div>' +
-            '<div class="skeleton" style="height:9px;width:84%;margin-top:5px"></div>' +
-            '</div>',
-        ).join('')}
+        ${['A안', 'B안', 'C안', 'D안']
+          .map(
+            (k) =>
+              '<div class="card">' +
+              `<div class="eyebrow">${k}</div>` +
+              '<div class="skeleton" style="height:120px;width:100%;margin-top:10px"></div>' +
+              '<div class="skeleton" style="height:12px;width:60%;margin-top:10px"></div>' +
+              '<div class="skeleton" style="height:9px;width:100%;margin-top:6px"></div>' +
+              '</div>',
+          )
+          .join('')}
       </div>`;
-
-    drawProgress();
-  }
-
-  function drawProgress() {
-    const el = root.querySelector('#prog');
-    if (!el) return;
-    el.innerHTML = progress
-      .map(
-        (p) =>
-          `<div class="row" style="margin-bottom:4px"><span class="badge">${esc(p.kind)}</span><span class="small dim">${esc(p.note)}</span></div>`,
-      )
-      .join('');
-  }
-
-  /**
-   * 안 하나가 실제로 티스토리에 올릴 수 있는 스킨이 되는지 본다.
-   * 세부 값이 범위 안이어도 골격을 통과하지 못하면 소용이 없다.
-   */
-  function auditConcept(concept) {
-    const problems = validateDetails(concept.details);
-    if (problems.length) return problems;
-
-    const preset = detailsToPreset(concept.details);
-    const html = buildSkinHtml(preset);
-    const a = auditPlaceholders(html);
-    const g = auditGroupTags(html);
-    const traps = checkPitfalls({ 'skin.html': html, 'style.css': shared.css, 'images/script.js': shared.js });
-
-    return [
-      ...a.unknown.map((x) => `없는 치환자 ${x}`),
-      ...a.blacklisted.map((x) => x.why),
-      ...a.scopeErrors.map((x) => x.message),
-      ...g.unknown.map((x) => `없는 그룹 태그 ${x}`),
-      ...g.unbalanced.map((x) => `여닫이가 안 맞는 ${x.tag}`),
-      ...g.parentErrors.map((x) => x.message),
-      ...traps.map((x) => x.message),
-    ];
-  }
-
-  async function callModel(prompt) {
-    const st = actions.getState();
-    const res = await createStructured(st.provider, st.apiKey, {
-      model: st.model,
-      system: prompt.system,
-      // 프리픽스/태스크 분리본. 없으면 undefined 그대로 넘어가고 제공자 쪽에서 system 만 쓴다
-      systemParts: prompt.systemParts,
-      messages: prompt.messages,
-      schema: prompt.schema,
-      effort: prompt.effort,
-    });
-    if (res.ok) {
-      actions.addUsage(res.usage, estimateCost(st.provider, st.model, res.usage));
-    }
-    return res;
   }
 
   async function generate() {
@@ -254,312 +65,176 @@ export function mount(root, ctx) {
     }
 
     phase = 'busy';
-    failed = [];
-    progress = KINDS.map((k) => ({ kind: k, note: '대기' }));
     actions.setBusy(true);
     drawBusy();
 
-    const res = await callModel(buildConceptPrompt({ purpose: st.purpose, mood: st.mood }));
+    const prompt = buildConsultConceptPrompt({ purpose: st.purpose });
+    const res = await createStructured(st.provider, st.apiKey, {
+      model: st.model,
+      system: prompt.system,
+      systemParts: prompt.systemParts,
+      messages: prompt.messages,
+      schema: prompt.schema,
+      effort: prompt.effort,
+    });
+
+    actions.setBusy(false);
 
     if (!res.ok) {
-      actions.setBusy(false);
-      phase = 'ask';
-      drawAsk(actions.getState());
+      // 물을 자리는 앞 화면(E1)에 있다. 알리고 돌려보내면 용도를 그대로 둔 채 다시 시도한다
       showError(res.error);
+      if (actions.getState().screen !== 'E1') actions.go('E1');
       return;
     }
+    if (res.usage) actions.addUsage(res.usage, estimateCost(st.provider, st.model, res.usage));
 
-    const concepts = res.data?.concepts || [];
-
-    // 넷이 서로 다른지 먼저 본다. 겹치면 사용자가 고를 근거가 없다
-    const setErrors = validateConceptSet(concepts);
-
-    // 안마다 실제로 스킨이 되는지 본다
-    const kept = [];
-    for (const c of concepts) {
-      const problems = auditConcept(c);
-      const i = progress.findIndex((p) => p.kind === c.kind);
-      if (i >= 0) progress[i].note = problems.length ? '통과하지 못함' : '완료';
-      if (problems.length) failed.push({ kind: c.kind, problems });
-      else kept.push(c);
+    const data = res.data || {};
+    const concepts = data.concepts || [];
+    // 넷이 서로 다른지만 가볍게 본다. 거친 구조가 겹치면 고를 근거가 약하다
+    const errs = validateConceptSet(concepts);
+    if (errs.length) {
+      // 치명적이지 않다. 그대로 보여 주되 로그에 남긴다
+      console.warn('concept set warnings:', errs);
     }
 
-    // 겉모습이 겹친다는 지적은 개별 안의 문제가 아니라 묶음의 문제다.
-    // 넷 다 멀쩡한데 서로 닮았을 뿐이라면 통째로 버리지 않고 알리기만 한다.
-    const shapeDup = setErrors.filter((e) => e.includes('겉모습이 같은'));
-
-    actions.setConcepts(kept);
-    actions.setBusy(false);
+    actions.setConsult({ consultation: data.consultation, concepts, purpose: st.purpose });
     phase = 'show';
-    zoomIndex = -1;
-    drawShow(actions.getState(), shapeDup);
+    drawShow(actions.getState());
     // 좁은 화면에서는 4안이 탭 건너에 있다. 만들어진 순간 그쪽으로 넘겨 준다
     showCanvas?.();
   }
 
-  /** 실패한 안 하나만 다시 만든다. 살아남은 셋을 참고로 줘서 겹치지 않게 한다. */
-  async function retryOne(kind) {
-    const st = actions.getState();
-    actions.setBusy(true);
-    const btn = root.querySelector(`[data-retry="${cssEsc(kind)}"]`);
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = '만드는 중';
-    }
+  /* ------------------------------------------------------------ 보여주기 */
 
-    const prompt = buildRetryConceptPrompt({
-      purpose: st.purpose,
-      mood: st.mood,
-      kind,
-      others: st.concepts,
-    });
-    const res = await callModel({ ...prompt, schema: prompt.schema || conceptSchemaFor(kind) });
-
-    actions.setBusy(false);
-
-    if (!res.ok) {
-      showError(res.error);
-      drawShow(actions.getState());
-      return;
-    }
-
-    const concept = res.data?.concept || res.data;
-    const problems = auditConcept(concept);
-    if (problems.length) {
-      toast('다시 만든 안도 통과하지 못했습니다', 'bad');
-      drawShow(actions.getState());
-      return;
-    }
-
-    failed = failed.filter((f) => f.kind !== kind);
-    actions.replaceConcept(kind, concept);
-    drawShow(actions.getState());
-  }
-
-  /* ------------------------------------------------------------ 4안 */
-
-  function drawShow(state, shapeDup = []) {
-    const chosen = state.concepts[state.conceptIndex];
-
-    const failedBox = failed.length
-      ? `<div class="msg sys">
-           <div class="msg-body" style="border-style:solid;border-color:var(--danger);background:var(--danger-bg)">
-             <h3 style="font-size:var(--t-body);color:var(--danger);margin-bottom:4px">${failed.map((f) => esc(f.kind)).join(', ')} 가 검증을 통과하지 못했습니다</h3>
-             <p class="small" style="margin:0">나온 안 중에서 고르거나, 통과하지 못한 안만 다시 만들 수 있습니다. 다시 만들 때 나머지와 겹치지 않도록 그것들을 참고합니다.</p>
-             <div class="msg-actions">
-               ${failed.map((f) => `<button class="sm" data-retry="${esc(f.kind)}">${esc(f.kind)} 다시 만들기</button>`).join('')}
-             </div>
-             <p class="tiny dim" style="margin:6px 0 0">${esc(failed[0].problems[0] || '')}</p>
-           </div>
-         </div>`
-      : '';
-
-    const dupBox = shapeDup.length
-      ? `<div class="msg sys">
-           <div class="msg-body">
-             <span class="strong">비슷해 보이는 안이 있습니다</span>
-             <p class="small" style="margin:4px 0 0">${esc(shapeDup[0])}</p>
-             <p class="tiny dim" style="margin:4px 0 0">조건을 바꿔 다시 만들면 더 다른 넷이 나올 수 있습니다.</p>
-           </div>
-         </div>`
-      : '';
-
+  function drawShow(state) {
+    // 용도(사용자 말)는 왼쪽 대화 로그가 위에 그려 둔다. 여기서 상담부터 얹는다
     root.innerHTML = `
-      <div class="msg user">
-        <div class="msg-role">나</div>
-        <div class="msg-body">${esc([state.purpose, state.mood].filter(Boolean).join(' / '))}</div>
-      </div>
-      ${failedBox}${dupBox}
       <div class="msg">
-        <div class="msg-role">안내</div>
+        <div class="msg-body" style="white-space:pre-wrap">${esc(state.consultation)}</div>
+      </div>
+      <div class="msg">
         <div class="msg-body">
-          넷을 만들었습니다. 오른쪽에서 읽고 하나를 고르세요.
+          오른쪽 네 방향 중 하나를 고르세요.
           <div class="msg-form">
             <div class="field">
-              <div class="field-label">고른 안</div>
+              <div class="field-label">방향</div>
               <div class="opts" id="picks"></div>
-              <div class="field-note" id="pick-note"></div>
             </div>
             <div class="field">
-              <div class="field-label">섞고 싶은 것이 있으면 적어 주세요</div>
-              <input type="text" id="mix" placeholder="예: 보편 A로 하되 실험 A의 고정폭 글꼴을 쓰고 싶다">
-              <div class="field-note">다음 화면의 세부 항목에 미리 반영됩니다</div>
+              <div class="field-label">덧붙일 의견 (선택)</div>
+              <textarea id="note" class="chip-input" rows="2"
+                placeholder="고른 방향에 바라는 점을 적으면 다음 단계에 반영합니다"></textarea>
             </div>
           </div>
         </div>
       </div>
       <div class="msg sys">
         <div class="msg-body">
-          마음에 드는 것이 없으면 다시 만들 수 있습니다. 한 번 더 호출합니다.
-          <div class="msg-actions">
-            <button class="sm" id="again">조건 바꾸기</button>
-            <button class="sm" id="remake">다시 만들기</button>
+          <span class="strong">다시 만들기</span>
+          <p class="small" style="margin:4px 0 0">마음에 드는 방향이 없으면 다시 만들 수 있습니다.</p>
+          <div class="msg-actions" style="margin-top:10px">
+            <button class="sm primary" id="remake">다시 만들기</button>
           </div>
         </div>
       </div>`;
 
     panes.foot.innerHTML = `
       <div class="composer">
-        <input type="text" id="composer" placeholder="말로 덧붙일 것은 섞기 칸에 적어 주세요" disabled>
+        <input type="text" placeholder="오른쪽에서 방향을 골라 다음으로 넘어갑니다" disabled>
         <div class="row">
-          <span class="tiny dim">다음 화면에서 세부를 정합니다</span>
+          <span class="tiny dim">고른 방향의 구조를 다음 화면에서 봅니다</span>
           <span class="spacer"></span>
-          <button class="primary" id="next" ${state.conceptIndex < 0 ? 'disabled' : ''}>세부 정하러 가기</button>
+          <button class="primary" id="next" ${state.genIndex < 0 ? 'disabled' : ''}>이 방향으로</button>
         </div>
       </div>`;
 
-    // 고른 안 버튼
-    const picks = root.querySelector('#picks');
-    state.concepts.forEach((c, i) => {
-      picks.append(
-        button(c.kind, i === state.conceptIndex, () => {
-          actions.chooseConcept(i);
-          drawShow(actions.getState());
-        }),
-      );
-    });
-    root.querySelector('#pick-note').textContent = chosen
-      ? `${chosen.kind} · ${chosen.name}`
-      : '아직 고르지 않았습니다';
+    // 덧붙일 의견은 상태에 저장해 둔 값으로 되살린다(되돌아온 경우)
+    const note = root.querySelector('#note');
+    note.value = state.conceptNote || '';
+    note.addEventListener('change', () => actions.setConceptNote(note.value));
 
-    root.querySelector('#again').addEventListener('click', () => {
-      phase = 'ask';
-      drawAsk(actions.getState());
+    // A~D 고르기 버튼
+    const picks = root.querySelector('#picks');
+    state.genConcepts.forEach((c, i) => {
+      picks.append(button(conceptLabel(i), i === state.genIndex, () => selectConcept(i)));
     });
+
     root.querySelector('#remake').addEventListener('click', () => generate());
 
-    const mix = root.querySelector('#mix');
-    mix.value = state.mixNote;
-    mix.addEventListener('input', () => actions.setMixNote(mix.value));
+    panes.foot.querySelector('#next').addEventListener('click', () => {
+      // 의견을 담고, 고른 안을 확정(wire→details)한 뒤 구조를 보러 P2 로
+      actions.setConceptNote(root.querySelector('#note').value);
+      actions.applyGenConcept();
+      actions.go('P2');
+    });
 
-    panes.foot.querySelector('#next').addEventListener('click', () => actions.go('P2'));
-
-    for (const b of root.querySelectorAll('[data-retry]')) {
-      b.addEventListener('click', () => retryOne(b.dataset.retry));
-    }
-
-    if (zoomIndex >= 0) drawZoom(state);
-    else drawCards(state);
+    drawCards(state);
   }
 
-  /** 캔버스의 4안 비교. 컨셉 글이 주인공이고 도식은 보조다. */
+  /** 캔버스의 4 방향 비교. 와이어가 주인공이고 글은 밑에 짧게. */
   function drawCards(state) {
     panes.canvasHead.innerHTML =
-      '<span class="badge">4안</span>' +
-      `<span class="badge plain">${esc([state.purpose, state.mood].filter(Boolean).join(' / '))}</span>` +
-      '<span class="spacer"></span><span>컨셉이 주인공, 도식은 보조</span>';
+      '<span class="badge">4 방향</span>' + `<span class="badge plain">${esc(state.purpose)}</span>`;
 
     panes.canvasBody.className = 'canvas-body';
-    panes.canvasBody.innerHTML = `<div class="split">${state.concepts
-      .map((c, i) => conceptCard(c, i, i === state.conceptIndex))
-      .join('')}</div>`;
+    panes.canvasBody.innerHTML = state.genConcepts
+      .map((c, i) => conceptPanel(c, i, i === state.genIndex))
+      .join('');
 
-    wireCards(state);
+    wireCards();
   }
 
-  function conceptCard(c, i, selected) {
-    const preset = detailsToPreset(c.details);
+  /** 한 방향 패널. 와이어 + A안 이름 + 한 줄 소개 + 포기하는 것. */
+  function conceptPanel(c, i, selected) {
+    const spec = wireToSpec(c.wire);
     return `
-      <div class="card pick${selected ? ' selected' : ''}" data-choose="${i}">
-        <div class="row" style="align-items:flex-start;flex-wrap:nowrap;gap:14px">
-          <div style="flex:1;min-width:0">
-            <div class="eyebrow">${esc(c.kind)}</div>
-            <h3 style="font-size:var(--t-title);margin:6px 0">${esc(c.name)}</h3>
-            <p class="small dim" style="margin:0">${esc(c.summary)}</p>
-          </div>
-          <div style="flex:0 0 92px">${schematic(preset)}</div>
-        </div>
-        <div class="eyebrow" style="margin:14px 0 4px">무엇을 다르게 하나</div>
-        <ul class="list marked small">${(c.differences || []).map((d) => `<li>${esc(d)}</li>`).join('')}</ul>
-        <div class="row" style="margin-top:12px">
-          <button class="sm${selected ? ' on' : ''}" data-choose-btn="${i}">${selected ? '선택됨' : '선택'}</button>
-          <button class="sm" data-zoom="${i}">크게 보기</button>
+      <div class="card pick${selected ? ' selected' : ''}" data-choose="${i}" style="margin-bottom:16px">
+        ${wireframe(spec, { lg: true })}
+        <div style="margin-top:12px">
+          <div class="eyebrow">${esc(conceptLabel(i))}</div>
+          <h3 style="font-size:var(--t-h2);margin:6px 0 8px">${esc(c.name)}</h3>
+          <p style="margin:0 0 10px">${esc(c.pitch)}</p>
+          <p class="small dim" style="margin:0 0 12px"><span class="strong">포기하는 것</span> ${esc(c.tradeoff)}</p>
+          <button class="${selected ? 'primary' : 'sm'}" data-choose-btn="${i}">${selected ? '선택됨' : '선택'}</button>
         </div>
       </div>`;
   }
 
-  function wireCards(state) {
+  function wireCards() {
     for (const b of panes.canvasBody.querySelectorAll('[data-choose-btn]')) {
       b.addEventListener('click', (e) => {
         e.stopPropagation();
-        actions.chooseConcept(Number(b.dataset.chooseBtn));
-        drawShow(actions.getState());
+        selectConcept(Number(b.dataset.chooseBtn));
       });
     }
-    for (const b of panes.canvasBody.querySelectorAll('[data-zoom]')) {
-      b.addEventListener('click', (e) => {
-        e.stopPropagation();
-        zoomIndex = Number(b.dataset.zoom);
-        drawZoom(actions.getState());
-      });
-    }
-    // 카드 아무 데나 눌러도 골라진다. 버튼만 누르게 하면 클릭 목표가 너무 작다
     for (const card of panes.canvasBody.querySelectorAll('[data-choose]')) {
-      card.addEventListener('click', () => {
-        actions.chooseConcept(Number(card.dataset.choose));
-        drawShow(actions.getState());
-      });
+      card.addEventListener('click', () => selectConcept(Number(card.dataset.choose)));
     }
   }
 
-  /** 크게 보기. 한 안이 캔버스를 통째로 쓴다. 길게 읽고 포기하는 것까지 본다. */
-  function drawZoom(state) {
-    const c = state.concepts[zoomIndex];
-    if (!c) {
-      zoomIndex = -1;
-      drawCards(state);
-      return;
+  /**
+   * 방향을 고른다. 캔버스를 통째로 다시 그리지 않고 필요한 곳만 제자리에서 손본다 -
+   * 크게 보며 내려둔 스크롤 위치를 지키기 위해서다.
+   */
+  function selectConcept(i) {
+    actions.chooseGenConcept(i);
+
+    for (const card of panes.canvasBody.querySelectorAll('[data-choose]')) {
+      const on = Number(card.dataset.choose) === i;
+      card.classList.toggle('selected', on);
+      const btn = card.querySelector('[data-choose-btn]');
+      if (btn) {
+        btn.textContent = on ? '선택됨' : '선택';
+        btn.classList.toggle('primary', on);
+        btn.classList.toggle('sm', !on);
+      }
     }
-    const preset = detailsToPreset(c.details);
 
-    panes.canvasHead.innerHTML =
-      `<span class="badge">${esc(c.kind)}</span>` +
-      `<span class="badge plain">${esc(c.name)}</span>` +
-      '<span class="spacer"></span><span>실제 렌더가 아니라 도식입니다</span>';
-
-    panes.canvasBody.className = 'canvas-body';
-    panes.canvasBody.innerHTML = `
-      <div class="row" style="margin-bottom:14px">
-        <button class="sm" id="zoom-prev">이전 안</button>
-        <button class="sm" id="zoom-next">다음 안</button>
-        <span class="spacer"></span>
-        <button class="sm" id="zoom-close">넷 다 보기</button>
-      </div>
-      <div class="split">
-        <div>
-          <h3 style="font-size:var(--t-h3);margin-bottom:8px">${esc(c.name)}</h3>
-          <p style="margin:0 0 14px">${esc(c.summary)}</p>
-          <div class="eyebrow" style="margin-bottom:4px">구체적으로</div>
-          <ul class="list marked small">${(c.differences || []).map((d) => `<li>${esc(d)}</li>`).join('')}</ul>
-          <div class="eyebrow" style="margin:16px 0 4px">이 컨셉이 포기하는 것</div>
-          <p class="small" style="margin:0">${esc(c.tradeoff)}</p>
-          <button class="primary" style="margin-top:16px" id="zoom-choose">이걸로 시작</button>
-        </div>
-        <div>
-          ${schematic(preset, { lg: true })}
-          <p class="tiny dim" style="text-align:center;margin-top:8px">
-            정확한 모습은 세부를 정한 뒤 작업 화면에서 봅니다.
-          </p>
-        </div>
-      </div>`;
-
-    const $ = (id) => panes.canvasBody.querySelector('#' + id);
-    $('zoom-close').addEventListener('click', () => {
-      zoomIndex = -1;
-      drawCards(actions.getState());
-    });
-    $('zoom-prev').addEventListener('click', () => {
-      zoomIndex = (zoomIndex - 1 + state.concepts.length) % state.concepts.length;
-      drawZoom(actions.getState());
-    });
-    $('zoom-next').addEventListener('click', () => {
-      zoomIndex = (zoomIndex + 1) % state.concepts.length;
-      drawZoom(actions.getState());
-    });
-    $('zoom-choose').addEventListener('click', () => {
-      actions.chooseConcept(zoomIndex);
-      actions.go('P2');
-    });
+    for (const b of root.querySelectorAll('#picks button')) {
+      b.classList.toggle('on', b.textContent === conceptLabel(i));
+    }
+    const next = panes.foot.querySelector('#next');
+    if (next) next.disabled = false;
   }
 
   /* ------------------------------------------------------------ 오류 */
@@ -576,10 +251,10 @@ export function mount(root, ctx) {
 
   /* ------------------------------------------------------------ */
 
-  function button(label, on, onClick, extra = '') {
+  function button(label, on, onClick) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = `opt sm${on ? ' on' : ''}${extra ? ' ' + extra : ''}`;
+    b.className = `opt sm${on ? ' on' : ''}`;
     b.textContent = label;
     b.addEventListener('click', onClick);
     return b;
@@ -587,45 +262,41 @@ export function mount(root, ctx) {
 
   const at = actions.getState();
 
-  // E1 의 입력줄에 용도를 적고 넘어온 경우. 그 답은 고정 선택지에 없는 자유
-  // 문장이라, custom 을 안 켜면 아무 버튼도 안 켜지고 적은 내용도 안 보인다
-  if (at.purpose && !PURPOSES.includes(at.purpose)) custom = true;
-
-  // 이미 4안을 받아 둔 상태로 되돌아온 경우에는 질문부터 다시 묻지 않는다
-  if (at.concepts.length) {
+  /*
+   * 진입 규칙
+   *   - 이 용도로 만든 4안이 이미 있으면 그것을 보여 준다(P2 에서 되돌아온 경우).
+   *   - E1 의 예약(pendingGenerate)으로 들어왔으면 곧장 만든다.
+   *   - 용도만 있고 예약이 없으면(직접 도착) 그래도 만든다.
+   *   - 용도조차 없으면 물을 자리가 여기 없으니 E1 으로.
+   */
+  if (at.genConcepts.length && at.genPurpose === at.purpose) {
     phase = 'show';
     drawShow(at);
+  } else if (at.pendingGenerate) {
+    // 마운트가 끝나 app.js 가 current 를 할당한 뒤 시작한다. 마운트 도중 set() 을
+    // 부르면 show() 가 재진입해 화면과 current 가 어긋난다
+    queueMicrotask(() => {
+      actions.requestGenerate(false);
+      generate();
+    });
+  } else if (at.purpose) {
+    queueMicrotask(() => generate());
   } else {
-    drawAsk(at);
+    actions.go('E1');
   }
 
   return {
-    update(state) {
-      if (phase === 'ask') {
-        // 입력칸을 다시 그리면 커서가 날아간다. 버튼 상태만 손댄다
-        const purposesEl = root.querySelector('#purposes');
-        if (purposesEl) {
-          for (const b of purposesEl.children) {
-            // custom 모드에서는 "직접 입력" 버튼이 켜져 있어야 한다.
-            // 값 비교만 하면 직접 입력 중에는 아무 버튼도 안 켜진다
-            const on = custom
-              ? b.textContent === '직접 입력'
-              : b.textContent === state.purpose;
-            b.classList.toggle('on', on);
-          }
-        }
-        updateAsk(state);
-      } else if (phase === 'busy') {
-        drawProgress();
-      }
+    update() {
+      // 'show' 중 상태 변화(방향 고르기)는 selectConcept 가 제자리에서 처리한다.
+      // 여기서 다시 그리면 캔버스 스크롤이 튀므로 아무것도 하지 않는다.
     },
   };
 }
 
 function esc(s) {
-  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-function cssEsc(s) {
-  return String(s).replace(/"/g, '\\"');
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }

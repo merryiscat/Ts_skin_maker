@@ -19,9 +19,13 @@
   --grid-min: 17rem;
 
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+  /* 제목 글꼴. 기본은 본문과 같고, 스킨이 분리하면 skeleton 이 이 값을 덮어쓴다. */
+  --font-head: var(--font-body);
   --font-code: 'JetBrains Mono', 'D2Coding', Consolas, monospace;
   --font-size-base: 15px;
   --line-height-base: 1.7;
+  /* 제목 크기 배율. 스킨이 제목 크기를 조절하면 skeleton 이 이 값을 덮어쓴다. */
+  --title-scale: 1;
 
   --header-h: 3.25rem;
   --space: 1rem;
@@ -45,6 +49,18 @@ body {
 img { max-width: 100%; height: auto; }
 a { color: inherit; text-decoration: none; }
 a:hover { color: var(--color-accent); }
+
+/* 제목 글꼴. --font-head 는 기본이 --font-body 라, 스킨이 제목을 분리하지 않으면
+   본문과 같은 글꼴이 그대로 쓰인다. 분리하면 이 제목류만 다른 글꼴로 바뀐다. */
+.site-title,
+.side-title,
+.list-header h1,
+.card-title,
+.post-title,
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4 { font-family: var(--font-head); }
 
 /* ---------- 헤더 ---------- */
 
@@ -212,7 +228,7 @@ a:hover { color: var(--color-accent); }
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--color-border);
 }
-.list-header h1 { margin: 0; font-size: 1.375rem; }
+.list-header h1 { margin: 0; font-size: calc(1.375rem * var(--title-scale)); }
 .list-count { margin-left: 0.375rem; font-size: 0.875rem; font-weight: 400; color: var(--color-text-dim); }
 
 .empty { padding: 4rem 0; text-align: center; color: var(--color-text-dim); }
@@ -261,7 +277,7 @@ a:hover { color: var(--color-accent); }
 }
 .card-cat { color: var(--color-accent); }
 
-.card-title { margin: 0 0 0.5rem; font-size: 1.1875rem; line-height: 1.4; }
+.card-title { margin: 0 0 0.5rem; font-size: calc(1.1875rem * var(--title-scale)); line-height: 1.4; }
 
 .card-summary {
   margin: 0 0 0.625rem;
@@ -282,9 +298,12 @@ a:hover { color: var(--color-accent); }
 .list-standard .card { padding-bottom: 2rem; border-bottom: 1px solid var(--color-border); }
 .list-standard .card:last-child { border-bottom: 0; }
 
-/* 칼럼: 구분선 없이 여백만으로 나눈다 */
-.list-plain .card { margin-bottom: 2.75rem; }
-.list-plain .card-title { font-size: 1.375rem; }
+/* 단순: 제목 중심. 사진 없이, 제목을 크게, 요약은 한 줄만, 넉넉한 여백으로
+   나눈다. 표준(사진+요약+구분선)과 눈에 띄게 갈라 놓는다. */
+.list-plain .card { margin-bottom: 3.25rem; }
+.list-plain .card-title { font-size: calc(1.75rem * var(--title-scale)); line-height: 1.3; }
+.list-plain .card-summary { font-size: 0.9375rem; -webkit-line-clamp: 1; }
+.list-plain .card-thumb { display: none; }
 
 /* 그리드: 카드 격자 */
 .list-grid s_index_article_rep,
@@ -306,7 +325,7 @@ a:hover { color: var(--color-accent); }
 .list-grid .protected { grid-column: 1 / -1; }
 .list-grid .card { margin-bottom: 0; }
 .list-grid .card-body { padding-top: 0.625rem; }
-.list-grid .card-title { font-size: 1rem; }
+.list-grid .card-title { font-size: calc(1rem * var(--title-scale)); }
 
 /* 밀집: 작은 썸네일을 왼쪽에 */
 .list-dense .card {
@@ -320,8 +339,95 @@ a:hover { color: var(--color-accent); }
 .list-dense .card-thumb { flex: 0 0 7rem; }
 .list-dense .card-thumb img { aspect-ratio: 4 / 3; }
 .list-dense .card-body { flex: 1 1 auto; min-width: 0; }
-.list-dense .card-title { font-size: 1rem; }
+.list-dense .card-title { font-size: calc(1rem * var(--title-scale)); }
 .list-dense .card-summary { -webkit-line-clamp: 2; font-size: 0.8125rem; }
+
+/*
+  히어로: 첫 글을 대표 이미지로 크게 깔고 제목을 얹는다. 나머지는 표준처럼 흐른다.
+
+  "화면 끝까지"는 사이드바가 없을 때만 진짜 뷰포트 끝까지 간다. 사이드바가 있으면
+  본문 칸이 가운데에서 오른쪽으로 밀려 있어, 100vw 배너를 뷰포트 기준으로 펴면
+  가로 스크롤이 생기고 어긋난다 - 그건 비용이 아니라 레이아웃의 사실이다.
+  그래서 사이드바가 있을 땐 본문 칸 폭을 꽉 채우는 배너로 둔다.
+*/
+.list-hero .card:first-of-type {
+  position: relative;
+  min-height: 70vh;
+  margin: 0 0 3rem;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  display: block;
+}
+/* 사이드바 없음: main-inner 최대폭을 뚫고 뷰포트 끝까지. 나머지 카드/머리말은
+   읽기 폭으로 도로 좁힌다(가운데 정렬). */
+.layout-no-sidebar.list-hero .main-inner { max-width: none; }
+.layout-no-sidebar.list-hero .card:first-of-type {
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  border-radius: 0;
+}
+.layout-no-sidebar.list-hero .list-header,
+.layout-no-sidebar.list-hero .empty,
+.layout-no-sidebar.list-hero .paging,
+.layout-no-sidebar.list-hero .card:not(:first-of-type) {
+  max-width: var(--content-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+/* 대표 이미지를 카드 전체에 깐다 */
+.list-hero .card:first-of-type .card-thumb {
+  position: absolute;
+  inset: 0;
+  display: block;
+  margin: 0;
+  border-radius: 0;
+}
+.list-hero .card:first-of-type .card-thumb img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  object-fit: cover;
+}
+/* 아래를 어둡게 깔고 제목을 흰색으로 얹는다 */
+.list-hero .card:first-of-type .card-body {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 1;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 3rem 2.5rem 2.5rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0));
+  color: #fff;
+}
+.list-hero .card:first-of-type .card-title {
+  font-size: calc(2.75rem * var(--title-scale));
+  line-height: 1.15;
+  margin-bottom: 0.625rem;
+}
+.list-hero .card:first-of-type .card-title a,
+.list-hero .card:first-of-type .card-meta a,
+.list-hero .card:first-of-type .card-meta time,
+.list-hero .card:first-of-type .card-cat { color: #fff; }
+.list-hero .card:first-of-type .card-summary {
+  color: rgba(255, 255, 255, 0.88);
+  -webkit-line-clamp: 2;
+  font-size: 1rem;
+}
+/* 나머지 카드는 표준 목록처럼 */
+.list-hero .card:not(:first-of-type) {
+  padding-bottom: 2rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.list-hero .card:not(:first-of-type):last-child { border-bottom: 0; }
+
+@media (max-width: 768px) {
+  .list-hero .card:first-of-type { min-height: 60vh; }
+  .list-hero .card:first-of-type .card-body { padding: 2rem 1.25rem 1.5rem; }
+  .list-hero .card:first-of-type .card-title { font-size: calc(1.875rem * var(--title-scale)); }
+}
 
 /* ---------- 글 상세 ---------- */
 
@@ -340,7 +446,7 @@ a:hover { color: var(--color-accent); }
   color: var(--color-text-dim);
 }
 
-.post-title { margin: 0; font-size: 1.875rem; line-height: 1.3; }
+.post-title { margin: 0; font-size: calc(1.875rem * var(--title-scale)); line-height: 1.3; }
 
 .post-tags { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 2rem; }
 .post-tags a { display: inline-block; padding: 0.125rem 0.4375rem; background: var(--color-surface);
@@ -730,7 +836,7 @@ a:hover { color: var(--color-accent); }
   .top-nav { display: none; }
 
   .main-inner { padding: 1.5rem 0 3rem; }
-  .post-title { font-size: 1.5rem; }
+  .post-title { font-size: calc(1.5rem * var(--title-scale)); }
 
   .list-dense .card-thumb { flex-basis: 5.5rem; }
   .post-nav { flex-direction: column; gap: 0.75rem; }

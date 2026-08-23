@@ -48,6 +48,7 @@
  */
 
 import * as actions from './state.js';
+import { renderConversation } from './conversation.js';
 
 const ROUTES = {
   E1: () => import('../screens/e1.js'),
@@ -124,7 +125,14 @@ function buildFrame() {
           <button type="button" class="tab" id="tab-canvas">나오는 것</button>
         </div>
 
-        <div class="chat-body" id="chat-body"></div>
+        <!-- 왼쪽 대화는 두 겹이다. #conv-log 는 끝난 단계의 말풍선으로, 화면이
+             바뀌어도 셸이 유지한다. #screen-root 는 지금 답하는 단계의 컨트롤로,
+             화면 모듈이 채우고 전환 때 비워진다. 둘 다 .chat-body 안이라 하나의
+             대화로 이어져 스크롤된다 (2026-08-23: 전체 흐름을 연속 대화로). -->
+        <div class="chat-body" id="chat-body">
+          <div id="conv-log"></div>
+          <div id="screen-root"></div>
+        </div>
         <div class="chat-foot" id="chat-foot"></div>
       </div>
 
@@ -160,7 +168,11 @@ function buildFrame() {
     drawer: $('drawer'),
     drawerBody: $('drawer-body'),
     tabs: $('tabs'),
-    body: $('chat-body'),
+    // body 는 화면 모듈이 채우는 자리(#screen-root). 스크롤 컨테이너는 그
+    // 부모(.chat-body)이고, convLog 는 셸이 유지하는 대화 로그다
+    chatBody: $('chat-body'),
+    convLog: $('conv-log'),
+    body: $('screen-root'),
     foot: $('chat-foot'),
     canvas: $('canvas'),
     canvasHead: $('canvas-head-note'),
@@ -255,6 +267,22 @@ function closeSettings() {
 }
 
 /**
+ * 왼쪽 대화 로그를 다시 그린다.
+ *
+ * 끝난 단계의 말풍선은 상태에서 계산해 낸다(conversation.js). 화면이 바뀌어도
+ * 이 자리는 셸이 유지하므로 대화가 접히지 않는다. 새 말풍선이 붙으면 바닥으로
+ * 내려 방금 것이 보이게 한다 - 단, 사용자가 위로 올려 지난 대화를 읽는 중이면
+ * 억지로 끌어내리지 않는다.
+ */
+function renderConvLog(state) {
+  if (!panes) return;
+  const box = panes.chatBody;
+  const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  panes.convLog.innerHTML = renderConversation(state);
+  if (nearBottom) box.scrollTop = box.scrollHeight;
+}
+
+/**
  * 대화 머리에서 화면마다 달라지는 것.
  *
  * 단계 표시는 두 번에 걸쳐 걷어냈다. 처음엔 다섯 단계를 늘어놓는 줄(.steprail)이
@@ -336,6 +364,11 @@ async function show(state) {
     shared,
     toast,
     go: actions.go,
+    // 화면의 root(#screen-root)는 스크롤 컨테이너가 아니다(그 부모 .chat-body 가
+    // 대화 로그와 함께 스크롤한다). 새 말풍선을 바닥으로 내릴 땐 이걸 부른다
+    scrollChat: () => {
+      panes.chatBody.scrollTop = panes.chatBody.scrollHeight;
+    },
     panes: {
       foot: panes.foot,
       canvasHead: panes.canvasHead,
@@ -361,6 +394,10 @@ async function show(state) {
 
   current = { id: state.screen, api };
   api.update?.(actions.getState());
+
+  // 새 화면의 컨트롤은 대화 맨 아래에 붙는다. 방금 것이 보이게 바닥으로 내린다.
+  // (화면 모듈의 root 는 #screen-root 라 스크롤 컨테이너가 아니다 - 여기서 한다)
+  panes.chatBody.scrollTop = panes.chatBody.scrollHeight;
 }
 
 export async function start(mountPoint) {
@@ -385,11 +422,13 @@ export async function start(mountPoint) {
 
   actions.restore();
   actions.subscribe((s) => {
+    renderConvLog(s);
     drawStep(s);
     show(s);
   });
 
   const s = actions.getState();
+  renderConvLog(s);
   drawStep(s);
   await show(s);
 }

@@ -26,6 +26,7 @@ export const LIST_STYLES = {
   PLAIN: 'list-plain',     // 제목 + 발췌, 썸네일 없음
   GRID: 'list-grid',       // 카드 그리드, 썸네일 우선
   DENSE: 'list-dense',     // 작은 썸네일 + 요약, 밀집
+  HERO: 'list-hero',       // 첫 글을 대표 이미지로 크게, 제목을 얹는다
 };
 
 /** 프리셋이 값을 안 주면 쓰는 기본값. */
@@ -46,7 +47,10 @@ const DEFAULTS = {
   showSubscribe: true,
   showPrevNext: true,
   bodyFont: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif",
+  headFont: null,
+  headFontUrl: null,
   codeFont: "'JetBrains Mono', 'D2Coding', Consolas, monospace",
+  themeCss: null,
 };
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -241,6 +245,14 @@ export function buildSkinHtml(preset) {
 
   const bodyClasses = [p.layout, p.listStyle, p.showToc ? 'has-toc' : ''].filter(Boolean).join(' ');
 
+  // 웹폰트 스타일시트 링크. 본문·제목이 같은 웹폰트면 한 번만 넣는다.
+  const fontUrls = [...new Set([p.bodyFontUrl, p.headFontUrl].filter(Boolean))];
+  const fontLinks = fontUrls.length
+    ? '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
+      fontUrls.map((u) => `  <link rel="stylesheet" href="${u}">`).join('\n') +
+      '\n'
+    : '';
+
   const prevNext = p.showPrevNext
     ? `
             <nav class="post-nav">
@@ -296,7 +308,7 @@ ${
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>`
     : ''
 }
-  <link rel="stylesheet" href="./style.css">
+${p.fontFaceCss ? `  <style>${p.fontFaceCss}</style>\n` : ''}${fontLinks}  <link rel="stylesheet" href="./style.css">
 
   <!--
     스킨 옵션 주입.
@@ -308,11 +320,16 @@ ${
     :root {
 ${tokensToCss(tokens)}
       --font-body: ${p.bodyFont};
+      --font-head: ${p.headFont || 'var(--font-body)'};
       --font-code: [##_var_codeFont_##];
       --color-accent: [##_var_accentColor_##];
     }
   </style>
-
+${
+  // 생성된 테마 CSS 레이어. 반드시 가장 마지막에 얹혀 base 와 위 :root 주입을 덮는다.
+  // 컨셉의 look 을 색·질감·모서리·hover 로 실제로 입히는 자리다(harness/theme-prompt.js).
+  p.themeCss ? `\n  <style>\n${p.themeCss}\n  </style>\n` : ''
+}
   <link rel="alternate" type="application/rss+xml" title="[##_title_##]" href="[##_rss_url_##]">
   <link rel="shortcut icon" href="[##_image_##]">
 

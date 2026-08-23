@@ -36,6 +36,7 @@
  */
 
 import { PROVIDERS, RECOMMENDED, chatModels, validateKeyFormat, listModels } from '../providers.js';
+import { purposeBlockHtml } from '../app/conversation.js';
 
 /**
  * 오류 문구.
@@ -65,7 +66,7 @@ const ERRORS = {
 };
 
 export function mount(root, ctx) {
-  const { actions, toast, panes } = ctx;
+  const { actions, toast, panes, scrollChat } = ctx;
 
   let checking = false;
   let failure = null; // { kind, message }
@@ -79,45 +80,22 @@ export function mount(root, ctx) {
   /* ------------------------------------------------------- 대화 아래 발판 */
 
   /*
-   * 입력줄은 대화용이지 키를 받는 자리가 아니다.
+   * 입력줄(발판)은 E1 내내 잠가 둔다.
    *
-   * 이 자리는 W1 에서 **모델에게 전송되는 통로**다. E1 에서 여기에 키를 넣게
-   * 가르치면 나중에 W1 에서 같은 자리에 키를 붙여넣는 손버릇이 생기고, 그러면
-   * 사용자 손으로 키가 밖에 나간다. 그래서 키는 말풍선 안 전용 칸에서 받고,
-   * 이 입력줄은 키가 확인되기 전까지 잠가 둔다.
-   *
-   * 잠금이 풀린 뒤에 여기 적는 답은 P1 의 첫 질문(용도)에 그대로 들어간다.
-   * 활성화만 해 놓고 아무 일도 안 하면 안내 문구가 거짓말이 된다.
+   * 이 자리는 W1 에서 **모델에게 전송되는 통로**다. E1 에서 여기에 무언가를
+   * 받게 가르치면 나중에 W1 에서 같은 자리에 키를 붙여넣는 손버릇이 생기고,
+   * 그러면 사용자 손으로 키가 밖에 나간다. 그래서 키도, 용도·느낌도 전부
+   * 말풍선 안 전용 칸에서 받는다. 실제로 이 입력줄이 열리는 것은 W1 부터다.
    */
   panes.foot.innerHTML = `
     <div class="composer">
       <div class="row" style="flex-wrap:nowrap">
-        <input type="text" id="composer" placeholder="어떤 용도의 블로그를 만들려고 하시나요?" disabled style="flex:1 1 auto;min-width:0">
+        <input type="text" id="composer" placeholder="용도와 느낌은 위 대화에서 정합니다" disabled style="flex:1 1 auto;min-width:0">
         <button class="primary" id="send" disabled>전송</button>
       </div>
     </div>`;
 
   const foot = (id) => panes.foot.querySelector('#' + id);
-
-  foot('composer').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.isComposing) {
-      e.preventDefault();
-      submitPurpose();
-    }
-  });
-
-  /*
-   * 나가는 문.
-   *
-   * 처음 온 사람은 P1(컨셉 고르기)로 간다. 하지만 작업 중에 설정에서 "키 관리"를
-   * 눌러 여기로 온 사람도 있다. 그 사람을 P1 으로 보내면 컨셉부터 다시 훑고
-   * 내려와야 한다. 이미 시작점을 고른 적이 있으면 작업 화면으로 돌려보낸다.
-   */
-  function exitTo() {
-    return actions.getState().conceptDetails ? 'W1' : 'P1';
-  }
-
-  foot('send').addEventListener('click', () => submitPurpose());
 
   /* ------------------------------------------------------------ 오른쪽 */
 
@@ -223,14 +201,15 @@ export function mount(root, ctx) {
     const provider = PROVIDERS[state.provider];
 
     /*
-     * 키와 모델이 모두 정해지면 설정 안내는 통째로 사라진다 (2026-08-17
-     * 디자인 피드백). 그 시점에 남은 질문은 "무엇을 만들 것인가" 하나라서,
-     * 그 질문과 답의 예시만 남긴다.
+     * 키와 모델이 모두 정해지면 설정 안내는 통째로 사라지고, 여기서 용도와
+     * 느낌을 대화로 받는다 (2026-08-23 디자인 피드백: 용도·느낌을 P1 로
+     * 나누지 않고 이 한 화면에서 채팅처럼 이어 묻는다). 4안 생성은 P1 이 맡되,
+     * "4안 만들기" 를 누르면 곧장 넘어가 생성이 시작된다.
      */
     if (state.keyChecked && state.model) {
       root.innerHTML = purposeHtml();
       wirePurpose();
-      root.scrollTop = root.scrollHeight;
+      scrollChat?.();
       return;
     }
 
@@ -270,7 +249,7 @@ export function mount(root, ctx) {
         `<div class="tiny dim" style="margin-top:8px">처음 연결 검증에는 비용이 소요되지 않습니다.</div>`;
 
     parts.push(
-      `<div class="msg"><div class="msg-role">안내</div><div class="msg-body">` +
+      `<div class="msg"><div class="msg-body">` +
         `<div>${lead}</div>` +
         `<div class="opts" id="providers" style="margin-top:8px"></div>` +
         (state.keyChecked ? '' : keyFieldHtml(state, provider)) +
@@ -285,7 +264,7 @@ export function mount(root, ctx) {
 
     root.innerHTML = parts.join('');
     wireChat(state);
-    root.scrollTop = root.scrollHeight;
+    scrollChat?.();
   }
 
   /**
@@ -312,7 +291,7 @@ export function mount(root, ctx) {
     // 적으면 입력칸의 패딩을 바꿀 때 따로 놀게 된다
     return (
       `<div class="row" style="margin-top:10px">` +
-      `<input type="password" class="mono" id="key" style="flex:1 1 150px;min-width:0" autocomplete="off" spellcheck="false" placeholder="${esc(provider.keyPlaceholder)}">` +
+      `<input type="password" class="mono chip-input" id="key" style="flex:1 1 150px;min-width:0" autocomplete="off" spellcheck="false" placeholder="${esc(provider.keyPlaceholder)}">` +
       `<button class="sm" id="check" style="align-self:stretch"${checking ? ' disabled' : ''}>검증</button>` +
       (checking ? `<span class="busy">확인 중</span>` : '') +
       `</div>`
@@ -333,7 +312,7 @@ export function mount(root, ctx) {
         : '';
 
     return (
-      `<div class="msg sys"><div class="msg-role">안내</div>` +
+      `<div class="msg sys">` +
       `<div class="msg-body" style="border-style:solid;border-color:var(--danger);background:var(--danger-bg)">` +
       `<h3 style="font-size:var(--t-body);color:var(--danger);margin-bottom:4px">${esc(shape.title)}</h3>` +
       `<p style="margin:0 0 4px">${esc(body)}</p>` +
@@ -349,7 +328,7 @@ export function mount(root, ctx) {
 
   function okHtml(state, provider) {
     return (
-      `<div class="msg"><div class="msg-role">안내</div><div class="msg-body">` +
+      `<div class="msg"><div class="msg-body">` +
       // 확인 상태는 대화 머리의 배지가 상시로 들고 있다. 여기서 또 말하지 않는다
       `키를 확인했습니다. 쓸 모델을 고르세요.` +
       `<div class="tiny dim" style="margin-top:6px" id="lock-note"></div>` +
@@ -371,51 +350,39 @@ export function mount(root, ctx) {
   }
 
   /**
-   * 키와 모델이 정해진 뒤의 대화.
+   * 키와 모델이 정해진 뒤의 대화 - 용도 하나만 묻는다.
    *
-   * 예시를 누르면 입력줄에 채워질 뿐 바로 보내지 않는다 - 보내는 행동은
-   * 사용자의 것이어야 하고, 채워진 글을 고쳐서 자기 말로 만들 수도 있다.
+   * 예전엔 여기서 느낌까지 받아 P1 에서 4안을 생성했지만, 자유 텍스트 컨셉을
+   * 고정 스키마로 충실히 옮기지 못해 선택형으로 바꿨다 (2026-08-23). 이제 용도를
+   * 받으면 곧장 스키마 선택 화면(P2)으로 넘어가 항목을 직접 고른다. 용도는
+   * 맥락으로 남아 로그 위에 표시되고 W1 대화·산출물에 쓰인다.
    *
-   * 키 지우기는 여기에도 남긴다. 설정의 "키 관리"가 이 화면으로 보내므로,
-   * 여기서 키를 지울 수 없으면 그 길이 막다른 골목이 된다. 모델 바꾸기는
-   * 설정 팝업이 맡는다.
+   * 블록 생김새는 conversation.js 가 단일 출처로 들고 있다. 키/모델 관리는 설정.
    */
   function purposeHtml() {
-    const samples = [
-      '개발 공부한 내용을 정리하는 기술 블로그예요. 코드 예제가 많이 들어갑니다',
-      '여행 다녀온 곳을 사진 위주로 기록하려고 해요',
-      '요리 레시피와 생활 팁을 모아 두는 블로그입니다',
-    ];
-    return (
-      `<div class="msg"><div class="msg-role">안내</div><div class="msg-body">` +
-      `어떤 용도의 블로그를 만들려고 하시나요?` +
-      `<div class="tiny dim" style="margin-top:6px">아래 입력줄에 적어 보내면 그 답에 맞춰 컨셉을 만듭니다. 예시를 누르면 입력줄에 채워집니다.</div>` +
-      `<div class="col" id="samples" style="margin-top:10px">` +
-      samples
-        .map((s) => `<button type="button" class="opt sm" style="text-align:left">${esc(s)}</button>`)
-        .join('') +
-      `</div>` +
-      `<div class="msg-actions">` +
-      `<button class="sm" id="forget">키 지우기</button>` +
-      `</div>` +
-      `</div></div>`
-    );
+    return purposeBlockHtml({ purpose: '' }, true);
   }
 
   function wirePurpose() {
+    // 용도를 고르거나 적으면 상담+4컨셉 생성을 예약하고 P1(생성형 앞단)으로 간다
+    const go = (purpose) => {
+      const text = String(purpose || '').trim();
+      if (!text) return;
+      actions.setQuestion({ purpose: text });
+      actions.requestGenerate(true);
+      actions.go('P1');
+    };
     for (const b of root.querySelectorAll('#samples button')) {
-      b.addEventListener('click', () => {
-        const el = foot('composer');
-        el.value = b.textContent;
-        el.focus();
-      });
+      b.addEventListener('click', () => go(b.textContent));
     }
-    root.querySelector('#forget').addEventListener('click', () => {
-      stored = false;
-      failure = null;
-      actions.forgetEverything();
-      toast('저장된 키를 지웠습니다');
+    const purposeInput = root.querySelector('#purpose-input');
+    purposeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.isComposing) {
+        e.preventDefault();
+        go(purposeInput.value);
+      }
     });
+    root.querySelector('#purpose-send').addEventListener('click', () => go(purposeInput.value));
   }
 
   /* ------------------------------------------------------------ 이어붙이기 */
@@ -588,24 +555,6 @@ export function mount(root, ctx) {
   }
 
   /**
-   * 입력줄에 적은 답을 들고 P1 으로 넘어간다.
-   *
-   * 이 자리의 안내 문구가 "어떤 용도의 블로그를 만들려고 하시나요?" 이므로,
-   * 여기 적은 것은 P1 의 첫 질문에 그대로 들어가야 한다. 활성화만 해 놓고
-   * 아무 데도 안 쓰면 물어놓고 안 듣는 셈이 된다.
-   */
-  function submitPurpose() {
-    const el = foot('composer');
-    const text = el.value.trim();
-    const state = actions.getState();
-    if (!state.keyChecked || !state.model) return;
-
-    if (text) actions.setQuestion({ purpose: text });
-    el.value = '';
-    actions.go(exitTo());
-  }
-
-  /**
    * 키 확인.
    *
    * 형식 검사를 먼저 통과시켜 네트워크를 타지 않는다. 형식이 틀린 키로 부르면
@@ -662,21 +611,16 @@ export function mount(root, ctx) {
     drawPrices(provider);
     drawChat();
 
-    // 입력줄은 키가 확인된 뒤에만 열린다. 그 전에는 답을 받아 봐야 쓸 데가 없다.
-    // 설정에서 키 관리로 온 사람은 전송이 "작업으로 돌아가기" 역할을 한다 —
-    // 그 사실은 자리표시 문구가 말한다
-    const ready = state.keyChecked && !!state.model;
-    const back = exitTo() === 'W1';
+    // 입력줄은 E1 내내 잠가 둔다. 용도·느낌은 위 말풍선 안에서 받고, 이 줄이
+    // 실제로 열리는 것은 W1(모델과의 대화)부터다. 상태에 맞춰 안내만 바꾼다
     const composer = foot('composer');
-    composer.disabled = !ready;
-    composer.placeholder = !ready
-      ? state.keyChecked
-        ? '모델을 고르면 여기서 대화를 시작합니다'
-        : '키를 확인하면 여기서 대화를 시작합니다'
-      : back
-        ? '엔터나 전송을 누르면 만들던 작업으로 돌아갑니다'
-        : '어떤 용도의 블로그를 만들려고 하시나요?';
-    foot('send').disabled = !ready;
+    composer.disabled = true;
+    composer.placeholder = !state.keyChecked
+      ? '키를 확인하면 다음으로 넘어갑니다'
+      : !state.model
+        ? '모델을 고르면 용도를 묻습니다'
+        : '용도와 느낌은 위 대화에서 정합니다';
+    foot('send').disabled = true;
 
     // 확인 전에는 비워 둔다. 이 줄에 넣을 만한 "지금 상태"가 아직 없다
     panes.canvasHead.textContent = state.keyChecked

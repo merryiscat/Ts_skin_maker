@@ -13,9 +13,10 @@
  * **되돌릴 수 없는 것을 구분선 아래로 몰았다.** 위쪽은 눌러도 잃는 것이 없고,
  * 아래쪽은 작업이 사라진다. 같은 목록에 섞어 두면 손이 미끄러진다.
  *
- * **키 원문은 여기서도 안 보여준다.** 뒤 4자리만 띄우고, 바꾸는 일은 E1 으로
- * 보낸다. 좁은 서랍에서 키를 받으면 발급 안내를 같이 띄울 자리가 없어서, 키가
- * 없는 사람은 결국 막힌다. E1 은 오른쪽에 발급 방법을 통째로 띄우는 화면이다.
+ * **키 원문은 여기서도 안 보여준다.** 뒤 4자리만 띄운다. 지우기는 이 자리에서
+ * 바로 하고, 바꾸기(새 키를 넣는 일)만 E1 으로 보낸다. 좁은 서랍에서 키를 받으면
+ * 발급 안내를 같이 띄울 자리가 없어서, 키가 없는 사람은 결국 막힌다. E1 은
+ * 오른쪽에 발급 방법을 통째로 띄우는 화면이다.
  *
  * **되돌릴 수 없는 것 앞에는 내려받기를 먼저 권한다.** 지금까지의 작업을 잃기
  * 전에 받아 둘 기회를 주는 것이 사과보다 낫다.
@@ -67,7 +68,7 @@ export function mount(root, ctx) {
       <div class="field">
         <div class="field-label">이번 작업</div>
         <ul class="list rows small">
-          <li><span class="spacer">시작점</span><span class="strong">${esc(state.concepts[state.conceptIndex]?.name || '없음')}</span></li>
+          <li><span class="spacer">용도</span><span class="strong">${esc(state.purpose || '없음')}</span></li>
           <li><span class="spacer">대화</span><span class="strong">${state.usage.calls} 회</span></li>
           <li><span class="spacer">토큰</span><span class="strong">${(state.usage.input + state.usage.output).toLocaleString()}</span></li>
           <li><span class="spacer">비용</span><span class="strong">${state.usage.cost > 0 ? money(state.usage.cost) : '알 수 없음'}</span></li>
@@ -80,8 +81,11 @@ export function mount(root, ctx) {
           <span class="badge ok">${esc(provider.label)}</span>
           <span class="token">... ${esc(String(state.apiKey || '').slice(-4))}</span>
         </div>
-        <button class="sm" style="margin-top:8px" id="to-key">키 관리</button>
-        <div class="field-note">키를 바꾸거나 지우는 일은 발급 안내가 있는 첫 화면에서 합니다</div>
+        <div class="col" style="margin-top:8px">
+          <button class="sm" id="change-key">키 바꾸기</button>
+          <button class="sm danger" id="forget-key">키 지우기</button>
+        </div>
+        <div class="field-note">바꾸기는 새 키를 넣고 검증하는 화면으로 갑니다. 지우기는 이 브라우저에서 키를 없앱니다.</div>
       </div>
 
       <div class="field">
@@ -96,9 +100,9 @@ export function mount(root, ctx) {
         <div class="field-label">작업이 사라지는 것</div>
         <div class="col">
           <button class="sm" id="clear-chat">대화 처음부터</button>
-          <button class="sm" id="to-reset">시작점 다시 고르기</button>
+          <button class="sm" id="to-reset">처음부터 다시</button>
         </div>
-        <div class="field-note">앞은 비용이 들지 않고, 뒤는 4안을 다시 만들어 비용이 듭니다</div>
+        <div class="field-note">앞은 대화만 지우고, 뒤는 용도부터 다시 시작합니다. 둘 다 비용은 들지 않습니다</div>
       </div>`;
 
     $('to-model').addEventListener('click', () => {
@@ -106,8 +110,20 @@ export function mount(root, ctx) {
       draw(actions.getState());
     });
 
-    $('to-key').addEventListener('click', () => {
-      // 화면을 옮기면 app.js 가 서랍을 닫는다
+    // 키를 바꾸는 일은 새 키 입력 + 검증 + 모델 다시 고르기가 필요하다. 좁은
+    // 팝업에는 발급 안내를 띄울 자리가 없어서, 그 일은 오른쪽에 발급 방법을
+    // 통째로 띄우는 E1 이 맡는다. 여기서는 키를 비워 E1 이 입력칸을 내밀게 하고
+    // 넘긴다 (화면을 옮기면 app.js 가 서랍을 닫는다).
+    $('change-key').addEventListener('click', () => {
+      actions.setApiKey('');
+      actions.go('E1');
+    });
+
+    // 지우기는 이 자리에서 바로 한다. 저장된 키·설정을 없애고, 키 없이는 쓸 수
+    // 없으니 입력 화면(E1)으로 돌려보낸다
+    $('forget-key').addEventListener('click', () => {
+      actions.forgetEverything();
+      toast('키를 지웠습니다');
       actions.go('E1');
     });
 
@@ -189,11 +205,11 @@ export function mount(root, ctx) {
   /* ------------------------------------------------- 되돌릴 수 없는 것 */
 
   /**
-   * 시작점 다시 고르기.
+   * 처음부터 다시.
    *
-   * 컨셉부터 다시 고른다는 것은 지금까지의 대화와 만들어 둔 스킨을 버린다는 뜻이다.
-   * 그래서 첫 선택지를 "먼저 내려받기" 로 둔다. 잃기 전에 받아 둘 기회를 주는 것이
-   * 나중에 사과하는 것보다 낫다.
+   * 용도부터 다시 시작한다는 것은 지금까지의 대화와 만들어 둔 스킨을 버린다는
+   * 뜻이다. 그래서 첫 선택지를 "먼저 내려받기" 로 둔다. 잃기 전에 받아 둘 기회를
+   * 주는 것이 나중에 사과하는 것보다 낫다.
    */
   function drawResetWarning(state) {
     $('main').hidden = true;
@@ -202,11 +218,11 @@ export function mount(root, ctx) {
     $('sub').innerHTML = `
       <div class="note bad">
         <h3>지금까지의 작업이 사라집니다</h3>
-        <p class="small">대화 ${state.usage.calls} 회와 지금 만들어 둔 스킨을 버리고 컨셉 고르기부터 다시 합니다. 4안을 새로 만드는 데 호출 한 번이 더 듭니다.</p>
+        <p class="small">대화 ${state.usage.calls} 회와 지금 만들어 둔 스킨을 버리고 용도부터 다시 시작합니다.</p>
       </div>
       <div class="col" style="margin-top:14px">
         <button class="primary" id="save-first">먼저 지금 것을 내려받기</button>
-        <button class="sm danger" id="do-reset">그래도 다시 고르기</button>
+        <button class="sm danger" id="do-reset">그래도 다시 시작</button>
         <button class="sm ghost" id="cancel">그만두기</button>
       </div>`;
 
@@ -216,8 +232,8 @@ export function mount(root, ctx) {
       draw(actions.getState());
     });
     $('do-reset').addEventListener('click', () => {
-      actions.clearChat();
-      actions.go('P1');
+      actions.startOver();
+      actions.go('E1');
     });
   }
 

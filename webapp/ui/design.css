@@ -18,6 +18,7 @@
 :root {
   /* 표면 */
   --bg: #ffffff;          /* 카드, 판, 입력칸 */
+  --field-bg: #ffffff;    /* 대화 안 자유 입력칸 - 테마가 --bg 를 물들여도 흰 바탕 유지 */
   --surface: #f3f3f1;     /* 페이지 바탕 */
   --surface-2: #ecebe7;   /* 옅은 채움, hover */
   --surface-3: #e3e2dd;   /* 도식 채움 */
@@ -451,6 +452,51 @@ input[type='password'] { letter-spacing: 0.08em; }
 select { width: auto; padding: 5px 8px; font-size: var(--t-small); }
 textarea { resize: vertical; min-height: 64px; }
 input.color { width: 40px; height: 30px; padding: 0; border: 1px solid var(--border); background: none; }
+
+/* 대화 말풍선 안의 자유 입력칸.
+   안쪽은 흰 바탕으로 두어 "채워 넣는 칸"임이 드러나게 한다 (2026-08-23 피드백).
+   input[type='text'] 규칙과 특정도가 같아야 이기므로 input.chip-input 으로 쓴다
+   (같은 특정도면 뒤에 온 이 규칙이 이긴다). */
+input.chip-input { background: var(--field-bg); }
+
+/* 검색형 콤보박스 (글꼴 선택). 입력칸 아래로 목록이 떠서 걸러 고른다. */
+.combo { position: relative; }
+.combo-input { width: 100%; }
+.combo-list {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--field-bg);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+.combo-cat {
+  padding: 5px 8px 2px;
+  font-size: var(--t-tag);
+  color: var(--faint);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+}
+.combo-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--t-small);
+  cursor: pointer;
+}
+.combo-item:hover { background: var(--surface-2); }
+.combo-item.on { background: var(--text); color: var(--bg); font-weight: var(--w-semi); }
 .color-code { font-family: var(--font-mono); font-size: var(--t-micro); color: var(--dim); }
 
 /* 필드. 라벨은 대문자 트래킹, 값은 아래로 정렬해 폼에 리듬을 준다. */
@@ -848,6 +894,19 @@ iframe.preview {
 }
 iframe.preview.mobile { width: 375px; max-width: 100%; margin: 0 auto; }
 
+/* 미리보기 샘플을 만드는 동안 자리를 지키는 로딩 상태. 이전 내용을 보여주다
+   바뀌게 두지 않는다. */
+.preview-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--dim);
+}
+
 /* 도식 틀 */
 .shot {
   display: flex;
@@ -905,6 +964,8 @@ a.shot-pick, .shot-pick { display: block; }
 .shot .cells > u { display: block; border-radius: 2px; background: var(--surface-3); }
 .shot .rowline { display: flex; align-items: center; gap: 4px; padding: 3px 0; border-bottom: 1px solid var(--border); }
 .shot .rowline > i { display: block; height: 2px; width: 14%; border-radius: 1px; background: var(--faint); }
+.shot .rowline > u.th { flex: 0 0 auto; width: 9px; height: 9px; border-radius: 2px; background: var(--surface-3); }
+.shot.lg .rowline > u.th { width: 12px; height: 12px; }
 .shot .hero { flex: 0 0 34%; border-radius: 2px; background: var(--surface-2); }
 
 /* 어두운 도식 - 코드 에디터 스타일 스킨을 나타낼 때 */
@@ -916,7 +977,7 @@ a.shot-pick, .shot-pick { display: block; }
 .shot.dark l { background: rgba(255, 255, 255, 0.18); }
 .shot.dark l.t, .shot.dark l.t2 { background: var(--accent-bright); }
 .shot.dark .item, .shot.dark .rowline { border-bottom-color: rgba(255, 255, 255, 0.1); }
-.shot.dark .thumb, .shot.dark .cells > u, .shot.dark .hero { background: rgba(255, 255, 255, 0.12); }
+.shot.dark .thumb, .shot.dark .cells > u, .shot.dark .hero, .shot.dark .rowline > u.th { background: rgba(255, 255, 255, 0.12); }
 
 .shot-caption {
   display: flex;
@@ -927,6 +988,81 @@ a.shot-pick, .shot-pick { display: block; }
   color: var(--dim);
 }
 .shot-caption b { color: var(--text); font-weight: var(--w-bold); }
+
+/* -------------------------------------------------------------------------
+   와이어프레임 (P1 4안) - webapp/ui/wireframe.js
+   screen-plan 스킬 결의 흑백 와이어프레임. 스킨의 골조를 라벨 붙여 보여 준다.
+   여기만 테마를 안 따르고 고정 회색을 쓴다(의도) - 순수 흑백 단계. 배경 밝기·
+   강조색을 살리는 팔레트는 다음 단계에서 얹는다.
+   ------------------------------------------------------------------------- */
+.wf {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 2px;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  font-size: 9px;
+  color: #666;
+  line-height: 1.2;
+}
+.wf.lg { aspect-ratio: 16 / 10; padding: 12px; gap: 8px; }
+
+.wf-top { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; padding-bottom: 6px; border-bottom: 1px solid #ccc; }
+.wf-logo { font-weight: 700; color: #333; }
+.wf-tab { color: #999; }
+.wf-sp { flex: 1; }
+
+.wf-body { display: flex; gap: 8px; flex: 1; min-height: 0; }
+.wf-side {
+  flex: 0 0 24%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid #ddd;
+  min-width: 0;
+}
+.wf-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.wf-mainrow { display: flex; gap: 8px; flex: 1; min-height: 0; }
+.wf-toc { flex: 0 0 16%; display: flex; flex-direction: column; gap: 4px; }
+
+/* 라벨과 글줄 자리 */
+.wf-lbl { color: #333; font-weight: 600; }
+.wf-line { height: 4px; background: #eee; border-radius: 1px; }
+.wf-line + .wf-line { margin-top: 3px; }
+.wf-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.wf-chips > span { width: 24%; height: 8px; border: 1px solid #ccc; border-radius: 2px; }
+
+/* 이미지 자리: 1px 보더 + 대각선 X + 가운데 레이블 */
+.wf-ph {
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  min-height: 22px;
+  background:
+    linear-gradient(to top right, transparent calc(50% - 0.5px), #ddd calc(50% - 0.5px), #ddd calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    linear-gradient(to bottom right, transparent calc(50% - 0.5px), #ddd calc(50% - 0.5px), #ddd calc(50% + 0.5px), transparent calc(50% + 0.5px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wf-ph > span { color: #999; background: #fff; padding: 0 3px; }
+.wf-avatar { flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%; margin: 0 auto; }
+
+/* 목록 */
+.wf-list { display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0; }
+.wf-item { padding-bottom: 6px; border-bottom: 1px solid #eee; }
+.wf-item:last-child { border-bottom: 0; }
+.wf-row { display: flex; align-items: flex-start; gap: 6px; }
+.wf-txt { flex: 1; min-width: 0; }
+.wf-thumb { flex: 0 0 30%; align-self: stretch; min-height: 30px; }
+.wf-thumb-sm { flex: 0 0 auto; width: 16px; height: 16px; min-height: 0; }
+.wf-dense { align-items: center; padding-bottom: 4px; }
+.wf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; }
+.wf-grid > .wf-ph { min-height: 0; }
 
 /* 도식 위에 얹는 영역 라벨 (P2 도식 상태) */
 .shot-zone { position: relative; }

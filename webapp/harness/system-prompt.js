@@ -176,6 +176,21 @@ function conceptTaskRules() {
     '넷이 서로 다른 이유를 한 줄로 설명할 수 있어야 한다. 색만 다르거나 레이아웃만',
     '다른 넷은 실패다.',
     '',
+    '## 느낌은 제약이고, 값은 그 느낌과 일치해야 한다',
+    '',
+    '사용자가 느낌을 구체적으로 말했으면(배경 밝기, 사진 비중, 글꼴 계열, 여백,',
+    '정보 밀도 등) 그것은 네 안 모두가 지켜야 하는 제약이다. 실험 A, 실험 B 도',
+    '예외가 아니다. 사용자가 못박은 것을 뒤집어 "다르게" 만들지 말고, 정하지 않은',
+    '부분에서만 차별화한다. 이 제약은 아래 "겉모습 조합은 서로 달라야 한다"보다',
+    '우선한다. (예: "흰 배경"이라 했으면 네 안 모두 밝은 배경으로 두고, 배경 밝기로',
+    '차별화하지 않는다.)',
+    '',
+    '그리고 각 안의 details 는 (1)사용자가 말한 느낌 (2)네가 쓴 summary·differences',
+    '와 어긋나면 안 된다. 특정 값을 외우라는 게 아니다 - 네가 고른 값이 그 느낌과',
+    '설명을 실제로 구현하는지가 기준이다. 설명은 큰 사진을 앞세운다면서 목록 방식은',
+    '사진을 못 보여주게 고르거나, 밝은 느낌이라면서 어두운 배경을 고르는 식으로',
+    '말과 값이 어긋나면 실패다.',
+    '',
     '각 안에 넣을 것:',
     `- kind : 보편 A / 보편 B / 실험 A / 실험 B 중 하나. 넷을 한 번씩 쓴다`,
     '- name : 컨셉 이름. 무엇을 하게 할 것인가를 짧게. 넷이 겹치면 안 된다',
@@ -192,20 +207,29 @@ function conceptTaskRules() {
     '',
     'differences 는 details 와 어긋나면 안 된다. 사이드바를 없앴다고 적었으면',
     'sidebar 는 none 이어야 한다.',
+    '',
+    '## 내보내기 전 자기검증',
+    '',
+    '네 안을 확정하기 전에 하나씩 다시 본다: 이 안의 details 가 사용자가 말한 느낌과',
+    '내가 쓴 summary·differences 와 어긋나는 곳이 없는가? 한 곳이라도 어긋나면 값을',
+    '고쳐서 맞춘 뒤 내보낸다.',
   ].join('\n');
 }
 
-/** 사용자가 답한 용도와 컨셉을 사람이 읽는 문장으로 만든다. */
-function askedFor(purpose, mood) {
+/** 사용자가 답한 용도·느낌·추가 의견을 사람이 읽는 문장으로 만든다. */
+function askedFor(purpose, mood, extra) {
   const p = String(purpose || '').trim();
   const m = String(mood || '').trim();
+  const e = String(extra || '').trim();
   const lines = [`용도: ${p || '말하지 않았다. 특정 분야를 가정하지 말 것.'}`];
   if (m) {
-    lines.push(`원하는 느낌: ${m}`);
+    lines.push(`원하는 느낌(네 안 모두가 지켜야 하는 제약): ${m}`);
   } else {
     // 컨셉은 비워 둘 수 있는 칸이다. 빈칸을 못 채운 것으로 읽고 되묻게 하면 안 된다.
     lines.push('원하는 느낌: 말하지 않았다. 용도만 보고 만들 것. 되묻지 말 것.');
   }
+  // 추가 의견은 있을 때만 싣는다. 없으면 아예 언급하지 않아 모델이 되묻지 않게 한다.
+  if (e) lines.push(`추가로 전한 의견: ${e}`);
   return lines.join('\n');
 }
 
@@ -218,7 +242,7 @@ function askedFor(purpose, mood) {
  * @param {{purpose?: string, mood?: string}} input
  * @returns {{system: string, systemParts: [string, string], messages: {role: string, content: string}[], schema: object, effort: string}}
  */
-export function buildConceptPrompt({ purpose, mood } = {}) {
+export function buildConceptPrompt({ purpose, mood, extra } = {}) {
   // systemParts 는 [고정 프리픽스, 태스크 규칙] 2요소 배열이다. providers 쪽이
   // Anthropic 에 system 을 두 블록으로 나눠 보내고 첫 블록에만 cache_control 을
   // 걸기 위한 인터페이스다. system 은 기존 호출부를 위해 그대로 유지하며,
@@ -233,7 +257,7 @@ export function buildConceptPrompt({ purpose, mood } = {}) {
         content: [
           '사용자가 이렇게 답했다.',
           '',
-          askedFor(purpose, mood),
+          askedFor(purpose, mood, extra),
           '',
           '이 답에 맞는 컨셉 4안을 만들어라.',
         ].join('\n'),
@@ -289,7 +313,7 @@ function othersSummary(others) {
  *
  * @param {{purpose?: string, mood?: string, kind: string, others?: object[]}} input
  */
-export function buildRetryConceptPrompt({ purpose, mood, kind, others } = {}) {
+export function buildRetryConceptPrompt({ purpose, mood, extra, kind, others } = {}) {
   const rules = [
     '## 이번 작업: 한 안만 다시 만들기',
     '',
@@ -320,7 +344,7 @@ export function buildRetryConceptPrompt({ purpose, mood, kind, others } = {}) {
         content: [
           '사용자가 이렇게 답했다.',
           '',
-          askedFor(purpose, mood),
+          askedFor(purpose, mood, extra),
           '',
           '이미 확정된 나머지 안들:',
           '',

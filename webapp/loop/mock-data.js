@@ -18,7 +18,7 @@ const IMG = (w, h, label) =>
       `fill="#8a857c" text-anchor="middle" dominant-baseline="middle">${label}</text></svg>`,
   );
 
-export const BLOG = {
+const BLOG = {
   title: '작업 기록',
   desc: '만든 것과 고친 것을 남겨 두는 곳입니다.',
   blogger: '김하늘',
@@ -31,7 +31,7 @@ export const BLOG = {
   tag: '개발, 기록, 회고',
 };
 
-export const ARTICLES = [
+const ARTICLES = [
   {
     title: '티스토리 스킨을 직접 만들면서 알게 된 것들',
     summary:
@@ -100,7 +100,7 @@ export const ARTICLES = [
 ];
 
 /** 글 본문. 에디터 특수 블록이 실제로 어떻게 나오는지 확인할 수 있게 섞어 뒀다. */
-export const ARTICLE_BODY = `
+const ARTICLE_BODY = `
 <p>티스토리 스킨은 HTML 파일 하나에 치환자를 박아 넣는 방식으로 만듭니다. 문서만 보면 단순해 보이는데, 실제로 올려 보면 문서에 안 적힌 것들이 계속 나옵니다.</p>
 <p></p>
 <p>가장 오래 붙잡은 것은 문단 여백이었습니다. 분명히 CSS 를 넣었는데 본문이 벽처럼 붙어 있었습니다.</p>
@@ -127,13 +127,13 @@ export const ARTICLE_BODY = `
 <p>정리하면, 문서를 읽는 것과 실제로 올려 보는 것 사이에는 항상 간격이 있습니다.</p>
 `;
 
-export const CATEGORIES = [
+const CATEGORIES = [
   { name: '개발', count: 24, children: [{ name: '프론트엔드', count: 11 }, { name: '도구', count: 6 }] },
   { name: '기록', count: 17, children: [] },
   { name: '일상', count: 9, children: [] },
 ];
 
-export const TAGS = [
+const TAGS = [
   { name: '티스토리', cls: 'cloud1' },
   { name: '개발', cls: 'cloud1' },
   { name: 'CSS', cls: 'cloud2' },
@@ -146,20 +146,106 @@ export const TAGS = [
   { name: '독서', cls: 'cloud5' },
 ];
 
-export const NOTICES = [
+const NOTICES = [
   { title: '블로그 운영 방침 안내', summary: '댓글과 인용에 대한 안내입니다.', date: '2026. 1. 5. 10:00', simple_date: '2026. 1. 5.' },
   { title: '검색 유입 관련 공지', summary: '일부 글의 주소가 변경되었습니다.', date: '2025. 12. 1. 09:00', simple_date: '2025. 12. 1.' },
 ];
 
+/* ------------------------------------------------------------ 목업 조립 */
+
+// 글마다 공유하는 날짜·댓글수. 테마가 달라도 이건 그대로 쓴다.
+const POST_META = [
+  ['2026. 7. 20. 14:32', '2026. 7. 20.', 12],
+  ['2026. 7. 14. 09:05', '2026. 7. 14.', 3],
+  ['2026. 7. 2. 21:47', '2026. 7. 2.', 0],
+  ['2026. 6. 28. 22:10', '2026. 6. 28.', 5],
+  ['2026. 6. 19. 11:20', '2026. 6. 19.', 1],
+  ['2026. 6. 11. 08:00', '2026. 6. 11.', 2],
+];
+const THUMB = IMG(640, 360, '이미지');
+const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/** 하드코딩 기본 목업. LLM 샘플이 아직 없을 때 쓴다. */
+export function mockDefault() {
+  return { BLOG, ARTICLES, ARTICLE_BODY, CATEGORIES, TAGS, NOTICES };
+}
+
+/**
+ * LLM 이 만든 샘플(sample-prompt.js 스키마)을 미리보기 목업 구조로 옮긴다.
+ * 값이 모자라면 기본 목업으로 메운다 - 미리보기가 깨지지 않게.
+ */
+export function mockFrom(sample) {
+  if (!sample || !Array.isArray(sample.posts) || !sample.posts.length) return mockDefault();
+
+  const cats = (sample.categories || []).length ? sample.categories : ['기록'];
+  const tags = (sample.tags || []).length ? sample.tags : cats;
+
+  const BLOG_S = {
+    title: sample.blogTitle || '내 블로그',
+    desc: sample.blogDesc || '',
+    blogger: sample.blogger || '글쓴이',
+    image: IMG(160, 160, '프로필'),
+    blog_link: '#',
+    rss_url: '#',
+    taglog_link: '#',
+    guestbook_link: '#',
+    page_title: sample.blogTitle || '내 블로그',
+    tag: tags.slice(0, 3).join(', '),
+  };
+
+  const ARTICLES_S = sample.posts.slice(0, 6).map((p, i) => {
+    const meta = POST_META[i] || POST_META[POST_META.length - 1];
+    return {
+      title: p.title || '제목',
+      summary: p.summary || '',
+      category: p.category || cats[0],
+      date: meta[0],
+      simple_date: meta[1],
+      tags: (p.tags || []).slice(0, 3),
+      rp: meta[2],
+      thumb: THUMB,
+    };
+  });
+
+  const CATEGORIES_S = cats.slice(0, 4).map((name, i) => ({
+    name,
+    count: [24, 17, 9, 6][i] || 8,
+    children: [],
+  }));
+
+  const TAGS_S = tags.slice(0, 10).map((name, i) => ({ name, cls: 'cloud' + ((i % 5) + 1) }));
+
+  const paras = (sample.bodyParagraphs || []).length
+    ? sample.bodyParagraphs
+    : ['미리보기용 본문입니다.'];
+  // 본문에 소제목과 이미지 한 장을 섞어 특수 블록 스타일도 함께 보이게 한다
+  const ARTICLE_BODY_S =
+    `<p>${esc(paras[0])}</p>` +
+    (paras[1] ? `<h2>${esc(ARTICLES_S[0]?.title || '자세히')}</h2><p>${esc(paras[1])}</p>` : '') +
+    paras.slice(2).map((p) => `<p>${esc(p)}</p>`).join('') +
+    `<figure data-ke-type="imageblock" class="alignCenter">` +
+    `<img src="${IMG(720, 400, '본문 이미지')}" alt="예시 이미지">` +
+    `<figcaption>본문에 들어간 이미지와 설명</figcaption></figure>`;
+
+  return {
+    BLOG: BLOG_S,
+    ARTICLES: ARTICLES_S,
+    ARTICLE_BODY: ARTICLE_BODY_S,
+    CATEGORIES: CATEGORIES_S,
+    TAGS: TAGS_S,
+    NOTICES,
+  };
+}
+
 /** 카테고리 트리 HTML. 티스토리가 자동 생성하는 마크업을 흉내 낸다. */
-export function categoryListHtml() {
+export function categoryListHtml(categories = CATEGORIES) {
   const li = (c) =>
     `<li><a href="#">${c.name}<span class="cnt"> (${c.count})</span></a>` +
     (c.children && c.children.length
       ? `<ul>${c.children.map(li).join('')}</ul>`
       : '') +
     '</li>';
-  return `<ul>${CATEGORIES.map(li).join('')}</ul>`;
+  return `<ul>${categories.map(li).join('')}</ul>`;
 }
 
 /** 댓글 영역. 티스토리가 React 로 렌더하는 부분이라 형태만 흉내 낸다. */
@@ -169,12 +255,12 @@ export function commentsHtml() {
     <p class="mock-comment-count">댓글 2</p>
     <div class="mock-comment">
       <strong>이재현</strong>
-      <p>같은 문제로 한참 헤맸는데 덕분에 해결했습니다. 감사합니다.</p>
+      <p>잘 봤습니다. 다음 글도 기대할게요.</p>
       <span class="mock-comment-date">2026. 7. 21. 09:12</span>
     </div>
     <div class="mock-comment">
       <strong>박서영</strong>
-      <p>실제로 올려 봐야 안다는 말에 공감합니다.</p>
+      <p>공감이 많이 가네요. 감사합니다.</p>
       <span class="mock-comment-date">2026. 7. 20. 18:40</span>
     </div>
     <p class="mock-note">실제 댓글 UI 는 티스토리가 렌더합니다. 미리보기에서는 형태만 보여 줍니다.</p>

@@ -14,6 +14,7 @@
  */
 
 import { LAYOUTS, LIST_STYLES } from '../presets/base/skeleton.js';
+import { FONT_CATALOG, fontById } from '../presets/base/fonts.js';
 
 /** 밝은 배경 색 묶음. */
 const LIGHT = {
@@ -57,7 +58,7 @@ export const DETAIL_FIELDS = [
   },
   {
     id: 'sidebarBlocks',
-    label: '사이드바에 넣을 것',
+    label: '사이드바 메뉴',
     type: 'multi',
     default: ['profile', 'categories', 'tags', 'menu'],
     dependsOn: { sidebar: ['left', 'right'] },
@@ -70,6 +71,18 @@ export const DETAIL_FIELDS = [
     ],
   },
   {
+    id: 'sidebarWidth',
+    label: '사이드바 너비',
+    type: 'single',
+    default: 'normal',
+    dependsOn: { sidebar: ['left', 'right'] },
+    options: [
+      { value: 'narrow', label: '좁게', note: '13rem' },
+      { value: 'normal', label: '보통', note: '16rem' },
+      { value: 'wide', label: '넓게', note: '20rem' },
+    ],
+  },
+  {
     id: 'listStyle',
     label: '글 목록',
     type: 'single',
@@ -79,6 +92,7 @@ export const DETAIL_FIELDS = [
       { value: 'plain', label: '단순', note: '제목만 크게' },
       { value: 'grid', label: '그리드', note: '썸네일 격자' },
       { value: 'dense', label: '밀집', note: '한 화면에 많이' },
+      { value: 'hero', label: '히어로', note: '첫 글을 사진으로 크게' },
     ],
   },
   {
@@ -107,7 +121,7 @@ export const DETAIL_FIELDS = [
   },
   {
     id: 'fontSize',
-    label: '글자 크기',
+    label: '본문 글자 크기',
     type: 'single',
     default: 'normal',
     options: [
@@ -117,10 +131,26 @@ export const DETAIL_FIELDS = [
     ],
   },
   {
+    id: 'titleScale',
+    label: '제목 글자 크기',
+    // 본문과 별개로 글 제목·목록 제목의 크기를 키우거나 줄인다. 본문 크기에
+    // 곱해지는 배율이라, 본문 크기를 바꿔도 제목과의 비율은 유지된다.
+    type: 'single',
+    default: 'normal',
+    options: [
+      { value: 'small', label: '작게' },
+      { value: 'normal', label: '보통' },
+      { value: 'large', label: '크게' },
+    ],
+  },
+  {
     id: 'background',
     label: '배경',
     type: 'single',
     default: 'light',
+    // palette: 배경 밝기·강조색은 "팔레트" 단계로 따로 뺀다 (2026-08-23 피드백).
+    // 지금은 폼에서 감추고 색 없이(중립) 만든다. 값은 기본값(밝게)이 그대로 쓰인다.
+    palette: true,
     options: [
       { value: 'light', label: '밝게' },
       { value: 'dark', label: '어둡게' },
@@ -130,19 +160,33 @@ export const DETAIL_FIELDS = [
     id: 'accent',
     label: '강조색',
     type: 'color',
-    default: '#2f6f4f',
+    // 색 없이 만드는 동안은 강조색을 본문 글자색과 같은 중립으로 둔다. 팔레트
+    // 단계에서 실제 색을 고른다.
+    default: '#24211d',
+    palette: true,
     note: '링크와 강조에만 쓰입니다',
   },
   {
     id: 'bodyFont',
     label: '본문 글꼴',
-    type: 'single',
+    // 검색형 입력칸(콤보박스)으로 낸다. 무료 웹폰트가 많아 칩으로는 안 된다.
+    type: 'font',
     default: 'sans',
-    options: [
-      { value: 'sans', label: '고딕' },
-      { value: 'serif', label: '명조' },
-      { value: 'mono', label: '고정폭' },
-    ],
+    options: FONT_CATALOG.map((f) => ({ value: f.id, label: f.label, cat: f.cat })),
+  },
+  {
+    id: 'headingFont',
+    label: '제목 글꼴',
+    // 제목을 본문과 다른 글꼴로 쓸 수 있게 스펙에는 열어 두되, P2 폼에는 내지
+    // 않는다(chatOnly). 대다수는 분리하지 않으므로 기본 화면을 어지럽히지 않고,
+    // 원하는 사용자는 W1 대화에서 "제목만 명조로" 처럼 말하면 이 값이 바뀐다.
+    // 기본값 'same' 은 본문 글꼴을 그대로 쓴다(= 분리 안 함).
+    type: 'font',
+    default: 'same',
+    chatOnly: true,
+    options: [{ value: 'same', label: '본문과 같게' }].concat(
+      FONT_CATALOG.map((f) => ({ value: f.id, label: f.label, cat: f.cat })),
+    ),
   },
   {
     id: 'features',
@@ -171,6 +215,12 @@ export function defaultDetails() {
 }
 
 const WIDTHS = { narrow: '38rem', normal: '46rem', wide: '58rem' };
+
+/** 사이드바 너비. 사이드바가 있을 때만 쓴다. */
+const SIDEBAR_WIDTHS = { narrow: '13rem', normal: '16rem', wide: '20rem' };
+
+/** 제목 크기 배율. 본문 크기에 곱해져 글 제목·목록 제목에 적용된다. */
+const TITLE_SCALES = { small: '0.85', normal: '1', large: '1.2' };
 
 /**
  * 본문 글자 크기.
@@ -201,6 +251,7 @@ const LIST_BY_STYLE = {
   plain: LIST_STYLES.PLAIN,
   grid: LIST_STYLES.GRID,
   dense: LIST_STYLES.DENSE,
+  hero: LIST_STYLES.HERO,
 };
 
 /**
@@ -213,6 +264,10 @@ export function detailsToPreset(details, meta = {}) {
   const items = new Set(d.listItems || []);
   const feats = new Set(d.features || []);
   const palette = d.background === 'dark' ? DARK : LIGHT;
+  const useUploaded = d.bodyFont === 'uploaded' && meta.uploadedFont && meta.uploadedFont.css;
+  // 제목 글꼴. 'same'(기본)이면 분리하지 않고 본문 글꼴을 그대로 쓴다.
+  const headSame = !d.headingFont || d.headingFont === 'same';
+  const head = headSame ? null : fontById(d.headingFont);
 
   return {
     id: meta.id || 'custom',
@@ -242,17 +297,29 @@ export function detailsToPreset(details, meta = {}) {
     showSubscribe: feats.has('subscribe'),
     syntaxHighlight: feats.has('syntax'),
 
-    bodyFont: FONTS[d.bodyFont] || FONTS.sans,
+    // 'uploaded' 면 사용자가 올린 글꼴(meta.uploadedFont)을 임베드해 쓴다.
+    bodyFont: useUploaded ? meta.uploadedFont.family : fontById(d.bodyFont).family,
+    // 고른 글꼴이 웹폰트면 스킨 <head> 에 넣을 링크. 시스템/업로드면 null.
+    bodyFontUrl: useUploaded ? null : fontById(d.bodyFont).url,
+    // 올린 글꼴이면 @font-face 를 <head> 에 직접 임베드한다.
+    fontFaceCss: useUploaded ? meta.uploadedFont.css : null,
+    // 제목 글꼴을 분리했을 때만 값이 있다. null 이면 골격이 본문 글꼴로 폴백한다.
+    headFont: headSame ? null : head.family,
+    headFontUrl: headSame ? null : head.url,
     codeFont: FONTS.mono,
+    // ④ 생성된 테마 CSS. 골격이 가장 마지막에 얹어 look 을 입힌다.
+    themeCss: meta.themeCss || null,
 
     tokens: {
       ...palette,
       'color-accent': d.accent || '#2f6f4f',
       'content-max': WIDTHS[d.contentWidth] || WIDTHS.normal,
-      'sidebar-width': d.sidebar === 'none' ? '0' : '16rem',
+      'sidebar-width':
+        d.sidebar === 'none' ? '0' : SIDEBAR_WIDTHS[d.sidebarWidth] || SIDEBAR_WIDTHS.normal,
       radius: '4px',
       'font-size-base': (SIZES[d.fontSize] || SIZES.normal).size,
       'line-height-base': (SIZES[d.fontSize] || SIZES.normal).line,
+      'title-scale': TITLE_SCALES[d.titleScale] || '1',
       'grid-min': '17rem',
     },
   };

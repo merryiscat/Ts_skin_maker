@@ -19,13 +19,17 @@ import { DETAIL_FIELDS } from '../harness/spec.js';
  * @param {object} [opts.conceptDetails] 컨셉이 정한 값. 다른 항목에 표시를 단다
  * @param {(next:object)=>void} opts.onChange
  */
-export function renderDetailForm(root, { details, conceptDetails, onChange }) {
+export function renderDetailForm(root, { details, conceptDetails, onChange, uploadedFont, onUpload }) {
   root.textContent = '';
   const state = { ...details };
 
   const emit = () => onChange({ ...state });
 
   for (const field of DETAIL_FIELDS) {
+    // 배경 밝기·강조색은 "팔레트" 단계로 따로 뺐다. 지금 폼에는 안 낸다.
+    if (field.palette) continue;
+    // chatOnly: 스펙에는 있지만 폼에는 안 내는 항목(제목 글꼴 등). W1 대화로만 바꾼다.
+    if (field.chatOnly) continue;
     // 사이드바를 없앤 상태에서 "사이드바에 넣을 것" 을 물어봐야 소용이 없다
     if (field.dependsOn && !meetsDependency(field.dependsOn, state)) continue;
 
@@ -33,16 +37,12 @@ export function renderDetailForm(root, { details, conceptDetails, onChange }) {
 
     const label = el('div', 'field-label');
     label.append(field.label);
-    if (conceptDetails && isFromConcept(field, state, conceptDetails)) {
-      const tag = el('span', 'from-concept');
-      tag.textContent = '컨셉';
-      tag.title = '컨셉이 정한 값입니다';
-      label.append(' ', tag);
-    }
     wrap.append(label);
 
     if (field.type === 'color') {
       wrap.append(colorControl(field, state, emit));
+    } else if (field.type === 'font') {
+      wrap.append(fontControl(field, state, emit, { uploadedFont, onUpload }));
     } else if (field.type === 'multi') {
       wrap.append(multiControl(field, state, emit));
     } else {
@@ -90,6 +90,125 @@ function singleControl(field, state, emit) {
     row.append(b);
   }
   return row;
+}
+
+/**
+ * 글꼴 선택. 종류가 많아 칩 대신 검색형 콤보박스(텍스트 박스)로 낸다.
+ * 입력칸에 치면 갈래별로 걸러 보여 주고, 고르면 그 글꼴 이름이 칸에 남는다.
+ */
+function fontControl(field, state, emit, opts = {}) {
+  const wrap = el('div', 'combo');
+  const input = el('input', 'chip-input combo-input');
+  input.type = 'text';
+  input.setAttribute('autocomplete', 'off');
+  input.setAttribute('spellcheck', 'false');
+  input.placeholder = '글꼴 검색…';
+
+  const list = el('div', 'combo-list');
+  list.hidden = true;
+
+  // 올린 글꼴이 있으면 맨 앞에 낀다. 업로드는 본문 글꼴에만 붙인다 - 제목 글꼴
+  // 경로는 카탈로그 id 만 받아(fontById), 'uploaded' 를 주면 폴백돼 버린다.
+  const canUpload = field.id === 'bodyFont';
+  const options = (canUpload && opts.uploadedFont ? [{ value: 'uploaded', label: opts.uploadedFont.name || '내 올린 글꼴', cat: '내 글꼴' }] : []).concat(field.options);
+
+  const labelOf = (v) => options.find((o) => o.value === v)?.label || v;
+  input.value = labelOf(state[field.id]);
+
+  const renderList = (filter) => {
+    list.textContent = '';
+    const f = (filter || '').trim().toLowerCase();
+    let lastCat = null;
+    for (const o of options) {
+      const hay = (o.label + ' ' + (o.cat || '')).toLowerCase();
+      if (f && !hay.includes(f)) continue;
+      if (o.cat && o.cat !== lastCat) {
+        lastCat = o.cat;
+        const h = el('div', 'combo-cat');
+        h.textContent = o.cat;
+        list.append(h);
+      }
+      const item = el('button', 'combo-item');
+      item.type = 'button';
+      item.textContent = o.label;
+      if (state[field.id] === o.value) item.classList.add('on');
+      // mousedown 로 처리해야 input 의 blur 보다 먼저 잡혀 선택이 먹는다
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        state[field.id] = o.value;
+        input.value = o.label;
+        list.hidden = true;
+        emit();
+      });
+      list.append(item);
+    }
+    if (!list.querySelector('.combo-item')) {
+      const none = el('div', 'combo-cat');
+      none.textContent = '검색 결과 없음';
+      list.append(none);
+    }
+  };
+
+  input.addEventListener('focus', () => {
+    input.select();
+    renderList('');
+    list.hidden = false;
+  });
+  input.addEventListener('input', () => {
+    renderList(input.value);
+    list.hidden = false;
+  });
+  input.addEventListener('blur', () => {
+    // 아무것도 안 고르고 나가면 원래 이름으로 되돌린다
+    setTimeout(() => {
+      list.hidden = true;
+      input.value = labelOf(state[field.id]);
+    }, 120);
+  });
+
+  wrap.append(input, list);
+
+  // 글꼴 파일 올리기. 본문 글꼴에만, onUpload 가 있을 때만(P2 에서 넘긴다).
+  if (canUpload && opts.onUpload) {
+    const upBtn = el('button', 'sm ghost');
+    upBtn.type = 'button';
+    upBtn.style.marginTop = '6px';
+    upBtn.textContent = '글꼴 파일 올리기';
+    const file = el('input');
+    file.type = 'file';
+    file.accept = '.woff2,.woff,.ttf,.otf';
+    file.hidden = true;
+    upBtn.addEventListener('click', () => file.click());
+    file.addEventListener('change', async () => {
+      const f = file.files && file.files[0];
+      if (!f) return;
+      const font = await readFontFile(f);
+      if (font) opts.onUpload(font);
+    });
+    wrap.append(upBtn, file);
+  }
+
+  return wrap;
+}
+
+/** 올린 글꼴 파일을 @font-face(data URL) 로 만든다. 글꼴은 스킨에 임베드된다. */
+function readFontFile(file) {
+  const fmt =
+    { woff2: 'woff2', woff: 'woff', ttf: 'truetype', otf: 'opentype' }[
+      (file.name.split('.').pop() || '').toLowerCase()
+    ] || '';
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onerror = () => resolve(null);
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      const css =
+        `@font-face{font-family:'UploadedFont';` +
+        `src:url(${dataUrl})${fmt ? ` format('${fmt}')` : ''};font-display:swap;}`;
+      resolve({ name: file.name, family: "'UploadedFont', sans-serif", css });
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function multiControl(field, state, emit) {
@@ -149,6 +268,8 @@ export function changedFromConcept(details, conceptDetails) {
   if (!conceptDetails) return [];
   const out = [];
   for (const field of DETAIL_FIELDS) {
+    if (field.palette) continue;
+    if (field.chatOnly) continue;
     if (isFromConcept(field, details, conceptDetails)) continue;
     if (conceptDetails[field.id] === undefined) continue;
     out.push({

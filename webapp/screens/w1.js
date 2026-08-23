@@ -20,12 +20,13 @@
  */
 
 import { detailsToPreset, validateDetails } from '../harness/spec.js';
-import { buildEditPrompt } from '../harness/system-prompt.js';
+import { buildStyleEditPrompt } from '../harness/edit-prompt.js';
+import { sanitizeThemeCss } from '../harness/theme-prompt.js';
 import { auditPlaceholders, auditGroupTags } from '../harness/contract.js';
 import { checkPitfalls } from '../harness/pitfalls.js';
 import { buildSkinHtml, buildIndexXml } from '../presets/base/skeleton.js';
 import { renderPreview, PREVIEW_PAGES } from '../loop/render.js';
-import { PREVIEW_EXTRA_CSS } from '../loop/mock-data.js';
+import { PREVIEW_EXTRA_CSS, mockFrom } from '../loop/mock-data.js';
 import { createStructured, estimateCost, PROVIDERS } from '../providers.js';
 
 /** 코드 열람 탭. 키는 파일 묶음의 이름이고 라벨만 짧게 줄인다. */
@@ -37,7 +38,7 @@ const CODE_TABS = [
 ];
 
 export function mount(root, ctx) {
-  const { actions, shared, toast, panes, setWide } = ctx;
+  const { actions, shared, toast, panes, setWide, scrollChat } = ctx;
 
   // 화면 안에서만 쓰는 표시 상태. 상태 저장소에 넣지 않는다. 새로고침하면 사라져도 되는 것들이다
   let pageType = 'tt-body-index';
@@ -253,10 +254,11 @@ export function mount(root, ctx) {
 
     actions.setBusy(true);
 
-    // 최근 대화를 몇 개까지 보낼지는 buildEditPrompt 가 정한다. 여기서 자르면
+    // 최근 대화를 몇 개까지 보낼지는 buildStyleEditPrompt 가 정한다. 여기서 자르면
     // 기준이 두 곳에 생겨 반드시 어긋난다
-    const prompt = buildEditPrompt({
+    const prompt = buildStyleEditPrompt({
       currentDetails: before,
+      currentThemeCss: state.themeCss,
       recentTurns,
       userMessage: message,
     });
@@ -318,13 +320,19 @@ export function mount(root, ctx) {
       return;
     }
 
-    // 되돌리기가 동작하려면 그 시점의 세부 값이 대화에 같이 들어 있어야 한다
+    // 테마 CSS 도 함께 반영한다. 소독 후 적용하고, 고른 안 키(themeFor)는 그대로 둬서
+    // 이 편집이 P2 로 돌아가도 다시 생성되지 않게 한다.
+    const nextTheme = sanitizeThemeCss(data.themeCss);
+
+    // 되돌리기가 동작하려면 그 시점의 세부 값과 테마가 대화에 같이 들어 있어야 한다
     actions.setDetails(data.details);
+    actions.setTheme({ css: nextTheme, forKey: state.themeFor });
     actions.pushChat({
       role: 'assistant',
       text: reply,
       changes,
       details: data.details,
+      themeCss: nextTheme,
     });
   }
 
@@ -361,8 +369,8 @@ export function mount(root, ctx) {
 
   /** 산출물 네 개. 미리보기, 코드 열람, 검증이 전부 같은 묶음을 본다. */
   function makeFiles(details, state) {
-    const name = state.concepts[state.conceptIndex]?.name || '내 스킨';
-    const preset = detailsToPreset(details, { name });
+    const name = state.selectedConcept?.name || state.concepts[state.conceptIndex]?.name || '내 스킨';
+    const preset = detailsToPreset(details, { name, uploadedFont: state.uploadedFont, themeCss: state.themeCss });
     return {
       'skin.html': buildSkinHtml(preset),
       'style.css': shared.css,
@@ -403,6 +411,7 @@ export function mount(root, ctx) {
       css: shared.css,
       js: shared.js,
       extraCss: PREVIEW_EXTRA_CSS,
+      mock: mockFrom(actions.getState().sample),
     });
     frame.classList.toggle('mobile', mobileFrame);
     frame.style.height = 'calc(100vh - 150px)';
@@ -417,18 +426,20 @@ export function mount(root, ctx) {
 
     root.innerHTML = intro + state.chat.map(entryHtml).join('');
     // 새 응답은 아래에 쌓인다. 사용자가 매번 굴려 내리게 두지 않는다
-    root.scrollTop = root.scrollHeight;
+    scrollChat?.();
   }
 
   function entryHtml(e, i) {
+    // 이름표(나/응답)는 두지 않는다 - 말풍선 좌우로 화자를 안다. 앞 단계의
+    // 대화와 같은 결로 이어지게 (2026-08-23: 전체 흐름을 하나의 연속 대화로)
     if (e.role === 'user') {
-      return `<div class="msg user"><div class="msg-role">나</div><div class="msg-body">${esc(e.text)}</div></div>`;
+      return `<div class="msg user"><div class="msg-body">${esc(e.text)}</div></div>`;
     }
 
     if (e.role === 'assistant' && e.refused) {
       // 모델이 거절한 것. 값은 멀쩡했고 요청이 범위 밖이었다는 뜻이라 실패와 갈라 놓는다
       return (
-        `<div class="msg"><div class="msg-role">응답</div><div class="msg-body">` +
+        `<div class="msg"><div class="msg-body">` +
         `<span class="badge">바꾸지 않음</span> ${esc(e.text)}</div></div>`
       );
     }
@@ -436,7 +447,7 @@ export function mount(root, ctx) {
     if (e.role === 'assistant') {
       const list = (e.changes || []).map((c) => `<li>${esc(c)}</li>`).join('');
       return (
-        `<div class="msg"><div class="msg-role">응답</div><div class="msg-body">` +
+        `<div class="msg"><div class="msg-body">` +
         `${esc(e.text)}` +
         (list ? `<ul class="list marked">${list}</ul>` : '') +
         `<div class="msg-actions"><button class="sm" data-rewind="${i}">이 지점으로 되돌리기</button></div>` +
@@ -525,7 +536,7 @@ export function mount(root, ctx) {
         return;
       }
       if (!state.conceptDetails) {
-        actions.go('P1');
+        actions.go('E1');
         return;
       }
 

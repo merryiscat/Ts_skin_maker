@@ -10,15 +10,7 @@
  * 실제 업로드 확인으로 잡는다.
  */
 
-import {
-  BLOG,
-  ARTICLES,
-  ARTICLE_BODY,
-  NOTICES,
-  TAGS,
-  categoryListHtml,
-  commentsHtml,
-} from './mock-data.js';
+import { mockDefault, categoryListHtml, commentsHtml } from './mock-data.js';
 
 /** 미리보기에서 고를 수 있는 페이지 타입. */
 export const PREVIEW_PAGES = [
@@ -59,6 +51,7 @@ function findClose(html, tag, fromIndex) {
 
 /** 그룹 태그를 만나면 어떻게 처리할지 결정한다. */
 function groupPlan(tag, ctx) {
+  const { ARTICLES, NOTICES, TAGS } = ctx.mock;
   const page = ctx.pageType;
   const isList = LIST_PAGES.includes(page);
   const isPermalink = page === 'tt-body-page';
@@ -189,6 +182,7 @@ function resolveVarConditions(html, vars) {
 
 /** 값 치환자를 실제 값으로 바꾼다. */
 function fillPlaceholders(html, ctx) {
+  const { BLOG, ARTICLES, ARTICLE_BODY, NOTICES, CATEGORIES } = ctx.mock;
   const a = ctx.item;
   const n = ctx.notice;
   const t = ctx.tag;
@@ -221,7 +215,7 @@ function fillPlaceholders(html, ctx) {
         return BLOG.title;
 
       // 사이드바 자동 생성
-      case 'category_list': return categoryListHtml();
+      case 'category_list': return categoryListHtml(CATEGORIES);
       case 'recent_article': return '<ul>' + ARTICLES.slice(0, 5).map((x) => `<li><a href="#">${x.title}</a></li>`).join('') + '</ul>';
       case 'recent_comment': return '<ul><li><a href="#">좋은 글 잘 봤습니다</a></li></ul>';
       case 'recent_notice': return '<ul>' + NOTICES.map((x) => `<li><a href="#">${x.title}</a></li>`).join('') + '</ul>';
@@ -230,7 +224,9 @@ function fillPlaceholders(html, ctx) {
 
       // 목록 머리말
       case 'list_conform':
-        return ctx.pageType === 'tt-body-search' ? '검색: 티스토리' : '개발';
+        if (ctx.pageType === 'tt-body-search') return '검색 결과';
+        if (ctx.pageType === 'tt-body-category') return CATEGORIES[0]?.name || '전체';
+        return '전체';
       case 'list_count': return String(ARTICLES.length);
 
       // 글
@@ -378,7 +374,9 @@ export function renderPreview(skinHtml, opts) {
     ...(opts.vars || {}),
   };
 
-  const ctx = { pageType: opts.pageType, vars };
+  // 미리보기 채움. 용도별 LLM 샘플이 있으면 그걸, 없으면 기본 목업을 쓴다.
+  const mock = opts.mock || mockDefault();
+  const ctx = { pageType: opts.pageType, vars, mock };
 
   let html = resolveVarConditions(skinHtml, vars);
   // 펼치기와 채우기가 한 번에 일어난다. 분리하면 반복 문맥이 사라진다.
