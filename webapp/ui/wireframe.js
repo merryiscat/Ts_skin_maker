@@ -59,6 +59,13 @@ function list(s) {
     return `<div class="wf-list">${Array.from({ length: 3 }, () => item).join('')}</div>`;
   }
 
+  if (s.listStyle === LIST_STYLES.HERO) {
+    // 첫 글을 대표 사진으로 크게, 나머지는 작은 목록. 히어로가 없으면 표준과
+    // 같아 보여 4안이 획일화된다.
+    const row = `<div class="wf-item wf-row">${s.showThumbnail ? ph('사진', 'wf-thumb') : ''}<div class="wf-txt">${lbl('제목')}</div></div>`;
+    return `<div class="wf-list">${ph('대표 사진', 'wf-hero')}${row}${row}</div>`;
+  }
+
   // 표준(list-standard): 썸네일 왼쪽, 제목·요약 오른쪽
   const item =
     `<div class="wf-item wf-row">${s.showThumbnail ? ph('사진', 'wf-thumb') : ''}` +

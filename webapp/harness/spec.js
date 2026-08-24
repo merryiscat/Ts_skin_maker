@@ -252,6 +252,7 @@ const LIST_BY_STYLE = {
   grid: LIST_STYLES.GRID,
   dense: LIST_STYLES.DENSE,
   hero: LIST_STYLES.HERO,
+  custom: LIST_STYLES.CUSTOM,
 };
 
 /**

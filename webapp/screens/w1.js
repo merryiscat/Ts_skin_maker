@@ -369,7 +369,7 @@ export function mount(root, ctx) {
 
   /** 산출물 네 개. 미리보기, 코드 열람, 검증이 전부 같은 묶음을 본다. */
   function makeFiles(details, state) {
-    const name = state.selectedConcept?.name || state.concepts[state.conceptIndex]?.name || '내 스킨';
+    const name = state.selectedConcept?.name || '내 스킨';
     const preset = detailsToPreset(details, { name, uploadedFont: state.uploadedFont, themeCss: state.themeCss });
     return {
       'skin.html': buildSkinHtml(preset),
@@ -419,7 +419,7 @@ export function mount(root, ctx) {
 
   /** 대화를 통째로 다시 그린다. 입력칸은 발판에 있어서 포커스가 날아가지 않는다. */
   function drawChat(state) {
-    const name = state.concepts[state.conceptIndex]?.name || '지금 값';
+    const name = state.selectedConcept?.name || '지금 값';
     const intro =
       `<div class="msg sys"><div class="msg-body">${esc(name)} 으로 시작합니다. ` +
       `바꾸고 싶은 것을 말해 주세요.</div></div>`;

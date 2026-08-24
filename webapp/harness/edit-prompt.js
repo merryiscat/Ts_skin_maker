@@ -15,7 +15,7 @@
 
 import { DETAIL_FIELDS } from './spec.js';
 import { EDIT_SCHEMA, detailFieldsSummary, RECENT_TURNS } from './system-prompt.js';
-import { themeGuide } from './theme-prompt.js';
+import { designGuide } from './theme-prompt.js';
 
 const EFFORT_EDIT = 'low';
 
@@ -50,16 +50,18 @@ function editSystem() {
     '',
     '## 두 가지를 고칠 수 있다',
     '',
-    '- 세부 값(details): 사이드바 위치, 목록 형태, 본문 폭, 글자 크기, 글꼴 등 구조·글꼴',
-    '- 테마 CSS(themeCss): 색, 배경, 포인트색, 테두리, 그림자, 모서리 둥글기, 여백 느낌,',
-    '  hover 등 "보이는 느낌"',
+    '- 디자인 CSS(themeCss): 목록 배치(격자/히어로/열수/여백), 색, 테두리, 그림자, 모서리,',
+    '  글자 크기·굵기 등 "보이는 화면" 거의 전부. 이 CSS 가 마지막에 얹혀 base 를 덮는다.',
+    '- 세부 값(details): 사이드바 위치(left/right/none)와 글꼴(bodyFont/headingFont)만.',
+    '  사이드바 유무는 골격 마크업을, 글꼴은 폰트 시스템을 건드리므로 여기로 간다.',
     '',
     '## 무엇을 어디로 보내나',
     '',
-    '- 사이드바/목록/본문 폭/글자 크기/글꼴 변경 → details',
-    '- 색·배경·포인트색·테두리·그림자·둥글기·여백감·hover 등 → themeCss (CSS 를 직접 고친다)',
-    '- 한쪽만 건드리는 지시면 다른 쪽은 지금 값을 "그대로" 옮겨 적는다. 특히 색 지시가',
-    '  없으면 themeCss 는 지금 것을 통째로 그대로 옮긴다(임의로 다시 쓰지 말 것).',
+    '- 사이드바 위치 변경 → details.sidebar. 글꼴 변경 → details.bodyFont/headingFont.',
+    '- 그 밖의 모든 것(배치·격자·첫 글 강조·여백·색·테두리·그림자·글자 크기 등) → themeCss.',
+    '  themeCss 를 직접 고친다. 지금 CSS 를 바탕으로 지시한 부분만 손보고 나머지는 유지한다.',
+    '- 한쪽만 건드리는 지시면 다른 쪽은 지금 값을 "그대로" 옮겨 적는다. 배치·색 지시가 없으면',
+    '  themeCss 는 지금 것을 통째로 그대로 옮긴다(임의로 다시 쓰지 말 것).',
     '',
     '## 말한 것만 바꾼다',
     '',
@@ -74,7 +76,7 @@ function editSystem() {
     '',
     '한 지시에 되는 것과 안 되는 것이 섞여 있으면 되는 것만 바꾸고 나머지는 reply 에서 말한다.',
     '',
-    themeGuide(),
+    designGuide(),
     '',
     '## details 로 정할 수 있는 항목',
     '',

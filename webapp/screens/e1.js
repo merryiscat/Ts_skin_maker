@@ -35,7 +35,7 @@
  * 화면 모듈 규약은 app/app.js 위쪽 주석에 있다.
  */
 
-import { PROVIDERS, RECOMMENDED, chatModels, validateKeyFormat, listModels } from '../providers.js';
+import { PROVIDERS, RECOMMENDED, validateKeyFormat, listModels } from '../providers.js';
 import { purposeBlockHtml } from '../app/conversation.js';
 
 /**
@@ -70,7 +70,6 @@ export function mount(root, ctx) {
 
   let checking = false;
   let failure = null; // { kind, message }
-  let showAll = false; // 전체 모델 목록을 펼쳐 둔 상태
   let attempt = 0; // 확인 중에 제공자를 바꾸면 늦게 온 응답을 버린다
 
   // 저장해 둔 키로 들어왔는지. 그러면 입력칸 대신 "확인할까요" 를 낸다.
@@ -331,20 +330,10 @@ export function mount(root, ctx) {
       `<div class="msg"><div class="msg-body">` +
       // 확인 상태는 대화 머리의 배지가 상시로 들고 있다. 여기서 또 말하지 않는다
       `키를 확인했습니다. 쓸 모델을 고르세요.` +
-      `<div class="tiny dim" style="margin-top:6px" id="lock-note"></div>` +
       `<div style="margin-top:10px" id="rec"></div>` +
-      // 전체 목록은 평소에 접어 둔다. 추천 카드가 기본 경로이고, 그 밖의 모델은
-      // 아래 "모델 선택" 을 눌렀을 때만 목록이 열린다 (2026-08-17 피드백으로
-      // 상시 노출되던 목록/직접 입력을 걷어냄. 직접 입력은 대체 없이 뺐다 -
-      // docs/TODO.md "정해야 할 것" 참조)
-      `<div class="row" id="all-row" hidden style="margin-top:10px">` +
-      `<select id="all" style="max-width:100%"></select>` +
-      `</div>` +
-      `<div class="field-note" id="model-note"></div>` +
-      `<div class="msg-actions">` +
-      `<button class="sm" id="pick-all">모델 선택</button>` +
-      `<button class="sm" id="forget">키 지우기</button>` +
-      `</div>` +
+      // 키 변경·삭제와 그 밖의 모델은 설정에서 다룬다. 카드를 누르면 바로 골라지므로
+      // "모델 선택" 버튼과 "키 지우기" 버튼은 걷어냈다 (2026-08-25 피드백).
+      `<div class="tiny dim" style="margin-top:8px" id="lock-note"></div>` +
       `</div></div>`
     );
   }
@@ -401,7 +390,6 @@ export function mount(root, ctx) {
         attempt++;
         checking = false;
         failure = null;
-        showAll = false;
         stored = false;
         actions.setProvider(p.id);
       });
@@ -436,15 +424,9 @@ export function mount(root, ctx) {
 
     if (!state.keyChecked) return;
 
-    $('pick-all').addEventListener('click', () => {
-      showAll = !showAll;
-      drawModels(actions.getState());
-    });
-    $('all').addEventListener('change', () => actions.setModel($('all').value));
-
     $('lock-note').textContent = [
       state.rememberKey ? '이 브라우저에 저장됨' : '이 탭에서만 유지됨',
-      '뒤 4자리만 표시합니다',
+      '키 변경·삭제는 설정에서',
     ].join(' · ');
 
     drawModels(state);
@@ -454,13 +436,6 @@ export function mount(root, ctx) {
 
   function drawModels(state) {
     drawRecommended(state);
-    drawAllModels(state);
-
-    const known = recommendedFor(state).some((r) => r.id === state.model);
-    const note = root.querySelector('#model-note');
-    if (note) {
-      note.textContent = known ? '' : '추천 밖 모델은 단가를 몰라 비용을 표시하지 못합니다';
-    }
   }
 
   /**
@@ -495,45 +470,18 @@ export function mount(root, ctx) {
       name.className = 'card-title';
       name.style.fontSize = 'var(--t-body)';
       name.textContent = r.label;
-      const gap = document.createElement('span');
-      gap.className = 'spacer';
-      const price = document.createElement('span');
-      price.className = 'tiny dim';
-      price.textContent = unitPrice(r);
-      head.append(name, gap, price);
+      head.append(name);
 
+      // 단가(100만 토큰당)는 사용자가 가늠하기 어려워 카드에서 뺐다. 상대적 비용은
+      // note 가 말로 전한다("가장 싸고 빠릅니다" 등). 실행당 총 비용 표시는
+      // 호출당 평균 토큰을 잰 뒤로 미뤄 둠 (docs/TODO.md, 2026-08-25 피드백).
       const note = document.createElement('div');
       note.className = 'card-sub';
-      note.textContent = r.note || unitPrice(r);
+      note.textContent = r.note || '';
 
       card.append(head, note);
       box.append(card);
     }
-  }
-
-  /** 받아온 전체 목록. "모델 선택" 으로 여닫는다. 목록이 바뀔 때만 다시 채운다. */
-  function drawAllModels(state) {
-    const sel = root.querySelector('#all');
-    if (!sel) return;
-
-    root.querySelector('#all-row').hidden = !showAll;
-    root.querySelector('#pick-all').classList.toggle('on', showAll);
-
-    // 음성·이미지·임베딩 모델을 빼고 채운다. 안 거르면 제공자에 따라 100개가 넘어
-    // 쓸 수 있는 모델을 찾지 못한다
-    const usable = chatModels(state.models);
-    const signature = usable.map((m) => m.id).join(',');
-    if (sel.dataset.signature !== signature) {
-      sel.dataset.signature = signature;
-      sel.textContent = '';
-      for (const m of usable) {
-        const o = document.createElement('option');
-        o.value = m.id;
-        o.textContent = m.label === m.id ? m.id : `${m.label} (${m.id})`;
-        sel.append(o);
-      }
-    }
-    if (sel.value !== state.model) sel.value = state.model;
   }
 
   /** 받아온 목록에 실제로 있는 추천만. */
@@ -643,10 +591,6 @@ function maskKey(provider, key) {
   return `${provider.keyPrefix} ... ${k.slice(-4)}`;
 }
 
-function unitPrice(rec) {
-  if (!rec.price) return '단가 모름';
-  return `100만 토큰당 입력 $${rec.price.input} · 출력 $${rec.price.output}`;
-}
 
 /**
  * 이미 고른 모델이 살아 있으면 유지한다. 처음이면 비워 둔다.

@@ -10,7 +10,7 @@
  */
 
 import { defaultDetails } from '../harness/spec.js';
-import { wireToDetails } from '../harness/concept-prompt.js';
+import { wireHint } from '../harness/concept-prompt.js';
 
 const KEY_STORAGE = 'tsm.key';
 const PREF_STORAGE = 'tsm.pref';
@@ -35,20 +35,14 @@ function emptyState() {
 
     // P1
     purpose: '',
-    mood: '',
-    extra: '', // 용도·느낌 뒤에 자유로 덧붙이는 추가 의견. 4안 생성 프롬프트에 실린다
-    concepts: [],
-    conceptIndex: -1,
-    mixNote: '',
 
-    // P1 (생성형 앞단, 2026-08-24). 상담 대화체 한 덩이 + 새 컨셉 4안(wire/look).
-    consultation: '',
-    genConcepts: [], // [{ kind, name, pitch, wire, look, tradeoff }]
-    genIndex: -1,
-    conceptNote: '', // 고른 안에 사용자가 덧붙인 의견. ④ CSS 실현에 실린다
-    selectedConcept: null, // 고른 안 전체(look 포함). ④단계 재료
+    // P1 (생성형 앞단, 2026-08-25). 값싼 4안 스케치(이름·설명·wire)를 흑백 와이어로 보고 고른다.
+    genConcepts: [], // [{ name, desc, wire{layout,listStyle} }] 4안
+    genIndex: -1, // 고른 안
+    conceptNote: '', // "이런 느낌으로 다시" 재생성 방향(선택)
+    selectedConcept: null, // 확정한 컨셉 { name, look(desc), wire, hint }. 실현 재료
 
-    // 마지막으로 상담/4안을 만든 용도. 이 값이 바뀌면 다시 생성한다
+    // 마지막으로 4안을 만든 용도. 이 값이 바뀌면 다시 만든다
     genPurpose: '',
 
     // ④ 생성된 테마 CSS 레이어와, 그것을 어느 안으로 만들었는지 키(고른 안이 바뀌면 다시 만든다)
@@ -218,10 +212,8 @@ export function startOver() {
     conceptDetails: null,
     details: defaultDetails(),
     chat: [],
-    mixNote: '',
     sample: null,
     uploadedFont: null,
-    consultation: '',
     genConcepts: [],
     genIndex: -1,
     conceptNote: '',
@@ -234,42 +226,57 @@ export function startOver() {
 
 /* ------------------------------------------------------------ P1 (생성형 앞단) */
 
-/** 상담 + 4 와이어 컨셉 결과를 넣는다. 만든 용도를 함께 저장해 용도가 바뀌면 다시 만든다. */
-export function setConsult({ consultation, concepts, purpose }) {
+/** 4안을 새로 시작한다. 용도가 바뀌면 안·선택·의견을 비우고 이 용도로 다시 뽑는다. */
+export function resetConsult(purpose) {
   set({
-    consultation: consultation || '',
-    genConcepts: Array.isArray(concepts) ? concepts : [],
+    genConcepts: [],
     genIndex: -1,
+    conceptNote: '',
+    selectedConcept: null,
+    themeCss: '',
+    themeFor: '',
     genPurpose: purpose ?? state.purpose,
   });
 }
 
-/** 컨셉 하나를 고른다(아직 확정 전, 강조만). */
-export function chooseGenConcept(i) {
-  set({ genIndex: i });
+/** 값싼 4안 스케치를 넣는다. */
+export function setConceptSet(concepts) {
+  set({ genConcepts: Array.isArray(concepts) ? concepts : [], genIndex: -1 });
 }
 
-/** 고른 안에 덧붙이는 의견. */
+/** 4안 중 하나를 고른다(강조만). 다시 누르면 해제. */
+export function chooseConcept(i) {
+  set({ genIndex: state.genIndex === i ? -1 : i });
+}
+
+/** "이런 느낌으로 다시" 재생성 방향. */
 export function setConceptNote(text) {
   set({ conceptNote: text });
 }
 
 /**
- * 고른 안을 확정한다. wire 를 세부 값(details)으로 옮겨 골격이 구조를 렌더하게 하고,
- * 안 전체(look 포함)를 selectedConcept 로 남긴다 - look 을 CSS 로 실현하는 ④단계 재료다.
+ * 고른 안을 확정한다. 컨셉(이름·설명·구조 힌트)을 selectedConcept 로 남기고, 세부 값은
+ * 중립(listStyle: custom)에 스케치의 사이드바만 반영한다 - 나머지 구조·색은 P2 에서
+ * CSS 로 생성한다(디자인 실현).
  */
-export function applyGenConcept() {
+export function applySelectedConcept() {
   const c = state.genConcepts[state.genIndex];
   if (!c) return;
-  const details = wireToDetails(c.wire);
-  // 새 안을 고르면 이전 테마는 낡았다. 비워서 P2 가 이 안으로 다시 만들게 한다
-  set({ selectedConcept: c, conceptDetails: { ...details }, details: { ...details }, themeCss: '', themeFor: '' });
+  const sidebar = c.wire?.layout === 'no-sidebar' ? 'none' : c.wire?.layout === 'sidebar-right' ? 'right' : 'left';
+  const details = { ...defaultDetails(), listStyle: 'custom', sidebar };
+  set({
+    selectedConcept: { name: c.name, look: c.desc || '', wire: c.wire, hint: wireHint(c.wire) },
+    conceptDetails: { ...details },
+    details: { ...details },
+    themeCss: '',
+    themeFor: '',
+  });
 }
 
-/** 고른 안을 가리키는 키. 이 값이 바뀌면 테마를 다시 만든다. */
+/** 고른 컨셉을 가리키는 키. 이 값이 바뀌면 디자인을 다시 만든다. */
 export function conceptKey(concept) {
   if (!concept) return '';
-  return `${concept.kind || ''}|${concept.name || ''}`;
+  return `${concept.name || ''}`;
 }
 
 /** ④ 생성된 테마 CSS 를 넣는다. 어느 안으로 만들었는지 키도 함께 저장한다. */
@@ -287,59 +294,13 @@ export function setUploadedFont(font) {
   set({ uploadedFont: font });
 }
 
-export function setQuestion({ purpose, mood, extra }) {
-  set({
-    purpose: purpose ?? state.purpose,
-    mood: mood ?? state.mood,
-    extra: extra ?? state.extra,
-  });
-}
-
-export function setConcepts(concepts) {
-  set({ concepts, conceptIndex: -1 });
+export function setQuestion({ purpose }) {
+  set({ purpose: purpose ?? state.purpose });
 }
 
 /** E1 의 "4안 만들기" 가 켜고, P1 이 열리며 소비한 뒤 끈다. */
 export function requestGenerate(on = true) {
   set({ pendingGenerate: on });
-}
-
-/**
- * P1 "조건 바꾸기" — 만든 4안과 고른 것, 그동안의 작업을 버리고 앞 화면(E1)에서
- * 용도·느낌을 다시 만지게 한다. 용도·느낌 자체는 남겨 두어 E1 이 그 값을 미리
- * 채워 보여 준다. conceptDetails 를 비워야 E1 이 다시 P1(4안 생성)로 나간다.
- */
-export function restartConcepts() {
-  set({
-    concepts: [],
-    conceptIndex: -1,
-    conceptDetails: null,
-    details: defaultDetails(),
-    mixNote: '',
-    chat: [],
-  });
-}
-
-/** 실패했다가 다시 만든 안 하나를 자리에 끼워 넣는다. */
-export function replaceConcept(kind, concept) {
-  const next = state.concepts.filter((c) => c.kind !== kind).concat(concept);
-  const order = ['보편 A', '보편 B', '실험 A', '실험 B'];
-  next.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
-  set({ concepts: next });
-}
-
-export function chooseConcept(index) {
-  const c = state.concepts[index];
-  if (!c) return;
-  set({
-    conceptIndex: index,
-    conceptDetails: { ...c.details },
-    details: { ...c.details },
-  });
-}
-
-export function setMixNote(text) {
-  set({ mixNote: text });
 }
 
 /* ------------------------------------------------------------ P2 */

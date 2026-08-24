@@ -533,6 +533,39 @@ input.chip-input { background: var(--field-bg); }
 .opts { display: flex; flex-wrap: wrap; gap: var(--s1); align-items: center; }
 .opt { padding: 5px 11px; font-size: var(--t-small); }
 
+/*
+  자연어 컨셉 옵션 카드 (P1 상담). 단어형 칩 대신 전체 폭 선택 행으로, 각 옵션이
+  "전체적인 디자인 컨셉"을 자연어로 설명한다 (2026-08-24 피드백).
+*/
+.opt-cards { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s2); }
+.opt-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--s3) var(--s3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+}
+.opt-card:hover { border-color: var(--accent); }
+.opt-card.on { border-color: var(--accent); background: var(--accent-bg); }
+.opt-card .oc-title { display: block; font-weight: var(--w-semi); font-size: var(--t-body); margin-bottom: 3px; }
+.opt-card.on .oc-title { color: var(--accent); }
+.opt-card .oc-desc { display: block; font-size: var(--t-small); color: var(--dim); line-height: var(--lh-read); }
+
+/* 사용자가 직접 적어 더한 컨셉 칩 (전송으로 추가, 눌러서 지움). */
+.custom-chips { display: flex; flex-wrap: wrap; gap: var(--s1); margin-top: var(--s2); }
+.custom-chip {
+  padding: 4px 10px;
+  border: 1px solid var(--accent);
+  border-radius: var(--r-pill);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: var(--t-small);
+  cursor: pointer;
+}
+
 /* 필드를 라벨/값 두 단으로 정렬한다. 폼이 나열이 아니라 표로 읽힌다. */
 @media (min-width: 720px) {
   .field.aligned {
@@ -1010,6 +1043,9 @@ a.shot-pick, .shot-pick { display: block; }
   line-height: 1.2;
 }
 .wf.lg { aspect-ratio: 16 / 10; padding: 12px; gap: 8px; }
+
+/* P1 4안 카드: 와이어프레임이 카드 폭을 꽉 채우게 (안 그러면 작게 뜬다). */
+.card.pick > .wf { width: 100%; }
 
 .wf-top { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; padding-bottom: 6px; border-bottom: 1px solid #ccc; }
 .wf-logo { font-weight: 700; color: #333; }

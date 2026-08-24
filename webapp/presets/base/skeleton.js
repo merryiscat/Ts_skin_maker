@@ -27,6 +27,9 @@ export const LIST_STYLES = {
   GRID: 'list-grid',       // 카드 그리드, 썸네일 우선
   DENSE: 'list-dense',     // 작은 썸네일 + 요약, 밀집
   HERO: 'list-hero',       // 첫 글을 대표 이미지로 크게, 제목을 얹는다
+  // 중립. base 에 이 클래스용 규칙이 없어, 생성된 디자인 CSS 가 목록 배치를 온전히
+  // 소유한다(base .list-* .card 규칙에 안 눌린다). 생성 흐름의 기본값이다.
+  CUSTOM: 'list-custom',
 };
 
 /** 프리셋이 값을 안 주면 쓰는 기본값. */
