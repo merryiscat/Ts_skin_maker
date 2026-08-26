@@ -160,6 +160,39 @@ export function moodBlockHtml(state, active) {
  */
 export const EXTRA_Q = '더 전하고 싶은 의견이 있으면 적어 주세요. 없으면 그대로 만들어도 됩니다.';
 
+/**
+ * 고른 레이아웃 블록(정적).
+ *
+ * P1 에서 레이아웃을 고르고 다음 단계로 넘어가면, 무슨 레이아웃을 골랐는지 로그에 남긴다
+ * - 화면이 바뀌어도 대화에 계속 보이게(연속 흐름).
+ */
+export function layoutBlockHtml(state) {
+  const c = state.genConcepts?.[state.genIndex];
+  if (!c) return '';
+  return (
+    `<div class="msg"><div class="msg-body" style="pointer-events:none">` +
+    `레이아웃을 <strong>${esc(c.name || '')}</strong> 로 골랐어요.` +
+    (c.desc ? `<p class="small dim" style="margin:6px 0 0">${esc(c.desc)}</p>` : '') +
+    `</div></div>`
+  );
+}
+
+/**
+ * 무드/컨셉 블록(정적).
+ *
+ * C1 에서 무드를 정하고 넘어가면 로그에 남긴다. 이름 + 한 줄.
+ */
+export function conceptBlockHtml(state) {
+  const c = state.overallConcept;
+  if (!c) return '';
+  return (
+    `<div class="msg"><div class="msg-body" style="pointer-events:none">` +
+    `무드를 <strong>${esc(c.name || '')}</strong> 로 잡았어요.` +
+    (c.summary ? `<p class="small dim" style="margin:6px 0 0">${esc(c.summary)}</p>` : '') +
+    `</div></div>`
+  );
+}
+
 export function extraBlockHtml() {
   return (
     `<div class="msg"><div class="msg-body">` +
@@ -175,9 +208,9 @@ export function extraBlockHtml() {
 
 /* ------------------------------------------------------------ 로그 조립 */
 
-// 진행 순서. 로그에는 "지금 단계보다 앞선" 단계만 들어간다. 선택형으로 바꾸며
-// 느낌·추가의견·컨셉 단계는 걷어냈다 - 이제 용도 하나만 대화로 받는다.
-const STEPS = ['purpose', 'concept', 'detail', 'chat'];
+// 진행 순서. 로그에는 "지금 단계보다 앞선" 단계만 들어간다(2026-08-26 옵션2 순서).
+// purpose(E1) → layout(P1 레이아웃 4안) → concept(C1 무드) → detail(P2) → chat(W1).
+const STEPS = ['purpose', 'layout', 'concept', 'detail', 'chat'];
 
 /** 지금 어느 단계인가. 화면 위치로 정한다. */
 function activeStep(state) {
@@ -185,6 +218,8 @@ function activeStep(state) {
     case 'E1':
       return 'purpose';
     case 'P1':
+      return 'layout';
+    case 'C1':
       return 'concept';
     case 'P2':
       return 'detail';
@@ -208,6 +243,16 @@ export function renderConversation(state) {
   // 용도는 E1 을 지나면 로그로 남는다. 질문 + 고른 답(정적 블록)으로.
   if (done('purpose') && state.purpose && state.purpose.trim()) {
     parts.push(purposeBlockHtml(state, false));
+  }
+
+  // 고른 레이아웃은 P1 을 지나면(C1 이후) 로그로 남는다.
+  if (done('layout') && state.genIndex >= 0 && state.genConcepts?.[state.genIndex]) {
+    parts.push(layoutBlockHtml(state));
+  }
+
+  // 무드는 C1 을 지나면(P2 이후) 로그로 남는다.
+  if (done('concept') && state.overallConcept) {
+    parts.push(conceptBlockHtml(state));
   }
 
   return parts.join('');

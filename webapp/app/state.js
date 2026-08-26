@@ -10,7 +10,7 @@
  */
 
 import { defaultDetails } from '../harness/spec.js';
-import { wireHint } from '../harness/concept-prompt.js';
+import { overallConceptToText } from '../harness/concept-prompt.js';
 
 const KEY_STORAGE = 'tsm.key';
 const PREF_STORAGE = 'tsm.pref';
@@ -19,7 +19,7 @@ const PREF_STORAGE = 'tsm.pref';
  *  2026-08-24 생성형으로 재피벗. E1(용도) → P1(상담+4 와이어 컨셉, 고름) →
  *  P2(고른 안의 구조를 미리보고 손보기) → W1(대화 편집) → D1(내려받기).
  *  P1 은 새 흐름으로 새로 짰다. 리치한 "look" 을 CSS 로 실현하는 ④단계는 뒤에 얹는다. */
-export const SCREENS = ['E1', 'P1', 'P2', 'W1', 'D1'];
+export const SCREENS = ['E1', 'P1', 'C1', 'P2', 'W1', 'D1'];
 
 function emptyState() {
   return {
@@ -36,11 +36,17 @@ function emptyState() {
     // P1
     purpose: '',
 
-    // P1 (생성형 앞단, 2026-08-25). 값싼 4안 스케치(이름·설명·wire)를 흑백 와이어로 보고 고른다.
-    genConcepts: [], // [{ name, desc, wire{layout,listStyle} }] 4안
-    genIndex: -1, // 고른 안
+    // P1 (용도 기반 4 와이어, 2026-08-26 옵션2). 용도에서 구조가 서로 다른 레이아웃 4개(A~D)를
+    // 뽑는다. 무드는 아직 없다(다음 C1 단계). 소독+실현가능성 린트를 통과한 것만 쌓인다.
+    genConcepts: [], // [{ name, desc, hint, sidebar, wireHtml, key(A~D), warned? }] 4안
+    genIndex: -1, // 고른 레이아웃
+
+    // C1 (전반 컨셉/무드, 2026-08-26 옵션2). 레이아웃을 고른 뒤 무드·색을 한 줄로 정한다.
+    // { name, summary }. P2 look 재료. (레이아웃 × 무드 = 두 축)
+    overallConcept: null,
+
     conceptNote: '', // "이런 느낌으로 다시" 재생성 방향(선택)
-    selectedConcept: null, // 확정한 컨셉 { name, look(desc), wire, hint }. 실현 재료
+    selectedConcept: null, // 확정한 컨셉 { name, look, hint, sidebar }. 실현 재료
 
     // 마지막으로 4안을 만든 용도. 이 값이 바뀌면 다시 만든다
     genPurpose: '',
@@ -214,6 +220,7 @@ export function startOver() {
     chat: [],
     sample: null,
     uploadedFont: null,
+    overallConcept: null,
     genConcepts: [],
     genIndex: -1,
     conceptNote: '',
@@ -226,9 +233,10 @@ export function startOver() {
 
 /* ------------------------------------------------------------ P1 (생성형 앞단) */
 
-/** 4안을 새로 시작한다. 용도가 바뀌면 안·선택·의견을 비우고 이 용도로 다시 뽑는다. */
+/** 상담을 새로 시작한다. 용도가 바뀌면 컨셉·안·선택을 비우고 이 용도로 다시 뽑는다. */
 export function resetConsult(purpose) {
   set({
+    overallConcept: null,
     genConcepts: [],
     genIndex: -1,
     conceptNote: '',
@@ -239,12 +247,24 @@ export function resetConsult(purpose) {
   });
 }
 
-/** 값싼 4안 스케치를 넣는다. */
-export function setConceptSet(concepts) {
-  set({ genConcepts: Array.isArray(concepts) ? concepts : [], genIndex: -1 });
+/** C1 에서 정한 전반 컨셉(무드)을 넣는다. 4안은 P1 에서 이미 골랐으므로 건드리지 않는다. */
+export function setOverallConcept(concept) {
+  set({ overallConcept: concept || null, themeCss: '', themeFor: '' });
 }
 
-/** 4안 중 하나를 고른다(강조만). 다시 누르면 해제. */
+/** 4안을 비운다. P1 에서 "4안 다시" 로 세트를 새로 뽑을 때. */
+export function resetVariants() {
+  set({ genConcepts: [], genIndex: -1 });
+}
+
+/** 새로 만든 와이어안 1개를 누적한다(4안을 순차 생성). 방금 것을 기본 선택으로 둔다. */
+export function addConcept(concept) {
+  if (!concept) return;
+  const genConcepts = [...state.genConcepts, concept];
+  set({ genConcepts, genIndex: genConcepts.length - 1 });
+}
+
+/** 쌓인 안 중 하나를 고른다(강조). 같은 것을 다시 누르면 해제. */
 export function chooseConcept(i) {
   set({ genIndex: state.genIndex === i ? -1 : i });
 }
@@ -262,10 +282,20 @@ export function setConceptNote(text) {
 export function applySelectedConcept() {
   const c = state.genConcepts[state.genIndex];
   if (!c) return;
-  const sidebar = c.wire?.layout === 'no-sidebar' ? 'none' : c.wire?.layout === 'sidebar-right' ? 'right' : 'left';
+  // 사이드바는 모델이 준 값을 쓴다(none/right/left). 나머지 구조·색은 P2 가 CSS 로 생성한다.
+  const sidebar = c.sidebar === 'none' ? 'none' : c.sidebar === 'right' ? 'right' : 'left';
   const details = { ...defaultDetails(), listStyle: 'custom', sidebar };
+  // look 은 전반 컨셉(무드·색감·타이포)이 재료다. hint 는 고른 안의 구조다.
+  // 둘을 합쳐 P2 가 "이 컨셉을, 이 구조로" CSS 실현하게 한다.
+  const conceptText = overallConceptToText(state.overallConcept);
+  const look = [conceptText, c.desc ? `이 안: ${c.desc}` : ''].filter(Boolean).join('\n');
   set({
-    selectedConcept: { name: c.name, look: c.desc || '', wire: c.wire, hint: wireHint(c.wire) },
+    selectedConcept: {
+      name: state.overallConcept?.name || c.name,
+      look,
+      hint: c.hint || '',
+      sidebar,
+    },
     conceptDetails: { ...details },
     details: { ...details },
     themeCss: '',

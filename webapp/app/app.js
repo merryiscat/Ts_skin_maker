@@ -52,6 +52,7 @@ import { renderConversation } from './conversation.js';
 
 const ROUTES = {
   E1: () => import('../screens/e1.js'),
+  C1: () => import('../screens/c1.js'),
   P1: () => import('../screens/p1.js'),
   P2: () => import('../screens/p2.js'),
   W1: () => import('../screens/w1.js'),

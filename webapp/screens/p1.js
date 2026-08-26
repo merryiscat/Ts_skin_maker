@@ -1,26 +1,31 @@
 /**
- * P1 4안 고르기 (생성형 앞단, 2026-08-25 개편)
+ * P1 레이아웃 고르기 (1안씩 탐색, 2026-08-26 옵션2 + 피드백)
  *
- * 용도로 값싼 4안 스케치를 만들어(이름·설명 + 거친 구조) 오른쪽에 흑백 와이어프레임
- * 넷을 나란히 그린다. 사용자가 하나를 고르고 "이 구성으로" 를 누르면, 그 컨셉을 들고
- * P2 로 가서 "구조 + 색" 을 CSS 로 풀 생성해 진짜 화면을 본다.
+ * 순서(옵션2)는 그대로 - 레이아웃을 먼저 고르고 무드는 C1 에서. 다만 P1 은 "4개를 한 번에"
+ * 가 아니라 "한 안씩 탐색" 이다(디자인 피드백):
+ *   - 시작에 레이아웃 1안을 보여준다.
+ *   - "새로운 안": 지금까지 본 것과 다른 새 레이아웃(다음 시드 + avoid).
+ *   - "이 안 수정": 입력한 의견으로 지금 안의 구조는 유지한 채 고친다(base 모드).
+ *   - "이 레이아웃으로": 이 레이아웃을 들고 C1(무드) 로.
+ *   - "이전으로": 용도(E1) 로.
  *
- * 왜 와이어를 값싸게? 4개를 다 풀 생성하면 호출이 4배다. 스케치는 출력이 작아 한 번에
- * 넷을 싸게 뽑고, 풀 생성은 고른 하나만 한다(2026-08-25 피드백). 스케치의 거친 구조는
- * 방향을 고르는 용도일 뿐, 최종 구조는 CSS 로 열려 있다(고정 템플릿 돌려쓰기가 아님).
+ * 각 안은 모델이 짓는 흑백 자유 와이어이고, 소독+실현가능성 린트를 통과한 것만 그린다.
  *
  * 화면 모듈 규약은 app/app.js 위쪽 주석에 있다.
  */
 
-import { buildConceptSetPrompt, wireToSketch } from '../harness/concept-prompt.js';
-import { wireframe } from '../ui/wireframe.js';
+import { buildVariantPrompt, conceptSummary, VARIANTS } from '../harness/concept-prompt.js';
+import { sanitizeWireHtml, lintWireFeasibility } from '../harness/wire-feasibility.js';
+import { renderWireDoc } from '../loop/wire-render.js';
 import { createStructured, estimateCost, PROVIDERS } from '../providers.js';
+
+const MAX_TRIES = 3; // 실현가능성 위반 시 재시도(최초 1 + 재시도 2)
 
 export function mount(root, ctx) {
   const { actions, toast, panes, showCanvas } = ctx;
   const getState = actions.getState;
 
-  let busy = false; // 4안을 만드는 중
+  let busy = false;
   let reqSeq = 0;
 
   function call(prompt) {
@@ -36,123 +41,154 @@ export function mount(root, ctx) {
 
   /* ------------------------------------------------------------ 생성 */
 
-  async function generateConcepts(note) {
+  /**
+   * 레이아웃 한 안을 만든다.
+   * @param {{refine?:boolean, note?:string}} opts
+   *   refine=true 면 지금 안의 구조를 유지하며 note 로 고친다. 아니면 새 구조를 avoid 로 뽑는다.
+   */
+  async function generateOne({ refine = false, note = '' } = {}) {
     busy = true;
     drawBusy();
     const my = ++reqSeq;
     const st = getState();
-    const res = await call(buildConceptSetPrompt({ purpose: st.purpose, note: note || st.conceptNote }));
+    const seen = st.genConcepts;
+
+    let promptBase;
+    if (refine) {
+      const cur = seen[st.genIndex];
+      if (!cur) {
+        busy = false;
+        drawShow(st);
+        return;
+      }
+      promptBase = { purpose: st.purpose, seed: cur.hint, base: `${cur.name} — ${cur.hint}`, note };
+    } else {
+      const seed = VARIANTS[seen.length % VARIANTS.length].seed;
+      const avoid = seen.map(conceptSummary).filter(Boolean);
+      promptBase = { purpose: st.purpose, seed, avoid };
+    }
+
+    let fix = [];
+    let concept = null;
+    let lastError = null;
+    for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
+      const res = await call(buildVariantPrompt({ ...promptBase, fix }));
+      if (my !== reqSeq) return;
+      if (!res.ok) {
+        lastError = res.error;
+        break;
+      }
+      actions.addUsage(res.usage, estimateCost(st.provider, st.model, res.usage));
+      // 사이드바 위치는 모델의 wireHtml 을 믿지 않고 sidebar 필드로 앱이 강제한다
+      // (싼 모델이 "오른쪽" 을 desc 엔 쓰고 wireHtml 엔 반영 못 하는 것을 막는다).
+      const wireHtml = withSidebarSide(sanitizeWireHtml(res.data.wireHtml), res.data.sidebar);
+      const { violations } = lintWireFeasibility(wireHtml, res.data);
+      if (violations.length && attempt < MAX_TRIES - 1) {
+        fix = violations.map((v) => v.message);
+        continue;
+      }
+      concept = {
+        name: res.data.name || '',
+        desc: res.data.desc || '',
+        hint: res.data.hint || '',
+        sidebar: res.data.sidebar || 'left',
+        wireHtml,
+        warned: violations.length > 0,
+      };
+      break;
+    }
+
     if (my !== reqSeq) return;
     busy = false;
-    if (!res.ok) {
-      showError(res.error);
-      drawBusy();
+    if (!concept) {
+      showError(lastError);
+      drawShow(getState());
       return;
     }
-    actions.addUsage(res.usage, estimateCost(st.provider, st.model, res.usage));
-    actions.setConceptSet(res.data.concepts || []);
+    actions.addConcept(concept);
     drawShow(getState());
     showCanvas?.();
   }
 
   function drawBusy() {
     root.innerHTML =
-      '<div class="msg"><div class="msg-body"><span class="busy">화면 구성 4안을 만드는 중입니다</span></div></div>';
+      '<div class="msg"><div class="msg-body"><span class="busy">레이아웃을 만드는 중입니다</span></div></div>';
     panes.foot.innerHTML = '';
-    panes.canvasHead.textContent = '4안';
+    panes.canvasHead.innerHTML = '<span class="badge">레이아웃</span>';
     panes.canvasBody.className = 'canvas-body';
-    panes.canvasBody.innerHTML = `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        ${[1, 2, 3, 4]
-          .map(
-            (n) =>
-              '<div class="card">' +
-              `<div class="eyebrow">${n}안</div>` +
-              '<div class="skeleton" style="height:150px;margin-top:8px"></div>' +
-              '<div class="skeleton" style="height:12px;width:60%;margin-top:10px"></div>' +
-              '</div>',
-          )
-          .join('')}
-      </div>`;
+    panes.canvasBody.innerHTML = '<div class="card" style="padding:8px"><div class="skeleton" style="height:420px"></div></div>';
   }
 
   /* ------------------------------------------------------------ 보여주기 */
 
   function drawShow(state) {
-    const name = state.genIndex >= 0 ? state.genConcepts[state.genIndex]?.name : '';
+    const c = state.genIndex >= 0 ? state.genConcepts[state.genIndex] : null;
     root.innerHTML = `
       <div class="msg">
         <div class="msg-body">
-          마음에 드는 화면 구성을 오른쪽에서 하나 고르세요.
+          이 레이아웃 어때요? 마음에 들면 이걸로 가고, 아니면 지금 안을 고치거나 새 안을 보세요.
           <div class="row" style="gap:8px;margin-top:10px;flex-wrap:nowrap">
             <input type="text" id="note-input" class="chip-input" style="flex:1 1 150px;min-width:0"
-              placeholder="원하는 느낌을 적어 다시 만들 수 있어요">
-            <button class="sm" id="remake">다시 만들기</button>
+              placeholder="지금 안을 고칠 의견 (예: 사이드바를 오른쪽으로)">
+            <button id="refine" style="align-self:stretch">이 안 수정</button>
           </div>
-          <button class="primary block" id="confirm" style="margin-top:14px"${state.genIndex < 0 ? ' disabled' : ''}>${name ? `‘${esc(name)}’ 로 만들기` : '이 구성으로 만들기'}</button>
+          <button class="block" id="new" style="margin-top:8px">새로운 안 보기</button>
+          <button class="primary block" id="confirm" style="margin-top:8px"${c ? '' : ' disabled'}>이 레이아웃으로</button>
+          <button class="ghost block" id="back" style="margin-top:8px">이전으로</button>
         </div>
       </div>`;
 
-    const note = root.querySelector('#note-input');
-    note.value = state.conceptNote || '';
-    const remake = () => {
-      const v = note.value.trim();
+    const noteEl = root.querySelector('#note-input');
+    const refine = () => {
+      if (busy) return;
+      const v = noteEl.value.trim();
+      if (!v) {
+        toast?.('고칠 의견을 적어 주세요', 'bad');
+        return;
+      }
       if (looksLikeKey(v)) {
         toast?.('API 키로 보이는 값이라 보내지 않았습니다. 키는 설정에서 바꿉니다.', 'bad');
         return;
       }
-      actions.setConceptNote(v);
-      generateConcepts(v);
+      generateOne({ refine: true, note: v });
     };
-    root.querySelector('#remake').addEventListener('click', remake);
-    note.addEventListener('keydown', (e) => {
+    root.querySelector('#refine').addEventListener('click', refine);
+    noteEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.isComposing) {
         e.preventDefault();
-        remake();
+        refine();
       }
+    });
+    root.querySelector('#new').addEventListener('click', () => {
+      if (busy) return;
+      generateOne({ refine: false });
     });
     root.querySelector('#confirm').addEventListener('click', () => {
       if (getState().genIndex < 0) return;
-      actions.applySelectedConcept();
-      actions.go('P2');
+      actions.go('C1'); // 레이아웃 확정 → 무드 단계로
     });
+    root.querySelector('#back').addEventListener('click', () => actions.go('E1'));
 
-    drawCards(state);
+    drawCanvas(state);
   }
 
-  function drawCards(state) {
-    panes.canvasHead.innerHTML = '<span class="badge">4안</span>' + `<span class="badge plain">${esc(state.purpose)}</span>`;
+  function drawCanvas(state) {
+    const c = state.genIndex >= 0 ? state.genConcepts[state.genIndex] : null;
+    panes.canvasHead.innerHTML =
+      '<span class="badge">레이아웃</span>' + `<span class="badge plain">${esc(state.purpose)}</span>`;
     panes.canvasBody.className = 'canvas-body';
-    panes.canvasBody.innerHTML =
-      '<div id="grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">' +
-      state.genConcepts.map((c, i) => conceptCard(c, i, i === state.genIndex)).join('') +
-      '</div>';
-    for (const card of panes.canvasBody.querySelectorAll('[data-i]')) {
-      card.addEventListener('click', () => selectConcept(Number(card.dataset.i)));
-    }
-  }
-
-  function conceptCard(c, i, selected) {
-    return `
-      <button type="button" class="card pick${selected ? ' selected' : ''}" data-i="${i}" style="display:block;width:100%;text-align:left;cursor:pointer">
-        ${wireframe(wireToSketch(c.wire))}
-        <div style="margin-top:10px"><span class="eyebrow">${i + 1}안</span> <span class="strong">${esc(c.name)}</span></div>
-        <p class="small dim" style="margin:4px 0 0">${esc(c.desc)}</p>
-      </button>`;
-  }
-
-  /** 고른다. 제자리 강조 + 확정 버튼 라벨/활성. */
-  function selectConcept(i) {
-    actions.chooseConcept(i);
-    const state = getState();
-    for (const card of panes.canvasBody.querySelectorAll('[data-i]')) {
-      card.classList.toggle('selected', Number(card.dataset.i) === state.genIndex);
-    }
-    const cf = root.querySelector('#confirm');
-    if (cf) {
-      cf.disabled = state.genIndex < 0;
-      const name = state.genIndex >= 0 ? state.genConcepts[state.genIndex]?.name : '';
-      cf.textContent = name ? `‘${name}’ 로 만들기` : '이 구성으로 만들기';
+    panes.canvasBody.innerHTML = `
+      <iframe id="wire-frame" title="와이어프레임" sandbox="" tabindex="-1"
+        style="width:100%;height:460px;border:0;background:#fff;border-radius:8px;pointer-events:none"></iframe>
+      <div id="wire-meta" style="margin-top:8px"></div>`;
+    const frame = panes.canvasBody.querySelector('#wire-frame');
+    if (frame && c) frame.srcdoc = renderWireDoc(c.wireHtml);
+    const meta = panes.canvasBody.querySelector('#wire-meta');
+    if (c) {
+      meta.innerHTML =
+        `<span class="strong">${esc(c.name)}</span>` +
+        (c.warned ? ' <span class="badge bad">확인 필요</span>' : '') +
+        `<p class="small dim" style="margin:4px 0 0">${esc(c.desc)}</p>`;
     }
   }
 
@@ -179,19 +215,27 @@ export function mount(root, ctx) {
     queueMicrotask(() => {
       actions.requestGenerate(false);
       actions.resetConsult(at.purpose);
-      generateConcepts();
+      generateOne({ refine: false });
     });
   } else if (at.genConcepts.length) {
     drawShow(at);
   } else {
     busy = true;
     drawBusy();
-    queueMicrotask(() => generateConcepts());
+    queueMicrotask(() => generateOne({ refine: false }));
   }
 
   return {
     update() {},
   };
+}
+
+/** 와이어 루트(.wf)에 사이드바 위치 클래스를 심어 렌더 측에서 좌/우/없음을 강제한다. */
+function withSidebarSide(html, sidebar) {
+  const cls = sidebar === 'right' ? 'side-right' : sidebar === 'none' ? 'side-none' : 'side-left';
+  return String(html)
+    .replace(/class="wf"/, `class="wf ${cls}"`)
+    .replace(/class='wf'/, `class='wf ${cls}'`);
 }
 
 function looksLikeKey(text) {
