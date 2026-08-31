@@ -19,6 +19,10 @@ import {
   listModels,
   createStructured,
   estimateCost,
+  parseDataUrl,
+  anthropicContent,
+  openaiContent,
+  googleParts,
 } from '../providers.js';
 
 let failures = 0;
@@ -555,6 +559,71 @@ for (const [id, list] of Object.entries(RECOMMENDED)) {
       `${id}/${m.id} 단가가 입출력 둘 다 있다`,
     );
   }
+}
+
+/* --------------------------------------------------------- temperature(자유도) */
+
+section('temperature — 탐색 호출의 샘플링 자유도');
+
+{
+  // OpenAI: 주면 본문 최상위에 실린다. 안 주면 안 실린다(제공자 기본값).
+  let calls = stubFetch(() => res(200, OKBODY.openai));
+  await createStructured('openai', KEYS.openai, { ...ARGS, model: 'gpt-x', temperature: 1.2 });
+  ok(calls[0].body.temperature === 1.2, 'OpenAI: temperature 가 본문에 실린다');
+  calls = stubFetch(() => res(200, OKBODY.openai));
+  await createStructured('openai', KEYS.openai, { ...ARGS, model: 'gpt-x' });
+  ok(!('temperature' in calls[0].body), 'OpenAI: 안 주면 보내지 않는다');
+
+  // Google: generationConfig 안에 실린다.
+  calls = stubFetch(() => res(200, OKBODY.google));
+  await createStructured('google', KEYS.google, { ...ARGS, model: 'gemini-x', temperature: 1.2 });
+  ok(calls[0].body.generationConfig.temperature === 1.2, 'Google: generationConfig.temperature 로 실린다');
+  calls = stubFetch(() => res(200, OKBODY.google));
+  await createStructured('google', KEYS.google, { ...ARGS, model: 'gemini-x' });
+  ok(!('temperature' in calls[0].body.generationConfig), 'Google: 안 주면 보내지 않는다');
+
+  // Anthropic: 줘도 무시한다(thinking 동반 호출에 넣으면 400 - 실측).
+  calls = stubFetch(() => res(200, OKBODY.anthropic));
+  await createStructured('anthropic', KEYS.anthropic, { ...ARGS, model: 'claude-x', temperature: 1.2 });
+  ok(!('temperature' in calls[0].body), 'Anthropic: temperature 를 받아도 보내지 않는다(400 방지)');
+}
+
+/* --------------------------------------------------------- 이미지(비전) */
+
+section('이미지 첨부(비전) 메시지 변환');
+
+{
+  const PNG = 'data:image/png;base64,AAAABBBB';
+  const p = parseDataUrl(PNG);
+  ok(p && p.mediaType === 'image/png' && p.base64 === 'AAAABBBB', 'parseDataUrl 이 mediaType/base64 를 가른다');
+  ok(parseDataUrl('그냥 글자') === null, 'data URL 이 아니면 null');
+
+  // 이미지가 없으면 문자열 content 그대로 (기존 동작 유지)
+  ok(anthropicContent({ content: '안녕' }) === '안녕', 'Anthropic: 이미지 없으면 문자열 그대로');
+  ok(openaiContent({ content: '안녕' }) === '안녕', 'OpenAI: 이미지 없으면 문자열 그대로');
+  ok(same(googleParts({ content: '안녕' }), [{ text: '안녕' }]), 'Google: 이미지 없으면 text part 만');
+
+  // 이미지가 있으면 제공자별 블록 모양으로
+  const a = anthropicContent({ content: '여기', image: PNG });
+  ok(
+    Array.isArray(a) &&
+      a[0].type === 'text' &&
+      a[1].type === 'image' &&
+      a[1].source.type === 'base64' &&
+      a[1].source.media_type === 'image/png' &&
+      a[1].source.data === 'AAAABBBB',
+    'Anthropic: text + base64 image 블록',
+  );
+  const o = openaiContent({ content: '여기', image: PNG });
+  ok(
+    Array.isArray(o) && o[0].type === 'text' && o[1].type === 'image_url' && o[1].image_url.url === PNG,
+    'OpenAI: text + image_url(data URL) 블록',
+  );
+  const g = googleParts({ content: '여기', image: PNG });
+  ok(
+    Array.isArray(g) && g[0].text === '여기' && g[1].inlineData.mimeType === 'image/png' && g[1].inlineData.data === 'AAAABBBB',
+    'Google: text + inlineData 파트',
+  );
 }
 
 console.log(`\n${checks} 가지 확인`);

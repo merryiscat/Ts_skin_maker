@@ -338,6 +338,44 @@ export function chatModels(models) {
   return (models || []).filter((m) => !NOT_CHAT.test(m.id));
 }
 
+/* --------------------------------------------------------- 이미지(비전) */
+
+/**
+ * 중립 메시지는 { role, content, image? } 다. image 는 data:image/...;base64,... URL(선택).
+ * W1 의 "캡처+그리기" 가 붙인다. 제공자마다 이미지 블록 모양이 달라 여기서 갈라 준다.
+ */
+export function parseDataUrl(url) {
+  const m = /^data:([^;,]+);base64,(.*)$/s.exec(String(url || ''));
+  return m ? { mediaType: m[1], base64: m[2] } : null;
+}
+
+/** Anthropic: content 를 text + image 블록 배열로. 이미지가 없으면 문자열 그대로. */
+export function anthropicContent(m) {
+  const img = m.image && parseDataUrl(m.image);
+  if (!img) return m.content;
+  return [
+    { type: 'text', text: m.content },
+    { type: 'image', source: { type: 'base64', media_type: img.mediaType, data: img.base64 } },
+  ];
+}
+
+/** OpenAI: content 를 text + image_url 배열로. 이미지가 없으면 문자열 그대로. */
+export function openaiContent(m) {
+  if (!m.image || !parseDataUrl(m.image)) return m.content;
+  return [
+    { type: 'text', text: m.content },
+    { type: 'image_url', image_url: { url: m.image } },
+  ];
+}
+
+/** Google: parts 에 text + inlineData. */
+export function googleParts(m) {
+  const img = m.image && parseDataUrl(m.image);
+  const parts = [{ text: m.content }];
+  if (img) parts.push({ inlineData: { mimeType: img.mediaType, data: img.base64 } });
+  return parts;
+}
+
 /* --------------------------------------------------------- 어댑터 */
 
 const ADAPTERS = {
@@ -362,6 +400,7 @@ const ADAPTERS = {
     messageUrl() {
       return 'https://api.anthropic.com/v1/messages';
     },
+    // temperature 는 받아도 무시한다 - thinking 이 기본인 이 호출에 넣으면 400 이 난다(실측).
     messageBody({ model, system, systemParts, messages, schema, effort }) {
       const outputConfig = { format: { type: 'json_schema', schema } };
       if (effort) outputConfig.effort = effort;
@@ -386,7 +425,7 @@ const ADAPTERS = {
         model,
         max_tokens: ANTHROPIC_MAX_TOKENS,
         ...(systemField ? { system: systemField } : {}),
-        messages: messages.map((m) => ({ role: m.role, content: m.content })),
+        messages: messages.map((m) => ({ role: m.role, content: anthropicContent(m) })),
         output_config: outputConfig,
       };
     },
@@ -419,7 +458,7 @@ const ADAPTERS = {
     messageUrl() {
       return 'https://api.openai.com/v1/chat/completions';
     },
-    messageBody({ model, system, messages, schema }) {
+    messageBody({ model, system, messages, schema, temperature }) {
       // effort 는 제공자마다 이름과 값이 달라 확인 전까지 보내지 않는다.
       // systemParts 는 받아도 무시한다 — OpenAI 는 프리픽스 자동 캐싱이라
       // 명시적 캐시 마커가 없고, 문자열 system 그대로 보내면 알아서 캐싱된다.
@@ -427,8 +466,10 @@ const ADAPTERS = {
         model,
         messages: [
           ...(system ? [{ role: 'system', content: system }] : []),
-          ...messages.map((m) => ({ role: m.role, content: m.content })),
+          ...messages.map((m) => ({ role: m.role, content: openaiContent(m) })),
         ],
+        // 탐색 호출(레이아웃 새 안·무드 후보)의 다양성을 위해 프롬프트가 지정할 때만 보낸다.
+        ...(temperature != null ? { temperature } : {}),
         response_format: {
           type: 'json_schema',
           json_schema: { name: 'result', schema, strict: true },
@@ -463,18 +504,20 @@ const ADAPTERS = {
     messageUrl(model) {
       return `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
     },
-    messageBody({ system, messages, schema }) {
+    messageBody({ system, messages, schema, temperature }) {
       // systemParts 는 받아도 무시한다 — Google(Gemini) 도 암시적 프리픽스 캐싱이
       // 기본이라 요청 본문에 캐시 지시를 넣을 게 없다. 문자열 system 그대로 보낸다.
       return {
         ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
         contents: messages.map((m) => ({
           role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }],
+          parts: googleParts(m),
         })),
         generationConfig: {
           responseMimeType: 'application/json',
           responseSchema: toGoogleSchema(schema),
+          // 탐색 호출의 다양성. 프롬프트가 지정할 때만 넣는다(기본은 제공자 기본값).
+          ...(temperature != null ? { temperature } : {}),
         },
       };
     },
@@ -583,13 +626,17 @@ export async function listModels(providerId, key) {
 /**
  * 구조화 JSON 출력을 받는다.
  *
- * messages 는 [{role:'user'|'assistant', content}] 형태의 제공자 중립 모양이고,
- * 각 어댑터가 자기 모양으로 바꾼다.
+ * messages 는 [{role:'user'|'assistant', content, image?}] 형태의 제공자 중립 모양이고,
+ * 각 어댑터가 자기 모양으로 바꾼다. image 는 data URL(선택) - 있으면 비전으로 함께 보낸다.
  *
  * systemParts 는 [프리픽스, 태스크규칙] 2요소 문자열 배열 (선택).
  * Anthropic 만 프롬프트 캐싱에 쓰고, OpenAI/Google 은 자동 캐싱이라 무시한다.
  */
-export async function createStructured(providerId, key, { model, system, systemParts, messages, schema, effort } = {}) {
+export async function createStructured(
+  providerId,
+  key,
+  { model, system, systemParts, messages, schema, effort, temperature } = {},
+) {
   const a = ADAPTERS[providerId];
   if (!a) return err('api', '모르는 제공자입니다');
 
@@ -600,7 +647,9 @@ export async function createStructured(providerId, key, { model, system, systemP
   const res = await call(providerId, a.messageUrl(model), {
     method: 'POST',
     headers: { ...a.authHeaders(key.trim()), 'content-type': 'application/json' },
-    body: JSON.stringify(a.messageBody({ model, system, systemParts, messages: messages || [], schema, effort })),
+    body: JSON.stringify(
+      a.messageBody({ model, system, systemParts, messages: messages || [], schema, effort, temperature }),
+    ),
   });
   if (!res.ok) return res;
 
