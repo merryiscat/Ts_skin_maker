@@ -169,6 +169,15 @@ W1 미리보기에서 "이 부분" 을 손으로 집어 채팅으로 넘기는 �
     메뉴 대신 조각 조합 자유(.wf-grid/.wf-card(.wide)/.wf-item(.rev/.col)/.wf-hero). 어휘 클래스
     2종 추가(wide=격자 가로 전체, rev=썸네일 오른쪽). W1 편집(edit-prompt)도 designGuide 공유라 동일 적용.
 - 실호출 눈 확인 남음(자유 설계 CSS 가 실제로 안 깨지는지 - 안전 규칙이 지켜지는지 관찰).
+- **첫 안이 매번 같은 문제(2026-09-01):** 시드를 없애니 프롬프트가 매번 동일 → 모델이 최빈 구성
+  하나로 수렴(생성 모델의 성질). 사용자 결정: 프롬프트 무작위 주입 대신 **파라미터(temperature) 조율**.
+  - `EXPLORE_TEMPERATURE = 1.2`(concept-prompt.js). 탐색 호출에만 붙는다: 레이아웃 **새 안**
+    (buildVariantPrompt, base 모드 제외) + **무드 후보**(buildMoodsPrompt). 수정·CSS 실현·편집·샘플은
+    기본값 유지(정밀 작업).
+  - providers.js `createStructured` 에 temperature 배선: OpenAI 본문 최상위, Google generationConfig.
+    **Anthropic 은 받아도 안 보낸다**(thinking 동반 구조화 호출에 넣으면 400 - 실측). 즉 Anthropic
+    키로는 첫 안 다양성이 안 늘어난다 - 이건 제공자 제약.
+  - providers.test 에 3사 wire format 검사 추가. 값 조절은 EXPLORE_TEMPERATURE 하나만 바꾸면 된다.
 
 ### [완료 2026-08-15] 1. OpenAI / Google 모델 단가 채우기
 
