@@ -19,7 +19,8 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const screensDir = path.resolve(here, '../screens');
 // s1 은 단계 흐름에 없는 설정 서랍이지만, 화면 모듈 규약은 똑같이 지켜야 한다
-const EXPECTED = ['e1', 'c1', 'p1', 'p2', 'w1', 'd1', 's1'];
+// p2 는 2026-08-30 제거(W1 과 미리보기가 같아 사용자가 구분 못 함). C1 다음 바로 W1.
+const EXPECTED = ['e1', 'c1', 'p1', 'w1', 'd1', 's1'];
 
 let failures = 0;
 function ok(cond, label, extra = '') {

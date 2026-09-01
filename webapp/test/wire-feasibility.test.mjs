@@ -13,9 +13,11 @@ import { sanitizeWireHtml, lintWireFeasibility } from '../harness/wire-feasibili
 import {
   CONCEPT_SCHEMA,
   SIDEBARS,
-  VARIANTS,
-  OVERALL_CONCEPT_SCHEMA,
-  buildOverallConceptPrompt,
+  MOODS_SCHEMA,
+  MOOD_CANDIDATE_SCHEMA,
+  MOOD_REFINE_SCHEMA,
+  buildMoodsPrompt,
+  buildMoodRefinePrompt,
   buildVariantPrompt,
   overallConceptToText,
   conceptSummary,
@@ -86,24 +88,67 @@ ok(
 
 /* --------------------------------------------------------- 스키마 / 프롬프트 */
 
-console.log('\n--- 전반 컨셉 스키마 / buildOverallConceptPrompt ---');
+console.log('\n--- 무드 후보 스키마 / buildMoodsPrompt ---');
 
 {
-  const props = OVERALL_CONCEPT_SCHEMA.properties;
-  ok(OVERALL_CONCEPT_SCHEMA.additionalProperties === false, '전반 컨셉 additionalProperties:false');
+  ok(MOODS_SCHEMA.additionalProperties === false, 'MOODS_SCHEMA additionalProperties:false');
   ok(
-    ['name', 'summary'].every((k) => OVERALL_CONCEPT_SCHEMA.required.includes(k) && props[k]) &&
-      OVERALL_CONCEPT_SCHEMA.required.length === 2,
-    '전반 컨셉은 한 줄(name/summary 2필드)',
+    ['intent', 'reply', 'moods'].every((k) => MOODS_SCHEMA.required.includes(k) && MOODS_SCHEMA.properties[k]),
+    'MOODS_SCHEMA 필수 = intent/reply/moods',
   );
-  const p = buildOverallConceptPrompt({ purpose: '여행 사진 블로그', note: '따뜻하게' });
-  ok(p.schema === OVERALL_CONCEPT_SCHEMA, '컨셉 프롬프트가 전반 컨셉 스키마를 쓴다');
+  ok(
+    MOODS_SCHEMA.properties.intent.enum.join(',') === 'mood,detail',
+    'intent enum = mood/detail (모델이 무드/세부를 가른다)',
+  );
+  const moods = MOODS_SCHEMA.properties.moods;
+  ok(moods.type === 'array' && moods.minItems === 3 && moods.maxItems === 3, '무드 후보는 3개');
+  ok(moods.items === MOOD_CANDIDATE_SCHEMA, 'moods.items 가 무드 후보 스키마');
+
+  const cand = MOOD_CANDIDATE_SCHEMA;
+  ok(cand.additionalProperties === false, '무드 후보 additionalProperties:false');
+  ok(
+    ['name', 'summary', 'palette'].every((k) => cand.required.includes(k) && cand.properties[k]),
+    '무드 후보 = name/summary + palette',
+  );
+  const pal = cand.properties.palette;
+  ok(pal.type === 'array' && pal.minItems === 4 && pal.maxItems === 10, '팔레트는 4~10색 가변 배열');
+  ok(
+    ['role', 'label', 'hex'].every((k) => pal.items.required.includes(k)),
+    '팔레트 칸 = role/label/hex',
+  );
+
+  const p = buildMoodsPrompt({ purpose: '여행 사진 블로그', note: '따뜻하게' });
+  ok(p.schema === MOODS_SCHEMA, '무드 프롬프트가 MOODS_SCHEMA 를 쓴다');
   ok(p.messages[0].content.includes('여행 사진 블로그') && p.messages[0].content.includes('따뜻하게'), '용도·방향 들어감');
+  const more = buildMoodsPrompt({ purpose: '여행', avoid: ['고요한 여행 - 모래빛'] });
+  ok(more.messages[0].content.includes('고요한 여행'), 'avoid 가 프롬프트에 들어감(더 보기)');
   const txt = overallConceptToText({ name: '고요한 여행', summary: '모래빛 필름 톤' });
   ok(/고요한 여행/.test(txt) && /모래빛 필름 톤/.test(txt), 'overallConceptToText 가 한 줄로 편다');
 }
 
-console.log('\n--- CONCEPT_SCHEMA / buildVariantPrompt (A~D 시드) ---');
+console.log('\n--- 무드 다듬기 스키마 / buildMoodRefinePrompt (실현 후 의견) ---');
+
+{
+  ok(MOOD_REFINE_SCHEMA.additionalProperties === false, 'MOOD_REFINE_SCHEMA additionalProperties:false');
+  ok(
+    ['intent', 'reply', 'mood'].every((k) => MOOD_REFINE_SCHEMA.required.includes(k) && MOOD_REFINE_SCHEMA.properties[k]),
+    '무드 다듬기 = intent/reply/mood',
+  );
+  ok(MOOD_REFINE_SCHEMA.properties.mood === MOOD_CANDIDATE_SCHEMA, 'mood 는 무드 후보 스키마(단건)');
+  const p = buildMoodRefinePrompt({
+    purpose: '요리 블로그',
+    current: { name: '소박한 부엌', summary: '따뜻한 톤', palette: [{ role: 'accent', label: '포인트', hex: '#A65335' }] },
+    note: '좀 더 어둡게',
+  });
+  ok(p.schema === MOOD_REFINE_SCHEMA, '다듬기 프롬프트가 MOOD_REFINE_SCHEMA 를 쓴다');
+  ok(
+    p.messages[0].content.includes('소박한 부엌') && p.messages[0].content.includes('좀 더 어둡게'),
+    '현재 무드와 의견이 프롬프트에 들어감',
+  );
+  ok(p.messages[0].content.includes('#A65335'), '현재 팔레트가 프롬프트에 들어감');
+}
+
+console.log('\n--- CONCEPT_SCHEMA / buildVariantPrompt (용도 주도, 시드 없음) ---');
 
 {
   const props = CONCEPT_SCHEMA.properties;
@@ -113,39 +158,43 @@ console.log('\n--- CONCEPT_SCHEMA / buildVariantPrompt (A~D 시드) ---');
     '필수 5필드(name/desc/hint/sidebar/wireHtml)',
   );
   ok(JSON.stringify(props.sidebar.enum) === JSON.stringify(SIDEBARS), 'sidebar enum = SIDEBARS');
-  ok(
-    VARIANTS.length === 4 &&
-      JSON.stringify(VARIANTS.map((v) => v.key)) === JSON.stringify(['A', 'B', 'C', 'D']) &&
-      VARIANTS.every((v) => typeof v.seed === 'string' && v.seed),
-    'VARIANTS = A/B/C/D 4개, 각 서로 다른 seed',
-  );
 }
 
 {
-  // 옵션2: 컨셉(무드) 없이 용도+시드로만 레이아웃을 뽑는 경우
-  const seed = VARIANTS[3].seed; // D: 비대칭 매거진
+  // 새 안: 용도가 유일한 재료. 2안부터는 이미 본 안(avoid)이 실린다.
   const p = buildVariantPrompt({
     purpose: '여행 사진 블로그',
-    seed,
     avoid: ['포토 갤러리 - 왼쪽 사이드바, 사진 격자'],
     fix: ['조회수 요소를 빼라.'],
     note: '미니멀',
   });
   ok(p.schema === CONCEPT_SCHEMA, '변형 프롬프트가 와이어안 스키마를 쓴다');
-  ok(p.system.includes(seed), '시스템에 이 안의 출발 구조(seed)가 들어감');
+  ok(/레이아웃은 용도에서 나온다/.test(p.system), '시스템: 용도에서 구조를 스스로 구상(시드 없음)');
+  ok(!/출발 구조/.test(p.system), '시드(출발 구조) 프레임이 사라짐');
   ok(/무드·색은 아직 정하지 않았다/.test(p.system), '컨셉 없으면 "무드는 다음 단계" 로 안내');
   const user = p.messages[0].content;
-  ok(user.includes('포토 갤러리'), 'avoid(형제 안)가 들어감');
+  ok(user.includes('포토 갤러리'), 'avoid(이미 본 안)가 들어감');
   ok(user.includes('조회수 요소를 빼라'), 'fix(위반 사유)가 들어감');
   ok(user.includes('미니멀'), 'note(추가 요청)가 들어감');
   ok(/와이어프레임 HTML 규약/.test(p.system) && /wf-header/.test(p.system), '와이어 규약+클래스 안내');
+  ok(
+    /쓸 수 있는 재료/.test(p.system) && /구독 버튼/.test(p.system) && /페이지네이션/.test(p.system),
+    '티스토리+골격이 주는 재료 목록이 들어감',
+  );
   ok(/조회수/.test(p.system), '실현가능성 제약');
 }
 
 {
-  // 컨셉이 주어지면(있는 경우) 앵커로 들어간다 (P2 나 옵션1 호환)
+  // 첫 안: avoid 조차 없다. 용도만 실린다.
+  const p = buildVariantPrompt({ purpose: '요리 블로그' });
+  ok(!/이미 본 안들이다/.test(p.messages[0].content), '첫 안에는 avoid 블록이 없다');
+  ok(p.messages[0].content.includes('요리 블로그'), '용도가 들어감');
+}
+
+{
+  // 컨셉이 주어지면(있는 경우) 앵커로 들어간다
   const concept = { name: '고요한 여행', summary: '모래빛 필름 톤' };
-  const p = buildVariantPrompt({ purpose: '여행', concept, seed: VARIANTS[0].seed });
+  const p = buildVariantPrompt({ purpose: '여행', concept });
   ok(/고요한 여행/.test(p.system) && /모래빛 필름 톤/.test(p.system), '컨셉이 있으면 앵커로 들어감');
 }
 

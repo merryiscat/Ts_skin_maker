@@ -12,6 +12,34 @@
 
 import { mockDefault, categoryListHtml, commentsHtml } from './mock-data.js';
 
+/**
+ * 미리보기 안에서의 이동을 막는 가드.
+ *
+ * 미리보기는 srcdoc iframe 이라 문서 URL 이 about:srcdoc 이다. 그 안의 상대 링크
+ * (<a href="#"> 등)는 부모 페이지 주소로 해석돼, 클릭하면 iframe 안에서 이 앱이
+ * 통째로 다시 로드돼 첫 화면으로 튄다. 검색창 엔터는 script.js 가 location.href
+ * 로 /search 로 보낸다. 미리보기는 보여 주기 전용이므로 이동을 전부 막는다.
+ * (capture 단계에서 막되 stopPropagation 은 안 해서, 메뉴 토글·복사 같은 다른 클릭
+ *  동작은 그대로 산다. 검색만은 script.js 로 넘어가기 전에 끊는다.)
+ */
+const PREVIEW_GUARD = `
+<script>
+(function () {
+  addEventListener('click', function (e) {
+    var a = e.target && e.target.closest && e.target.closest('a');
+    if (a) e.preventDefault();
+  }, true);
+  addEventListener('submit', function (e) { e.preventDefault(); }, true);
+  addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target && e.target.closest &&
+        e.target.closest('#search-input, #search-input-side')) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  }, true);
+})();
+</script>`;
+
 /** 미리보기에서 고를 수 있는 페이지 타입. */
 export const PREVIEW_PAGES = [
   { id: 'tt-body-index', label: '홈' },
@@ -395,6 +423,10 @@ export function renderPreview(skinHtml, opts) {
     /<script\s+src="\.\/images\/script\.js"\s+defer><\/script>/,
     `<script>\n${opts.js || ''}\n</script>`,
   );
+
+  // 미리보기 안에서 링크·검색이 실제로 이동하지 않게 가드를 맨 끝에 심는다.
+  const guarded = html.replace('</body>', `${PREVIEW_GUARD}\n</body>`);
+  html = guarded !== html ? guarded : html + PREVIEW_GUARD;
 
   return html;
 }

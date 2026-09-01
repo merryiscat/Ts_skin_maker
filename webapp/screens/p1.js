@@ -3,8 +3,8 @@
  *
  * 순서(옵션2)는 그대로 - 레이아웃을 먼저 고르고 무드는 C1 에서. 다만 P1 은 "4개를 한 번에"
  * 가 아니라 "한 안씩 탐색" 이다(디자인 피드백):
- *   - 시작에 레이아웃 1안을 보여준다.
- *   - "새로운 안": 지금까지 본 것과 다른 새 레이아웃(다음 시드 + avoid).
+ *   - 시작에 레이아웃 1안을 보여준다. 용도가 유일한 재료다(시드 없음, 2026-08-31).
+ *   - "새로운 안": 이미 본 안들의 요약(avoid)을 실어, 그것들과 다른 새 레이아웃.
  *   - "이 안 수정": 입력한 의견으로 지금 안의 구조는 유지한 채 고친다(base 모드).
  *   - "이 레이아웃으로": 이 레이아웃을 들고 C1(무드) 로.
  *   - "이전으로": 용도(E1) 로.
@@ -14,9 +14,9 @@
  * 화면 모듈 규약은 app/app.js 위쪽 주석에 있다.
  */
 
-import { buildVariantPrompt, conceptSummary, VARIANTS } from '../harness/concept-prompt.js';
+import { buildVariantPrompt, conceptSummary } from '../harness/concept-prompt.js';
 import { sanitizeWireHtml, lintWireFeasibility } from '../harness/wire-feasibility.js';
-import { renderWireDoc } from '../loop/wire-render.js';
+import { mountWire } from '../loop/wire-render.js';
 import { createStructured, estimateCost, PROVIDERS } from '../providers.js';
 
 const MAX_TRIES = 3; // 실현가능성 위반 시 재시도(최초 1 + 재시도 2)
@@ -36,6 +36,7 @@ export function mount(root, ctx) {
       messages: prompt.messages,
       schema: prompt.schema,
       effort: prompt.effort,
+      temperature: prompt.temperature, // 탐색 호출만 프롬프트가 지정(자유도)
     });
   }
 
@@ -61,11 +62,11 @@ export function mount(root, ctx) {
         drawShow(st);
         return;
       }
-      promptBase = { purpose: st.purpose, seed: cur.hint, base: `${cur.name} — ${cur.hint}`, note };
+      promptBase = { purpose: st.purpose, base: `${cur.name} — ${cur.hint}`, note };
     } else {
-      const seed = VARIANTS[seen.length % VARIANTS.length].seed;
+      // 용도가 유일한 재료다. 2안부터는 이미 본 안들의 요약을 실어 같은 걸 또 내지 않게 한다.
       const avoid = seen.map(conceptSummary).filter(Boolean);
-      promptBase = { purpose: st.purpose, seed, avoid };
+      promptBase = { purpose: st.purpose, avoid };
     }
 
     let fix = [];
@@ -108,15 +109,17 @@ export function mount(root, ctx) {
     actions.addConcept(concept);
     drawShow(getState());
     showCanvas?.();
+    // 새로 더한 안이 보이게 캔버스를 아래로 내린다.
+    panes.canvasBody.scrollTop = panes.canvasBody.scrollHeight;
   }
 
   function drawBusy() {
     root.innerHTML =
-      '<div class="msg"><div class="msg-body"><span class="busy">레이아웃을 만드는 중입니다</span></div></div>';
+      '<div class="msg"><div class="msg-body"><span class="busy">새 레이아웃을 만드는 중입니다</span></div></div>';
     panes.foot.innerHTML = '';
-    panes.canvasHead.innerHTML = '<span class="badge">레이아웃</span>';
-    panes.canvasBody.className = 'canvas-body';
-    panes.canvasBody.innerHTML = '<div class="card" style="padding:8px"><div class="skeleton" style="height:420px"></div></div>';
+    // 기존 안은 그대로 두고, 맨 아래에 로딩 카드만 붙인다.
+    drawCanvas(getState(), true);
+    panes.canvasBody.scrollTop = panes.canvasBody.scrollHeight;
   }
 
   /* ------------------------------------------------------------ 보여주기 */
@@ -126,15 +129,16 @@ export function mount(root, ctx) {
     root.innerHTML = `
       <div class="msg">
         <div class="msg-body">
-          이 레이아웃 어때요? 마음에 들면 이걸로 가고, 아니면 지금 안을 고치거나 새 안을 보세요.
+          레이아웃 안내 드립니다.
+          <div id="sel-info" style="margin-top:6px">${selInfoHtml(c)}</div>
           <div class="row" style="gap:8px;margin-top:10px;flex-wrap:nowrap">
             <input type="text" id="note-input" class="chip-input" style="flex:1 1 150px;min-width:0"
               placeholder="지금 안을 고칠 의견 (예: 사이드바를 오른쪽으로)">
-            <button id="refine" style="align-self:stretch">이 안 수정</button>
+            <button id="refine" style="align-self:stretch">수정</button>
           </div>
           <button class="block" id="new" style="margin-top:8px">새로운 안 보기</button>
-          <button class="primary block" id="confirm" style="margin-top:8px"${c ? '' : ' disabled'}>이 레이아웃으로</button>
-          <button class="ghost block" id="back" style="margin-top:8px">이전으로</button>
+          <button class="block" id="confirm" style="margin-top:8px"${c ? '' : ' disabled'}>레이아웃 선택</button>
+          <button class="block" id="back" style="margin-top:8px">이전으로</button>
         </div>
       </div>`;
 
@@ -172,24 +176,63 @@ export function mount(root, ctx) {
     drawCanvas(state);
   }
 
-  function drawCanvas(state) {
-    const c = state.genIndex >= 0 ? state.genConcepts[state.genIndex] : null;
+  function drawCanvas(state, generating = false) {
+    const items = state.genConcepts;
     panes.canvasHead.innerHTML =
-      '<span class="badge">레이아웃</span>' + `<span class="badge plain">${esc(state.purpose)}</span>`;
+      '<span class="badge accent">레이아웃</span>' + `<span class="badge plain accent">${esc(state.purpose)}</span>`;
     panes.canvasBody.className = 'canvas-body';
-    panes.canvasBody.innerHTML = `
-      <iframe id="wire-frame" title="와이어프레임" sandbox="" tabindex="-1"
-        style="width:100%;height:460px;border:0;background:#fff;border-radius:8px;pointer-events:none"></iframe>
-      <div id="wire-meta" style="margin-top:8px"></div>`;
-    const frame = panes.canvasBody.querySelector('#wire-frame');
-    if (frame && c) frame.srcdoc = renderWireDoc(c.wireHtml);
-    const meta = panes.canvasBody.querySelector('#wire-meta');
-    if (c) {
-      meta.innerHTML =
-        `<span class="strong">${esc(c.name)}</span>` +
-        (c.warned ? ' <span class="badge bad">확인 필요</span>' : '') +
-        `<p class="small dim" style="margin:4px 0 0">${esc(c.desc)}</p>`;
+
+    // 안들을 세로로 쌓는다. "새로운 안 보기" 는 기존 안 아래로 새 안을 더한다 -
+    // 그래서 이전 안도 그대로 보이고 아무거나 골라 선택할 수 있다.
+    const cards = items
+      .map(
+        (v, i) => `
+        <button type="button" class="card pick${i === state.genIndex ? ' selected' : ''}" data-i="${i}"
+          style="display:block;width:100%;text-align:left;padding:0;overflow:hidden;cursor:pointer">
+          <iframe data-wire="${i}" title="와이어프레임" sandbox="" tabindex="-1"
+            style="width:100%;height:360px;border:0;background:#fff;display:block;pointer-events:none"></iframe>
+          <div style="padding:10px 12px;border-top:1px solid var(--border)">
+            <span class="eyebrow">${i + 1}안</span> <span class="strong">${esc(v.name)}</span>${v.warned ? ' <span class="badge bad">확인 필요</span>' : ''}
+            <p class="small dim" style="margin:4px 0 0">${esc(v.desc)}</p>
+          </div>
+        </button>`,
+      )
+      .join('');
+
+    // 생성 중이면 기존 안 아래에 로딩 카드를 따로 붙인다(기존 안은 안 사라진다).
+    const loading = generating
+      ? `<div class="card" style="padding:0;overflow:hidden">
+           <div class="skeleton" style="height:360px"></div>
+           <div style="padding:10px 12px;border-top:1px solid var(--border)"><span class="busy">새 안을 만드는 중…</span></div>
+         </div>`
+      : '';
+
+    panes.canvasBody.innerHTML = `<div style="display:flex;flex-direction:column;gap:14px">${cards}${loading}</div>`;
+
+    for (const frame of panes.canvasBody.querySelectorAll('iframe[data-wire]')) {
+      const v = items[Number(frame.dataset.wire)];
+      if (v) mountWire(frame, v.wireHtml); // 내용 높이에 맞춰 자동 확장(잘림 방지)
     }
+    // 생성 중에는 선택 클릭을 막는다(끝나면 다시 붙는다).
+    if (!generating) {
+      for (const card of panes.canvasBody.querySelectorAll('[data-i]')) {
+        card.addEventListener('click', () => selectConcept(Number(card.dataset.i)));
+      }
+    }
+  }
+
+  /** 쌓인 안 중 하나를 고른다(강조). 확정 버튼은 이 선택을 쓴다. */
+  function selectConcept(i) {
+    if (getState().genIndex !== i) actions.chooseConcept(i);
+    const state = getState();
+    for (const card of panes.canvasBody.querySelectorAll('[data-i]')) {
+      card.classList.toggle('selected', Number(card.dataset.i) === state.genIndex);
+    }
+    const cf = root.querySelector('#confirm');
+    if (cf) cf.disabled = state.genIndex < 0;
+    // 좌측의 "선택된 레이아웃 정보" 도 갱신한다.
+    const info = root.querySelector('#sel-info');
+    if (info) info.innerHTML = selInfoHtml(state.genIndex >= 0 ? state.genConcepts[state.genIndex] : null);
   }
 
   /* ------------------------------------------------------------ 오류 */
@@ -236,6 +279,16 @@ function withSidebarSide(html, sidebar) {
   return String(html)
     .replace(/class="wf"/, `class="wf ${cls}"`)
     .replace(/class='wf'/, `class='wf ${cls}'`);
+}
+
+/** 좌측에 보여줄 "지금 고른 레이아웃" 정보(이름·설명). */
+function selInfoHtml(c) {
+  if (!c) return '<span class="small dim">아직 고른 레이아웃이 없어요. 오른쪽에서 하나 고르세요.</span>';
+  return (
+    `<span class="strong">${esc(c.name)}</span>` +
+    (c.warned ? ' <span class="badge bad">확인 필요</span>' : '') +
+    `<p class="small dim" style="margin:2px 0 0">${esc(c.desc)}</p>`
+  );
 }
 
 function looksLikeKey(text) {

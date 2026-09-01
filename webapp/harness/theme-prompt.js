@@ -98,36 +98,25 @@ export function designGuide() {
     '`.main-inner` 안에서 `.card`(글 하나)가 여러 개 반복되는 마크업이며, 그 배치는',
     '전부 CSS 로 정해진다. 그래서 마크업을 안 건드리고도 구조를 바꿀 수 있다.',
     '',
-    '## 배치는 아래 세 갈래 중 하나를 골라 그대로 쓴다 (직접 격자를 발명하지 말 것)',
+    '## 목록 배치는 네가 설계한다',
     '',
-    '목록 배치는 반드시 아래 검증된 패턴 하나를 base 로 쓰고, 값(여백·색)만 컨셉에 맞게',
-    '조절한다. 직접 grid-template 을 지어내면 칸이 너무 좁아져 글자가 세로로 쪼개진다.',
+    '와이어(고른 화면 구성)가 약속한 구조를 CSS 로 실현한다. 정해진 패턴 목록은 없다 -',
+    '세로 목록, 격자, 히어로(첫 글 크게), 비대칭, 좌우 교차, 그 조합 무엇이든 컨셉에 맞게',
+    '직접 설계한다. 다만 아래 안전 규칙은 실제 사고에서 나온 것이라 반드시 지킨다.',
     '',
-    'A) 세로 목록 (기본, 가장 안전):',
-    '   .main-inner { display: block; }',
-    '   .card { display: flex; gap: 1.25rem; align-items: flex-start; margin-bottom: 2rem; }',
-    '   .card-thumb { flex: 0 0 34%; }        /* 사진 없는 컨셉이면 .card-thumb{display:none} 가능 */',
-    '   .card-body { flex: 1 1 auto; min-width: 0; }',
-    '',
-    'B) 사진 격자 (매거진·갤러리). 격자를 쓰려면 사이드바는 none 으로:',
-    '   .main-inner { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 1.5rem; }',
-    '   .card { display: block; }',
-    '   .card-thumb img { aspect-ratio: 4/3; object-fit: cover; }',
-    '   @media (max-width: 768px) { .main-inner { grid-template-columns: 1fr; } }',
-    '',
-    'C) 히어로 (첫 글 크게 + 아래 세로 목록). 격자와 절대 섞지 말 것:',
-    '   .card:first-of-type { position: relative; min-height: 60vh; margin-bottom: 2.5rem; }',
-    '   .card:first-of-type .card-thumb { position: absolute; inset: 0; }',
-    '   .card:first-of-type .card-thumb img { width: 100%; height: 100%; object-fit: cover; }',
-    '   .card:first-of-type .card-body { position: absolute; inset: auto 0 0 0; padding: 1.5rem; background: linear-gradient(to top, rgba(0,0,0,.65), transparent); color: #fff; }',
-    '   .card:not(:first-of-type) { display: flex; gap: 1rem; margin-bottom: 1.5rem; }',
-    '   .card:not(:first-of-type) .card-thumb { flex: 0 0 30%; }',
+    '- 격자는 repeat(auto-fill, minmax(17rem, 1fr)) 처럼 칸 최소폭을 17rem 이상 보장한다.',
+    '  고정 열 수(repeat(2, 1fr) 등)를 쓰면 @media (max-width: 768px) 에서 1열로 무너뜨린다.',
+    '  (칸이 좁아지면 글자가 세로로 쪼개진다 - 실제로 겪은 사고다.)',
+    '- 첫 글 강조는 .card:first-of-type 으로. 격자 안에서 넓히려면 grid-column: 1 / -1.',
+    '  이미지 위에 글자를 얹으면 어두운 그라데이션 등으로 대비를 확보한다.',
+    '- 썸네일 이미지는 aspect-ratio + object-fit: cover 로 비율을 고정한다.',
+    '- position: absolute 는 .card 안(카드 내부 겹침)에서만. 페이지 레벨 요소를 절대 배치로 띄우지 마라.',
     '',
     '## 절대 하지 말 것 (화면이 깨진다)',
     '',
     '- minmax 최소값을 17rem 보다 작게 두지 말 것. auto-fit/auto-fill 로 열을 만들 때 칸이',
     '  좁아지면 글자가 세로로 쪼개진다.',
-    '- .card 에 width:100vw / 고정 px 폭을 주지 말 것. 히어로와 격자를 한 화면에 섞지 말 것.',
+    '- .card 에 width:100vw / 고정 px 폭을 주지 말 것.',
     '- 구조 컨테이너(.site-body/.main/.main-inner/.sidebar/.card)나 글 목록 전체를 display:none 하지 말 것.',
     '- 본문 칸은 사이드바가 있으면 좁다(600~900px). 그 폭에서도 제목이 한 줄에 여러 글자로',
     '  보이는지 스스로 점검하라.',
@@ -154,6 +143,18 @@ export function designGuide() {
   ].join('\n');
 }
 
+/**
+ * 사용자가 정한 색 팔레트를 프롬프트 한 줄로. 팔레트는 [{role,label,hex}] 배열이고
+ * 개수는 무드가 정한다(4~10). role 이 곧 :root 변수 매핑 힌트다.
+ */
+function paletteLine(palette) {
+  if (!Array.isArray(palette) || !palette.length) return '';
+  const parts = palette
+    .filter((c) => c && c.hex)
+    .map((c) => `${c.label || c.role || '색'}(${c.role || '?'}) ${c.hex}`);
+  return parts.length ? `\n사용자가 정한 색 팔레트(이 색들을 정확히 쓴다): ${parts.join(', ')}` : '';
+}
+
 export function buildDesignPrompt({ purpose, concept } = {}) {
   const c = concept || {};
   const system = [
@@ -176,10 +177,17 @@ export function buildDesignPrompt({ purpose, concept } = {}) {
         '컨셉 설명:',
         c.look || c.pitch || '(없음)',
         c.hint ? `\n고른 화면 구성(이 방향을 따른다): ${c.hint}` : '',
+        c.palette ? paletteLine(c.palette) : '',
         c.note ? `\n사용자가 덧붙인 의견: ${c.note}` : '',
         '',
         '이 컨셉을 실제 화면으로 실현하는 CSS 를 써라. 고른 화면 구성을 살려 목록·본문의',
         '배치(구조)와 색·타이포를 함께 만들고, 사이드바 위치와 어울리는 글꼴을 고른다.',
+        c.palette
+          ? '위 팔레트의 각 색을 role 대로 :root 변수에 넣는다(bg→--color-bg, surface→--color-surface, ' +
+            'border→--color-border, text→--color-text, text-dim→--color-text-dim, accent→--color-accent). ' +
+            'accent2·accent3·tag 같은 여분 색은 링크 hover·태그·강조·그라데이션에 살려 쓴다. ' +
+            '팔레트에 없는 role(예: border)은 팔레트 색에서 자연스러운 톤으로 파생한다.'
+          : '',
       ].join('\n'),
     },
   ];

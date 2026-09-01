@@ -36,8 +36,10 @@ body{font:12px/1.45 system-ui,-apple-system,'Segoe UI',sans-serif;color:#111;bac
 .wf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .wf-grid.g2{grid-template-columns:repeat(2,1fr)}
 .wf-card{border:1px solid #111;padding:6px;display:flex;flex-direction:column;gap:6px}
+.wf-card.wide{grid-column:1/-1}
 .wf-item{border:1px solid #111;padding:6px;display:flex;gap:8px;align-items:flex-start}
 .wf-item.col{flex-direction:column}
+.wf-item.rev{flex-direction:row-reverse}
 .wf-img{border:1px solid #111;min-height:44px;
   background:
     linear-gradient(to top right,transparent calc(50% - .5px),#111 calc(50%),transparent calc(50% + .5px)),
@@ -48,6 +50,8 @@ body{font:12px/1.45 system-ui,-apple-system,'Segoe UI',sans-serif;color:#111;bac
 .wf-title{height:11px;background:#111;width:70%;border-radius:1px}
 .wf-line{height:8px;background:#ccc;width:100%;border-radius:1px}
 .wf-line.short{width:45%}
+/* wf-img/title/line 은 글자 없는 자리 표시다. 모델이 안에 텍스트를 넣어도 깨지지 않게 숨긴다. */
+.wf-img,.wf-title,.wf-line{font-size:0;overflow:hidden}
 .wf-tag{display:inline-block;border:1px solid #999;padding:1px 7px;margin:2px 3px 0 0;color:#666;font-size:10px}
 .wf-btn{display:inline-block;border:1px solid #111;padding:2px 10px}
 .wf-paging{display:flex;gap:6px;justify-content:center;padding-top:4px}
@@ -60,15 +64,19 @@ export const WIRE_CLASS_GUIDE = [
   '### 쓸 수 있는 클래스 (이것만 조합해서 골조를 짓는다)',
   '- 뼈대: .wf(전체 테두리) > .wf-header + .wf-body',
   '- 머리: .wf-header 안에 .wf-logo(로고), .wf-nav(<span>메뉴</span> 여러 개), .wf-search',
-'- 본문: .wf-body 안에 .wf-sidebar 와 .wf-main. 사이드바 좌/우는 신경 쓰지 마라 - sidebar 필드로',
-  '  정하면 앱이 알아서 배치한다(rev 같은 것 쓰지 마라). 사이드바가 없으면 .wf-main 만 둔다.',
+  '- 본문: .wf-body 안에 .wf-sidebar 와 .wf-main. **사이드바를 왼쪽/오른쪽/없음 중 어디에 둘지는',
+  '  네가 sidebar 필드로 정한다(컨셉에 맞게).** 다만 wireHtml 마크업 순서로 표현하지는 마라 -',
+  '  앱이 sidebar 필드값대로 배치한다. 사이드바가 없으면(none) .wf-main 만 둔다.',
   '- 사이드바 블록: .wf-block 에 <b>프로필</b>/<b>카테고리</b>/<b>태그</b> 식 라벨.',
-  '- 목록 형태(성격에 맞게 하나 고름):',
-  '  - 사진 격자: .wf-grid(또는 .wf-grid.g2) 안에 .wf-card( .wf-img + .wf-title ) 반복',
-  '  - 큰 대표사진: .wf-img.wf-hero 하나 + 아래 .wf-item 몇 개',
-  '  - 제목+요약: .wf-item( .wf-img.wf-thumb + .wf-text( .wf-title + .wf-line + .wf-line.short ) ) 반복',
-  '  - 촘촘한 제목: .wf-item 에 .wf-title 만(썸네일/요약 없이) 여러 줄',
+  '- 목록: 정해진 형태 목록은 없다. 아래 조각을 조합해 네가 설계한다.',
+  '  - .wf-grid(3열 격자) / .wf-grid.g2(2열 격자), 그 안의 칸은 .wf-card( .wf-img + .wf-title )',
+  '  - .wf-card.wide 는 격자에서 가로 전체를 차지한다(첫 글 강조 등)',
+  '  - .wf-item(가로 항목: .wf-img.wf-thumb + .wf-text). .wf-item.rev 는 썸네일이 오른쪽,',
+  '    .wf-item.col 은 세로 쌓기. 썸네일·요약 없이 .wf-title 만 두면 촘촘한 제목 줄',
+  '  - .wf-img.wf-hero 는 큰 대표사진 한 장',
+  '  이 클래스 밖의 배치(인라인 style, 새 클래스)는 렌더러가 그리지 못한다 - 조합만 자유다.',
   '- 조각: .wf-img(이미지 자리, 자동 X 표시), .wf-title(제목 줄), .wf-line/.wf-line.short(본문 줄),',
   '  .wf-tag(태그 칩), .wf-btn(버튼), .wf-paging(<span>1</span>... 페이지네이션), .wf-cap(작은 캡션 텍스트)',
   '- 라벨 텍스트는 "로고/메뉴/검색/프로필/카테고리/태그/댓글" 처럼 자리 이름만. 실제 글 문장은 쓰지 않는다.',
+  '- .wf-img / .wf-title / .wf-line 안에는 글자를 절대 넣지 마라(빈 막대·이미지 자리 표시다). 이것들은 비워 둔다.',
 ].join('\n');

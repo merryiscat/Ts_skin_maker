@@ -22,3 +22,24 @@ export function renderWireDoc(wireHtml) {
     '</body></html>'
   );
 }
+
+/**
+ * iframe 에 와이어를 넣고, 내용 높이에 맞춰 iframe 높이를 자동으로 맞춘다.
+ * 고정 높이면 큰 레이아웃(그리드·히어로)이 잘리므로, 로드 후 scrollHeight 로 늘린다.
+ *
+ * sandbox 는 allow-same-origin 만 준다(스크립트는 소독으로 이미 제거됨 + allow-scripts
+ * 없음). 그래야 부모가 contentDocument 로 높이를 잴 수 있다.
+ */
+export function mountWire(iframe, wireHtml) {
+  iframe.setAttribute('sandbox', 'allow-same-origin');
+  const fit = () => {
+    try {
+      const doc = iframe.contentDocument;
+      if (doc) iframe.style.height = Math.max(120, doc.documentElement.scrollHeight) + 'px';
+    } catch {
+      // 높이를 못 재면 인라인 초기 높이를 그대로 둔다
+    }
+  };
+  iframe.addEventListener('load', fit, { once: true });
+  iframe.srcdoc = renderWireDoc(wireHtml);
+}

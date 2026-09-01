@@ -16,10 +16,11 @@ const KEY_STORAGE = 'tsm.key';
 const PREF_STORAGE = 'tsm.pref';
 
 /** 화면 목록. 순서가 곧 진행 순서다.
- *  2026-08-24 생성형으로 재피벗. E1(용도) → P1(상담+4 와이어 컨셉, 고름) →
- *  P2(고른 안의 구조를 미리보고 손보기) → W1(대화 편집) → D1(내려받기).
- *  P1 은 새 흐름으로 새로 짰다. 리치한 "look" 을 CSS 로 실현하는 ④단계는 뒤에 얹는다. */
-export const SCREENS = ['E1', 'P1', 'C1', 'P2', 'W1', 'D1'];
+ *  2026-08-24 생성형으로 재피벗. E1(용도) → P1(레이아웃) → C1(무드·색 실현) →
+ *  W1(미리보기+대화 편집) → D1(내려받기).
+ *  P2(미리보기 확인 전용)는 2026-08-30 제거 - W1 과 미리보기가 똑같아 사용자가 두 화면을
+ *  구분하지 못했다. W1 이 미리보기+편집을 겸하므로 C1 다음에 바로 W1 으로 간다. */
+export const SCREENS = ['E1', 'P1', 'C1', 'W1', 'D1'];
 
 function emptyState() {
   return {
@@ -41,9 +42,10 @@ function emptyState() {
     genConcepts: [], // [{ name, desc, hint, sidebar, wireHtml, key(A~D), warned? }] 4안
     genIndex: -1, // 고른 레이아웃
 
-    // C1 (전반 컨셉/무드, 2026-08-26 옵션2). 레이아웃을 고른 뒤 무드·색을 한 줄로 정한다.
-    // { name, summary }. P2 look 재료. (레이아웃 × 무드 = 두 축)
-    overallConcept: null,
+    // C1 (무드, 2026-08-29 개편). 레이아웃을 고른 뒤 무드 후보 3개를 텍스트+팔레트로 받아
+    // 그중 하나를 고른다. 후보는 { name, summary, palette:[{role,label,hex}], warned? }.
+    moodCandidates: [], // 아직 안 고른 후보들(C1 이 텍스트로 제시)
+    overallConcept: null, // 고른 무드 1개. P2 look 재료. (레이아웃 × 무드 = 두 축)
 
     conceptNote: '', // "이런 느낌으로 다시" 재생성 방향(선택)
     selectedConcept: null, // 확정한 컨셉 { name, look, hint, sidebar }. 실현 재료
@@ -220,6 +222,7 @@ export function startOver() {
     chat: [],
     sample: null,
     uploadedFont: null,
+    moodCandidates: [],
     overallConcept: null,
     genConcepts: [],
     genIndex: -1,
@@ -236,6 +239,7 @@ export function startOver() {
 /** 상담을 새로 시작한다. 용도가 바뀌면 컨셉·안·선택을 비우고 이 용도로 다시 뽑는다. */
 export function resetConsult(purpose) {
   set({
+    moodCandidates: [],
     overallConcept: null,
     genConcepts: [],
     genIndex: -1,
@@ -247,9 +251,41 @@ export function resetConsult(purpose) {
   });
 }
 
-/** C1 에서 정한 전반 컨셉(무드)을 넣는다. 4안은 P1 에서 이미 골랐으므로 건드리지 않는다. */
+/** C1 이 받은 무드 후보 묶음으로 갈아끼운다("반영" 으로 새로 뽑을 때). */
+export function setMoodCandidates(list) {
+  set({ moodCandidates: Array.isArray(list) ? list : [] });
+}
+
+/** 무드 후보를 뒤에 더한다("다른 무드 더 보기"). */
+export function addMoodCandidates(list) {
+  if (!Array.isArray(list) || !list.length) return;
+  set({ moodCandidates: [...state.moodCandidates, ...list] });
+}
+
+/** 후보 중 하나를 무드로 고른다. 테마는 이 무드로 다시 만들게 비운다. */
+export function chooseMood(i) {
+  const m = state.moodCandidates[i];
+  if (!m) return;
+  set({ overallConcept: m, themeCss: '', themeFor: '' });
+}
+
+/** 고른 무드를 물러 후보 고르기로 되돌린다("다른 무드 고르기"). 후보는 그대로 둔다. */
+export function clearChosenMood() {
+  set({ overallConcept: null, themeCss: '', themeFor: '' });
+}
+
+/** C1 에서 정한 무드를 직접 넣는다(외부 진입용). */
 export function setOverallConcept(concept) {
   set({ overallConcept: concept || null, themeCss: '', themeFor: '' });
+}
+
+/**
+ * C1 에서 사용자가 색 스와치를 손봤을 때. 팔레트(배열)만 바꾸고 테마는 다시 만들게 비운다.
+ * palette 는 [{role,label,hex}] 배열이다(무드가 개수를 정한 가변 팔레트).
+ */
+export function setPalette(palette) {
+  if (!state.overallConcept) return;
+  set({ overallConcept: { ...state.overallConcept, palette }, themeCss: '', themeFor: '' });
 }
 
 /** 4안을 비운다. P1 에서 "4안 다시" 로 세트를 새로 뽑을 때. */
@@ -295,6 +331,7 @@ export function applySelectedConcept() {
       look,
       hint: c.hint || '',
       sidebar,
+      palette: state.overallConcept?.palette || null, // 사용자가 C1 에서 정한 색 팔레트
     },
     conceptDetails: { ...details },
     details: { ...details },
