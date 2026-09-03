@@ -133,7 +133,7 @@ export function mount(root, ctx) {
           <div id="sel-info" style="margin-top:6px">${selInfoHtml(c)}</div>
           <div class="row" style="gap:8px;margin-top:10px;flex-wrap:nowrap">
             <input type="text" id="note-input" class="chip-input" style="flex:1 1 150px;min-width:0"
-              placeholder="지금 안을 고칠 의견 (예: 사이드바를 오른쪽으로)">
+              placeholder="예) 사이드바를 오른쪽으로">
             <button id="refine" style="align-self:stretch">수정</button>
           </div>
           <button class="block" id="new" style="margin-top:8px">새로운 안 보기</button>
