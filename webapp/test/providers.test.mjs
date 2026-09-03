@@ -586,6 +586,24 @@ section('temperature — 탐색 호출의 샘플링 자유도');
   calls = stubFetch(() => res(200, OKBODY.anthropic));
   await createStructured('anthropic', KEYS.anthropic, { ...ARGS, model: 'claude-x', temperature: 1.2 });
   ok(!('temperature' in calls[0].body), 'Anthropic: temperature 를 받아도 보내지 않는다(400 방지)');
+
+  // 모델이 temperature 를 거부하면(OpenAI 추론 계열 등) 빼고 한 번 더 보낸다.
+  let n = 0;
+  calls = stubFetch(() => {
+    n++;
+    return n === 1
+      ? res(400, { error: { message: "Unsupported value: 'temperature' does not support 1.2 with this model. Only the default (1) value is supported." } })
+      : res(200, OKBODY.openai);
+  });
+  const r = await createStructured('openai', KEYS.openai, { ...ARGS, model: 'gpt-x', temperature: 1.2 });
+  ok(r.ok === true, 'temperature 거부 시 빼고 재시도해 성공한다');
+  ok(calls.length === 2 && 'temperature' in calls[0].body && !('temperature' in calls[1].body),
+    '재시도 요청에는 temperature 가 빠진다');
+
+  // temperature 와 무관한 400 은 재시도하지 않는다(그대로 오류 전달).
+  calls = stubFetch(() => res(400, { error: { message: 'Invalid schema' } }));
+  const r2 = await createStructured('openai', KEYS.openai, { ...ARGS, model: 'gpt-x', temperature: 1.2 });
+  ok(r2.ok === false && calls.length === 1, '다른 400 은 재시도 없이 그대로 실패한다');
 }
 
 /* --------------------------------------------------------- 이미지(비전) */

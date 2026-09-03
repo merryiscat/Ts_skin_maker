@@ -178,6 +178,12 @@ W1 미리보기에서 "이 부분" 을 손으로 집어 채팅으로 넘기는 �
     **Anthropic 은 받아도 안 보낸다**(thinking 동반 구조화 호출에 넣으면 400 - 실측). 즉 Anthropic
     키로는 첫 안 다양성이 안 늘어난다 - 이건 제공자 제약.
   - providers.test 에 3사 wire format 검사 추가. 값 조절은 EXPLORE_TEMPERATURE 하나만 바꾸면 된다.
+  - **후속(2026-09-03 실호출):** OpenAI gpt-5.6-luna 가 temperature 1.2 를 400 으로 거부
+    ("Only the default (1) value is supported" - 추론 계열은 기본값만). createStructured 에 폴백:
+    temperature 를 언급하는 400 이면 빼고 1회 재시도(400 은 생성 전이라 과금 없음). 결과적으로
+    **OpenAI 추론 계열·Anthropic 키는 첫 안 다양성이 안 늘어난다**(제공자 제약. Google 은 적용됨).
+    이 모델들에서도 다양성을 원하면 프롬프트 엔트로피 주입뿐인데 사용자가 이미 기각 - 재론 조건:
+    실사용에서 첫 안 똑같음이 다시 불편으로 올라오면.
 
 ### [완료 2026-08-15] 1. OpenAI / Google 모델 단가 채우기
 

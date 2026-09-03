@@ -644,13 +644,21 @@ export async function createStructured(
   if (formatError) return err('format', formatError);
   if (!model) return err('api', '모델을 고르지 않았습니다');
 
-  const res = await call(providerId, a.messageUrl(model), {
-    method: 'POST',
-    headers: { ...a.authHeaders(key.trim()), 'content-type': 'application/json' },
-    body: JSON.stringify(
-      a.messageBody({ model, system, systemParts, messages: messages || [], schema, effort, temperature }),
-    ),
-  });
+  const send = (temp) =>
+    call(providerId, a.messageUrl(model), {
+      method: 'POST',
+      headers: { ...a.authHeaders(key.trim()), 'content-type': 'application/json' },
+      body: JSON.stringify(
+        a.messageBody({ model, system, systemParts, messages: messages || [], schema, effort, temperature: temp }),
+      ),
+    });
+
+  let res = await send(temperature);
+  // temperature 지원은 모델마다 갈린다(예: OpenAI 추론 계열은 기본값만 허용).
+  // 거부당하면 빼고 한 번 더 - 400 은 생성 전에 나서 과금이 없고, 다양성만 포기된다.
+  if (!res.ok && temperature != null && res.error.kind === 'api' && /temperature/i.test(res.error.message || '')) {
+    res = await send(undefined);
+  }
   if (!res.ok) return res;
 
   const { text, usage } = a.extract(res.body);
