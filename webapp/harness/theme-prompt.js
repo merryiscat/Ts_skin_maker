@@ -98,11 +98,12 @@ export function designGuide() {
     '`.main-inner` 안에서 `.card`(글 하나)가 여러 개 반복되는 마크업이며, 그 배치는',
     '전부 CSS 로 정해진다. 그래서 마크업을 안 건드리고도 구조를 바꿀 수 있다.',
     '',
-    '## 목록 배치는 네가 설계한다',
+    '## 목록 배치 CSS 는 네가 설계한다 (구조 자체는 고른 와이어를 따른다)',
     '',
-    '와이어(고른 화면 구성)가 약속한 구조를 CSS 로 실현한다. 정해진 패턴 목록은 없다 -',
-    '세로 목록, 격자, 히어로(첫 글 크게), 비대칭, 좌우 교차, 그 조합 무엇이든 컨셉에 맞게',
-    '직접 설계한다. 다만 아래 안전 규칙은 실제 사고에서 나온 것이라 반드시 지킨다.',
+    '정해진 패턴 목록은 없다 - 세로 목록, 격자, 히어로(첫 글 크게), 비대칭, 좌우 교차, 그',
+    '조합 무엇이든 CSS 로 직접 설계한다. 단, **무엇을 만들지(구조)는 사용자가 고른 와이어가',
+    '정한다** - 와이어가 주어지면 그 구조를 그대로 옮기고, 네 재량은 그것을 구현하는 CSS 와',
+    '색·타이포·여백·질감이다. 아래 안전 규칙은 실제 사고에서 나온 것이라 반드시 지킨다.',
     '',
     '- 격자는 repeat(auto-fill, minmax(17rem, 1fr)) 처럼 칸 최소폭을 17rem 이상 보장한다.',
     '  고정 열 수(repeat(2, 1fr) 등)를 쓰면 @media (max-width: 768px) 에서 1열로 무너뜨린다.',
@@ -155,6 +156,23 @@ function paletteLine(palette) {
   return parts.length ? `\n사용자가 정한 색 팔레트(이 색들을 정확히 쓴다): ${parts.join(', ')}` : '';
 }
 
+/**
+ * 와이어 원문을 프롬프트 블록으로. 와이어는 사용자가 "고른" 구조라 실현이 마음대로
+ * 바꾸면 안 된다. 읽는 법(클래스 뜻)을 같이 줘야 모델이 구조를 정확히 옮긴다.
+ */
+function wireBlock(wire) {
+  const w = String(wire || '').trim();
+  if (!w) return '';
+  return [
+    '',
+    '고른 레이아웃 와이어프레임(구조 계약 - 이 구조를 그대로 실현한다):',
+    '읽는 법: .wf-grid=격자(3열)/.wf-grid.g2=2열, .wf-card=격자 칸, .wf-card.wide=가로 전체 칸,',
+    '.wf-item=가로 목록 항목(.rev=썸네일 오른쪽, .col=세로 쌓기), .wf-img.wf-hero=큰 대표사진,',
+    '.wf-img.wf-thumb=작은 썸네일, .wf-sidebar 안 .wf-block=사이드바 블록.',
+    w,
+  ].join('\n');
+}
+
 export function buildDesignPrompt({ purpose, concept } = {}) {
   const c = concept || {};
   const system = [
@@ -176,12 +194,14 @@ export function buildDesignPrompt({ purpose, concept } = {}) {
         `고른 컨셉: ${c.name || ''}`,
         '컨셉 설명:',
         c.look || c.pitch || '(없음)',
-        c.hint ? `\n고른 화면 구성(이 방향을 따른다): ${c.hint}` : '',
+        c.hint ? `\n고른 화면 구성 요약: ${c.hint}` : '',
+        wireBlock(c.wire),
         c.palette ? paletteLine(c.palette) : '',
         c.note ? `\n사용자가 덧붙인 의견: ${c.note}` : '',
         '',
-        '이 컨셉을 실제 화면으로 실현하는 CSS 를 써라. 고른 화면 구성을 살려 목록·본문의',
-        '배치(구조)와 색·타이포를 함께 만들고, 사이드바 위치와 어울리는 글꼴을 고른다.',
+        '이 컨셉을 실제 화면으로 실현하는 CSS 를 써라. **구조(사이드바 위치, 목록 형태,',
+        '첫 글 강조 여부, 열 수)는 위 와이어가 확정한 계약이다 - 바꾸지 말고 그대로 옮겨라.**',
+        '네 재량은 색·타이포·여백·질감·모서리다. 사이드바 위치와 어울리는 글꼴을 고른다.',
         c.palette
           ? '위 팔레트의 각 색을 role 대로 :root 변수에 넣는다(bg→--color-bg, surface→--color-surface, ' +
             'border→--color-border, text→--color-text, text-dim→--color-text-dim, accent→--color-accent). ' +

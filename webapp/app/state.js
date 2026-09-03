@@ -330,6 +330,9 @@ export function applySelectedConcept() {
       name: state.overallConcept?.name || c.name,
       look,
       hint: c.hint || '',
+      // 고른 와이어 원문. CSS 실현이 구조를 멋대로 바꾸지 않게 "구조 계약" 으로 넘긴다
+      // (한 줄 hint 만 주면 생성 자유도가 hint 를 눌러 레이아웃이 어긋난다 - 2026-09-03 피드백).
+      wire: c.wireHtml || '',
       sidebar,
       palette: state.overallConcept?.palette || null, // 사용자가 C1 에서 정한 색 팔레트
     },
