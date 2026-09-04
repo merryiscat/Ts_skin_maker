@@ -352,6 +352,11 @@ export function mount(root, ctx) {
 
     // 색 스와치를 손보면 그 팔레트로 디자인을 다시 만든다(새 시안으로 쌓인다).
     for (const inp of root.querySelectorAll('input[data-idx]')) {
+      // 색을 고르는 동안(input) 아래 색상 코드가 실시간으로 따라간다.
+      inp.addEventListener('input', () => {
+        const t = root.querySelector(`[data-hex="${inp.dataset.idx}"]`);
+        if (t) t.textContent = inp.value;
+      });
       inp.addEventListener('change', () => {
         if (designBusy || candBusy) return;
         const cur = getState().overallConcept?.palette || [];
@@ -498,7 +503,8 @@ function chipsRO(palette) {
   return `<div class="row" style="gap:6px;flex-wrap:wrap">${chips}</div>`;
 }
 
-/** 실현 단계의 편집 가능한 색 스와치들(팔레트 길이만큼). */
+/** 실현 단계의 편집 가능한 색 스와치들(팔레트 길이만큼). 아래에 색상 코드를 같이 보여
+ *  준다 - 값이 숨어 있으면 사용자가 색을 옮겨 적을 방법이 없다(2026-09-04 피드백). */
 function swatchesEdit(palette) {
   if (!Array.isArray(palette) || !palette.length) return '';
   const items = palette
@@ -506,7 +512,8 @@ function swatchesEdit(palette) {
       (c, idx) =>
         `<label class="tiny dim" style="display:flex;flex-direction:column;gap:3px;align-items:center">${esc(c.label || c.role || '색')}` +
         `<input type="color" data-idx="${idx}" value="${hex6(c.hex)}" ` +
-        `style="width:36px;height:26px;border:1px solid var(--border);border-radius:6px;padding:0;background:none;cursor:pointer"></label>`,
+        `style="width:36px;height:26px;border:1px solid var(--border);border-radius:6px;padding:0;background:none;cursor:pointer">` +
+        `<span class="mono" data-hex="${idx}" style="font-size:10px">${hex6(c.hex)}</span></label>`,
     )
     .join('');
   return `<div class="row" style="gap:12px;margin-top:10px;flex-wrap:wrap">${items}</div>`;
